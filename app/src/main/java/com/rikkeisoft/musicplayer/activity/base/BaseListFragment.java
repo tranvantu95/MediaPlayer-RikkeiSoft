@@ -10,19 +10,19 @@ import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
-import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
+import com.rikkeisoft.musicplayer.model.base.BaseListModel;
 
 import java.util.List;
 
-public class BaseMainFragment<Item> extends Fragment {
+public class BaseListFragment<Item> extends Fragment {
 
-    protected BaseMainModel<Item> baseMainModel;
+    protected BaseListModel<Item> baseListModel;
 
     protected RecyclerView recyclerView;
-    protected BaseRecyclerAdapter<Item, ? > adapter;
+    protected BaseRecyclerAdapter<Item, ? > recyclerAdapter;
 
-//    public static BaseMainFragment newInstance() {
-//        BaseMainFragment fragment = new BaseMainFragment();
+//    public static BaseListFragment newInstance() {
+//        BaseListFragment fragment = new BaseListFragment();
 //        Bundle args = new Bundle();
 //        fragment.setArguments(args);
 //        return fragment;
@@ -35,11 +35,11 @@ public class BaseMainFragment<Item> extends Fragment {
 //    }
 
     protected void init() {
-        baseMainModel.getItems().observe(this, new Observer<List<Item>>() {
+        baseListModel.getItems().observe(this, new Observer<List<Item>>() {
             @Override
             public void onChanged(@Nullable List<Item> songItems) {
-                adapter.setItems(songItems);
-                adapter.notifyDataSetChanged();
+                recyclerAdapter.setItems(songItems);
+                recyclerAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -54,7 +54,7 @@ public class BaseMainFragment<Item> extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(recyclerAdapter);
     }
 
 //    @Override
@@ -66,6 +66,7 @@ public class BaseMainFragment<Item> extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
+        recyclerView.setLayoutManager(null);
         recyclerView.setAdapter(null);
         recyclerView = null;
     }

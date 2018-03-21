@@ -9,13 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.base.BaseMainFragment;
+import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.AlbumsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 
-public class AlbumsFragment extends BaseMainFragment<AlbumItem> {
+public class AlbumsFragment extends BaseListFragment<AlbumItem> {
 
     public static AlbumsFragment newInstance() {
         AlbumsFragment fragment = new AlbumsFragment();
@@ -30,10 +30,10 @@ public class AlbumsFragment extends BaseMainFragment<AlbumItem> {
 
         Log.d("debug", "onCreate AlbumsFragment");
 
-        baseMainModel = ViewModelProviders.of(getActivity()).get(AlbumsModel.class);
+        baseListModel = ViewModelProviders.of(getActivity()).get(AlbumsModel.class);
 
-        adapter = new AlbumsRecyclerAdapter();
-        adapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        recyclerAdapter = new AlbumsRecyclerAdapter();
+        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
 

@@ -8,13 +8,14 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.ArtistsModel;
-import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
+import com.rikkeisoft.musicplayer.model.base.BaseListModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
@@ -48,8 +49,10 @@ public class MainActivity extends BaseActivity {
 //            @Override
 //            public void run() {
 //                loadData();
+//
+//                new Handler().postDelayed(this, 3000);
 //            }
-//        }, 2000);
+//        }, 3000);
     }
 
     void init() {
@@ -87,8 +90,9 @@ public class MainActivity extends BaseActivity {
             songItems.add(songItem);
         }
 
-        BaseMainModel<SongItem> songsMainModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsMainModel.getItems().setValue(songItems);
+        BaseListModel<SongItem> songsModel = ViewModelProviders.of(this).get(SongsModel.class);
+//        if(songsModel.getItems().getValue() != null) songItems.addAll(songsModel.getItems().getValue());
+        songsModel.getItems().setValue(songItems);
 
         //
         List<AlbumItem> albumItems = new ArrayList<>();
@@ -111,5 +115,11 @@ public class MainActivity extends BaseActivity {
 
         ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
         artistsModel.getItems().setValue(artistItems);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }
