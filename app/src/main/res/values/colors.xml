@@ -1,6 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">@color/colorIndigo</color>
+    <color name="colorPrimaryDark">@color/colorIndigoDark</color>
+	<color name="colorPrimaryLight">@color/colorIndigoLight</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="colorWhite">@android:color/white</color>
+    <color name="colorBlack">@android:color/black</color>
+    <color name="colorTransparent">@android:color/transparent</color>
+
+    <color name="colorRed">#F44336</color>
+    <color name="colorRedDark">#D32F2F</color>
+    <color name="colorRedLight">#E57373</color>
+
+    <color name="colorPink">#E91E63</color>
+    <color name="colorPinkDark">#C2185B</color>
+    <color name="colorPinkLight">#F06292</color>
+
+    <color name="colorPurple">#9C27B0</color>
+    <color name="colorPurpleDark">#7B1FA2</color>
+    <color name="colorPurpleLight">#BA68C8</color>
+
+	<color name="colorDeepPurple">#673AB7</color>
+    <color name="colorDeepPurpleDark">#512DA8</color>
+    <color name="colorDeepPurpleLight">#7E57C2</color>
+
+	<color name="colorIndigo">#3F51B5</color>
+    <color name="colorIndigoDark">#303F9F</color>
+    <color name="colorIndigoLight">#5C6BC0</color>
+
+    <color name="colorBlue">#2196F3</color>
+    <color name="colorBlueDark">#1976D2</color>
+    <color name="colorBlueLight">#64B5F6</color>
+
+    <color name="colorLightBlue">#03A9F4</color>
+    <color name="colorLightBlueDark">#0288D1</color>
+    <color name="colorLightBlueLight">#29B6F6</color>
+
+    <color name="colorCyan">#00BCD4</color>
+    <color name="colorCyanDark">#0097A7</color>
+    <color name="colorCyanLight">#26C6DA</color>
+
+    <color name="colorTeal">#009688</color>
+    <color name="colorTealDark">#00796B</color>
+    <color name="colorTealLight">#4DB6AC</color>
+
+    <color name="colorGreen">#4CAF50</color>
+    <color name="colorGreenDark">#388E3C</color>
+    <color name="colorGreenLight">#81C784</color>
+
+    <color name="colorLightGreen">#8BC34A</color>
+    <color name="colorLightGreenDark">#689F38</color>
+    <color name="colorLightGreenLight">#9CCC65</color>
+
+    <color name="colorLime">#CDDC39</color>
+    <color name="colorLimeDark">#AFB42B</color>
+    <color name="colorLimeLight">#DCE775</color>
+
+    <color name="colorYellow">#FFEB3B</color>
+    <color name="colorYellowDark">#FBC02D</color>
+    <color name="colorYellowLight">#FFF176</color>
+
+	<color name="colorAmber">#FFC107</color>
+    <color name="colorAmberDark">#FFA000</color>
+    <color name="colorAmberLight">#FFCA28</color>
+
+    <color name="colorOrange">#FF9800</color>
+    <color name="colorOrangeDark">#F57C00</color>
+    <color name="colorOrangeLight">#FFB74D</color>
+
+    <color name="colorDeepOrange">#FF5722</color>
+    <color name="colorDeepOrangeDark">#E64A19</color>
+    <color name="colorDeepOrangeLight">#FF7043</color>
+
+    <color name="colorBrown">#795548</color>
+    <color name="colorBrownDark">#5D4037</color>
+    <color name="colorBrownLight">#A1887F</color>
+
+    <color name="colorGrey">#9E9E9E</color>
+    <color name="colorGreyDark">#616161</color>
+    <color name="colorGreyLight">#BDBDBD</color>
+
+    <color name="colorBlueGrey">#607D8B</color>
+    <color name="colorBlueGreyDark">#455A64</color>
+    <color name="colorBlueGreyLight">#78909C</color>
+
 </resources>
