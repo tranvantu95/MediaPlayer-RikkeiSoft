@@ -10,18 +10,15 @@ import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseMainFragment;
-import com.rikkeisoft.musicplayer.custom.adapter.AlbumsMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.SongsMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.base.BaseMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.model.AlbumsMainModel;
-import com.rikkeisoft.musicplayer.model.SongsMainModel;
-import com.rikkeisoft.musicplayer.model.item.AlbumItem;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.custom.adapter.ArtistsRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.model.ArtistsModel;
+import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 
-public class AlbumsMainFragment extends BaseMainFragment<AlbumItem> {
+public class ArtistsFragment extends BaseMainFragment<ArtistItem> {
 
-    public static AlbumsMainFragment newInstance() {
-        AlbumsMainFragment fragment = new AlbumsMainFragment();
+    public static ArtistsFragment newInstance() {
+        ArtistsFragment fragment = new ArtistsFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -31,12 +28,12 @@ public class AlbumsMainFragment extends BaseMainFragment<AlbumItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("debug", "onCreate SongsMainFragment");
+        Log.d("debug", "onCreate ArtistsFragment");
 
-        baseMainModel = ViewModelProviders.of(getActivity()).get(AlbumsMainModel.class);
+        baseMainModel = ViewModelProviders.of(getActivity()).get(ArtistsModel.class);
 
-        adapter = new AlbumsMainRecyclerAdapter();
-        adapter.setOnItemClickListener(new BaseMainRecyclerAdapter.OnItemClickListener() {
+        adapter = new ArtistsRecyclerAdapter();
+        adapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
 

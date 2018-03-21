@@ -11,14 +11,14 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseActivity;
-import com.rikkeisoft.musicplayer.custom.adapter.MainPagerAdapter;
-import com.rikkeisoft.musicplayer.model.AlbumsMainModel;
-import com.rikkeisoft.musicplayer.model.ArtistsMainModel;
+import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
+import com.rikkeisoft.musicplayer.model.AlbumsModel;
+import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.model.SongsMainModel;
+import com.rikkeisoft.musicplayer.model.SongsModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,20 +42,28 @@ public class MainActivity extends BaseActivity {
 
         init();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                loadData();
-            }
-        }, 2000);
+        loadData();
+
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                loadData();
+//            }
+//        }, 2000);
     }
 
     void init() {
         findView();
-        initAppbar();
+
+        setSupportActionBar(toolbar);
 
         pagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
+        tabs.setupWithViewPager(viewPager);
+
+        setTitleTap(0, R.string.songs);
+        setTitleTap(1, R.string.albums);
+        setTitleTap(2, R.string.artists);
     }
 
     void findView() {
@@ -66,9 +74,9 @@ public class MainActivity extends BaseActivity {
         viewPager = findViewById(R.id.view_pager);
     }
 
-    void initAppbar() {
-        setSupportActionBar(toolbar);
-        tabs.setupWithViewPager(viewPager);
+    void setTitleTap(int index, int resStringId) {
+        TabLayout.Tab tab = tabs.getTabAt(index);
+        if(tab != null) tab.setText(getString(resStringId));
     }
 
     void loadData() {
@@ -79,7 +87,7 @@ public class MainActivity extends BaseActivity {
             songItems.add(songItem);
         }
 
-        BaseMainModel<SongItem> songsMainModel = ViewModelProviders.of(this).get(SongsMainModel.class);
+        BaseMainModel<SongItem> songsMainModel = ViewModelProviders.of(this).get(SongsModel.class);
         songsMainModel.getItems().setValue(songItems);
 
         //
@@ -90,8 +98,8 @@ public class MainActivity extends BaseActivity {
             albumItems.add(albumItem);
         }
 
-        AlbumsMainModel albumsMainModel = ViewModelProviders.of(this).get(AlbumsMainModel.class);
-        albumsMainModel.getItems().setValue(albumItems);
+        AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
+        albumsModel.getItems().setValue(albumItems);
 
         //
         List<ArtistItem> artistItems = new ArrayList<>();
@@ -101,7 +109,7 @@ public class MainActivity extends BaseActivity {
             artistItems.add(artistItem);
         }
 
-        ArtistsMainModel artistsMainModel = ViewModelProviders.of(this).get(ArtistsMainModel.class);
-        artistsMainModel.getItems().setValue(artistItems);
+        ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
+        artistsModel.getItems().setValue(artistItems);
     }
 }

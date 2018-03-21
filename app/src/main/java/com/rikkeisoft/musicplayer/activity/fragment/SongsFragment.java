@@ -10,15 +10,15 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseMainFragment;
-import com.rikkeisoft.musicplayer.custom.adapter.SongsMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.base.BaseMainRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.model.SongsMainModel;
+import com.rikkeisoft.musicplayer.model.SongsModel;
 
-public class SongsMainFragment extends BaseMainFragment<SongItem> {
+public class SongsFragment extends BaseMainFragment<SongItem> {
 
-    public static SongsMainFragment newInstance() {
-        SongsMainFragment fragment = new SongsMainFragment();
+    public static SongsFragment newInstance() {
+        SongsFragment fragment = new SongsFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -28,12 +28,12 @@ public class SongsMainFragment extends BaseMainFragment<SongItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("debug", "onCreate SongsMainFragment");
+        Log.d("debug", "onCreate SongsFragment");
 
-        baseMainModel = ViewModelProviders.of(getActivity()).get(SongsMainModel.class);
+        baseMainModel = ViewModelProviders.of(getActivity()).get(SongsModel.class);
 
-        adapter = new SongsMainRecyclerAdapter();
-        adapter.setOnItemClickListener(new BaseMainRecyclerAdapter.OnItemClickListener() {
+        adapter = new SongsRecyclerAdapter();
+        adapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
 

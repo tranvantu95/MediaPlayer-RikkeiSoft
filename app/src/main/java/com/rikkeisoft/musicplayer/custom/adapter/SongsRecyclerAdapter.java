@@ -7,16 +7,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.custom.adapter.base.BaseMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.model.item.AlbumItem;
-import com.rikkeisoft.musicplayer.model.item.ArtistItem;
+import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
 
-public class ArtistsMainRecyclerAdapter extends BaseMainRecyclerAdapter<ArtistItem, ArtistsMainRecyclerAdapter.ViewHolder> {
+import com.rikkeisoft.musicplayer.R;
+
+public class SongsRecyclerAdapter extends BaseRecyclerAdapter<SongItem, SongsRecyclerAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_artist_main, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_song_main, parent, false);
         return new ViewHolder(view);
     }
 
@@ -24,19 +24,19 @@ public class ArtistsMainRecyclerAdapter extends BaseMainRecyclerAdapter<ArtistIt
     public void onBindViewHolder(ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
 
-        ArtistItem artistItem = items.get(position);
+        SongItem songItem = items.get(position);
 
-        holder.tvArtistName.setText(artistItem.getName());
+        holder.tvSongName.setText(songItem.getName());
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tvArtistName;
+        private TextView tvSongName;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            tvArtistName = itemView.findViewById(R.id.artist_name);
+            tvSongName = itemView.findViewById(R.id.song_name);
         }
     }
 }

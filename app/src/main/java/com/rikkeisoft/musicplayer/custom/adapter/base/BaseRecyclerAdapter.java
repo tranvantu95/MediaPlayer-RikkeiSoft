@@ -6,7 +6,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseMainRecyclerAdapter<T, V extends RecyclerView.ViewHolder>
+public abstract class BaseRecyclerAdapter<T, V extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<V> implements View.OnClickListener {
 
     protected List<T> items = new ArrayList<>();

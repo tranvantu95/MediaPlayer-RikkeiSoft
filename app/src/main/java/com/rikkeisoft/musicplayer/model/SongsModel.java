@@ -1,9 +1,8 @@
 package com.rikkeisoft.musicplayer.model;
 
 import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
-import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 
-public class AlbumsMainModel extends BaseMainModel<AlbumItem> {
+public class SongsModel extends BaseMainModel<SongItem> {
 
 }

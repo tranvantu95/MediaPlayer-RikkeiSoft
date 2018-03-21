@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.custom.adapter.base.BaseMainRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class BaseMainFragment<Item> extends Fragment {
     protected BaseMainModel<Item> baseMainModel;
 
     protected RecyclerView recyclerView;
-    protected BaseMainRecyclerAdapter<Item, ? > adapter;
+    protected BaseRecyclerAdapter<Item, ? > adapter;
 
 //    public static BaseMainFragment newInstance() {
 //        BaseMainFragment fragment = new BaseMainFragment();
