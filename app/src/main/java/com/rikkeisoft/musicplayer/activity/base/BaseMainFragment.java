@@ -10,15 +10,16 @@ import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseMainRecyclerAdapter;
-import com.rikkeisoft.musicplayer.model.base.MainModel;
+import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
 
 import java.util.List;
 
 public class BaseMainFragment<Item> extends Fragment {
 
+    protected BaseMainModel<Item> baseMainModel;
+
     protected RecyclerView recyclerView;
     protected BaseMainRecyclerAdapter<Item, ? > adapter;
-    protected MainModel<Item> mainModel;
 
 //    public static BaseMainFragment newInstance() {
 //        BaseMainFragment fragment = new BaseMainFragment();
@@ -34,7 +35,7 @@ public class BaseMainFragment<Item> extends Fragment {
 //    }
 
     protected void init() {
-        mainModel.getItems().observe(this, new Observer<List<Item>>() {
+        baseMainModel.getItems().observe(this, new Observer<List<Item>>() {
             @Override
             public void onChanged(@Nullable List<Item> songItems) {
                 adapter.setItems(songItems);

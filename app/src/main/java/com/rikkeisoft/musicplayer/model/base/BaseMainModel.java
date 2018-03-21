@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModel;
 
 import java.util.List;
 
-public class MainModel<Item> extends ViewModel {
+public class BaseMainModel<Item> extends ViewModel {
 
     private MutableLiveData<List<Item>> items;
 

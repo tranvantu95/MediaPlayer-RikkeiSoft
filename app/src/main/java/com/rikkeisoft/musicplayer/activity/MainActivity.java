@@ -12,6 +12,11 @@ import android.util.Log;
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.MainPagerAdapter;
+import com.rikkeisoft.musicplayer.model.AlbumsMainModel;
+import com.rikkeisoft.musicplayer.model.ArtistsMainModel;
+import com.rikkeisoft.musicplayer.model.base.BaseMainModel;
+import com.rikkeisoft.musicplayer.model.item.AlbumItem;
+import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsMainModel;
 
@@ -74,7 +79,29 @@ public class MainActivity extends BaseActivity {
             songItems.add(songItem);
         }
 
-        SongsMainModel songsMainModel = ViewModelProviders.of(this).get(SongsMainModel.class);
+        BaseMainModel<SongItem> songsMainModel = ViewModelProviders.of(this).get(SongsMainModel.class);
         songsMainModel.getItems().setValue(songItems);
+
+        //
+        List<AlbumItem> albumItems = new ArrayList<>();
+        for(int i = 0; i < 9; i++) {
+            AlbumItem albumItem = new AlbumItem();
+            albumItem.setName("album " + i);
+            albumItems.add(albumItem);
+        }
+
+        AlbumsMainModel albumsMainModel = ViewModelProviders.of(this).get(AlbumsMainModel.class);
+        albumsMainModel.getItems().setValue(albumItems);
+
+        //
+        List<ArtistItem> artistItems = new ArrayList<>();
+        for(int i = 0; i < 9; i++) {
+            ArtistItem artistItem = new ArtistItem();
+            artistItem.setName("artist " + i);
+            artistItems.add(artistItem);
+        }
+
+        ArtistsMainModel artistsMainModel = ViewModelProviders.of(this).get(ArtistsMainModel.class);
+        artistsMainModel.getItems().setValue(artistItems);
     }
 }
