@@ -1,15 +1,8 @@
 package com.rikkeisoft.musicplayer.model.item;
 
-public class ArtistItem {
+import com.rikkeisoft.musicplayer.model.base.BaseItem;
 
-    private String name;
-    
-    public String getName() {
-        return name;
-    }
+public class ArtistItem extends BaseItem {
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
 }

@@ -6,18 +6,18 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseRecyclerAdapter<T, V extends RecyclerView.ViewHolder>
+public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.ViewHolder<Item>>
         extends RecyclerView.Adapter<V> implements View.OnClickListener {
 
-    protected List<T> items = new ArrayList<>();
+    private List<Item> items = new ArrayList<>();
 
     private OnItemClickListener onItemClickListener;
 
-    public List<T> getItems() {
+    public List<Item> getItems() {
         return items;
     }
 
-    public void setItems(List<T> items) {
+    public void setItems(List<Item> items) {
         this.items = items;
     }
 
@@ -31,6 +31,9 @@ public abstract class BaseRecyclerAdapter<T, V extends RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(V holder, int position) {
+        Item item = items.get(position);
+        holder.setItem(item);
+
         holder.itemView.setTag(position);
         holder.itemView.setOnClickListener(this);
     }
@@ -45,6 +48,19 @@ public abstract class BaseRecyclerAdapter<T, V extends RecyclerView.ViewHolder>
 //        int id = view.getId();
         int position = (int) view.getTag();
         onItemClickListener.onItemClick(view, position);
+    }
+
+    public static class ViewHolder<Item> extends RecyclerView.ViewHolder {
+
+        protected Item item;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public void setItem(Item item) {
+            this.item = item;
+        }
     }
 
     public interface OnItemClickListener {

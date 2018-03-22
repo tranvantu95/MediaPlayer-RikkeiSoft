@@ -1,10 +1,15 @@
 package com.rikkeisoft.musicplayer.activity;
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,11 +25,14 @@ import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity {
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
 
     AppBarLayout appbar;
     Toolbar toolbar;
@@ -43,7 +51,7 @@ public class MainActivity extends BaseActivity {
 
         init();
 
-        loadData();
+        checkPermission();
 
 //        new Handler().postDelayed(new Runnable() {
 //            @Override
@@ -82,17 +90,84 @@ public class MainActivity extends BaseActivity {
         if(tab != null) tab.setText(getString(resStringId));
     }
 
-    void loadData() {
-        List<SongItem> songItems = new ArrayList<>();
-        for(int i = 0; i < 9; i++) {
-            SongItem songItem = new SongItem();
-            songItem.setName("song " + i);
-            songItems.add(songItem);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                    loadData();
+                }
+                else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                    Log.d("debug", "permission denied");
+                }
+
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
         }
+    }
+    void checkPermission() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                Log.d("debug", "should Show Request Permission Rationale");
+
+                requestPermissions();
+
+            }
+            else {
+                // No explanation needed; request the permission
+                requestPermissions();
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+        else {
+            // Permission has already been granted
+
+            loadData();
+        }
+    }
+
+    void requestPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+    }
+
+    void loadData() {
+        Log.d("debug", "loadData");
+
+        List<SongItem> songs = Loader.loadSongs(this);
 
         BaseListModel<SongItem> songsModel = ViewModelProviders.of(this).get(SongsModel.class);
 //        if(songsModel.getItems().getValue() != null) songItems.addAll(songsModel.getItems().getValue());
-        songsModel.getItems().setValue(songItems);
+        songsModel.getItems().setValue(songs);
 
         //
         List<AlbumItem> albumItems = new ArrayList<>();

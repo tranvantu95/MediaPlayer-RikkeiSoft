@@ -1,12 +1,10 @@
-package com.rikkeisoft.musicplayer.model.item;
+package com.rikkeisoft.musicplayer.model;
 
-import com.rikkeisoft.musicplayer.model.base.BaseItem;
-
-import java.util.List;
-
-public class SongItem extends BaseItem {
+public class MusicInfo {
 
     private String path;
+    private String songId;
+    private String songName;
     private String albumId;
     private String albumName;
     private String artistId;
@@ -19,6 +17,22 @@ public class SongItem extends BaseItem {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getSongId() {
+        return songId;
+    }
+
+    public void setSongId(String songId) {
+        this.songId = songId;
+    }
+
+    public String getSongName() {
+        return songName;
+    }
+
+    public void setSongName(String songName) {
+        this.songName = songName;
     }
 
     public String getAlbumId() {

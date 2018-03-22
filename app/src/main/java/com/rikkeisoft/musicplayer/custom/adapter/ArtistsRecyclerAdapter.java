@@ -1,7 +1,5 @@
 package com.rikkeisoft.musicplayer.custom.adapter;
 
-
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +17,13 @@ public class ArtistsRecyclerAdapter extends BaseRecyclerAdapter<ArtistItem, Arti
         return new ViewHolder(view);
     }
 
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        super.onBindViewHolder(holder, position);
+//    @Override
+//    public void onBindViewHolder(ViewHolder holder, int position) {
+//        super.onBindViewHolder(holder, position);
+//
+//    }
 
-        ArtistItem artistItem = items.get(position);
-
-        holder.tvArtistName.setText(artistItem.getName());
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends BaseRecyclerAdapter.ViewHolder<ArtistItem> {
 
         private TextView tvArtistName;
 
@@ -36,6 +31,13 @@ public class ArtistsRecyclerAdapter extends BaseRecyclerAdapter<ArtistItem, Arti
             super(itemView);
 
             tvArtistName = itemView.findViewById(R.id.artist_name);
+        }
+
+        @Override
+        public void setItem(ArtistItem artistItem) {
+            super.setItem(artistItem);
+
+            tvArtistName.setText(artistItem.getName());
         }
     }
 }
