@@ -51,16 +51,6 @@ public class MainActivity extends BaseActivity {
 
         init();
 
-        checkPermission();
-
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                loadData();
-//
-//                new Handler().postDelayed(this, 3000);
-//            }
-//        }, 3000);
     }
 
     void init() {
@@ -91,6 +81,13 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        checkPermission();
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
@@ -118,6 +115,7 @@ public class MainActivity extends BaseActivity {
             // permissions this app might request.
         }
     }
+
     void checkPermission() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
@@ -163,10 +161,10 @@ public class MainActivity extends BaseActivity {
     void loadData() {
         Log.d("debug", "loadData");
 
+        //
         List<SongItem> songs = Loader.loadSongs(this);
 
         BaseListModel<SongItem> songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-//        if(songsModel.getItems().getValue() != null) songItems.addAll(songsModel.getItems().getValue());
         songsModel.getItems().setValue(songs);
 
         //
