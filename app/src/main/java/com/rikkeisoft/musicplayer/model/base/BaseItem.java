@@ -1,5 +1,10 @@
 package com.rikkeisoft.musicplayer.model.base;
 
+import android.support.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class BaseItem {
 
     private String id;
@@ -21,4 +26,5 @@ public class BaseItem {
     public void setName(String name) {
         this.name = name;
     }
+
 }

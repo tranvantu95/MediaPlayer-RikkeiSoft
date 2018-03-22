@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
@@ -37,8 +38,8 @@ public class BaseListFragment<Item> extends Fragment {
     protected void init() {
         baseListModel.getItems().observe(this, new Observer<List<Item>>() {
             @Override
-            public void onChanged(@Nullable List<Item> songItems) {
-                recyclerAdapter.setItems(songItems);
+            public void onChanged(@Nullable List<Item> items) {
+                recyclerAdapter.setItems(items);
                 recyclerAdapter.notifyDataSetChanged();
             }
         });

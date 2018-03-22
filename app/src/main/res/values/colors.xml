@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">@color/colorIndigo</color>
     <color name="colorPrimaryDark">@color/colorIndigoDark</color>
-	<color name="colorPrimaryLight">@color/colorIndigoLight</color>
+    <color name="colorPrimaryLight">@color/colorIndigoLight</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorWhite">@android:color/white</color>
@@ -21,11 +21,11 @@
     <color name="colorPurpleDark">#7B1FA2</color>
     <color name="colorPurpleLight">#BA68C8</color>
 
-	<color name="colorDeepPurple">#673AB7</color>
+    <color name="colorDeepPurple">#673AB7</color>
     <color name="colorDeepPurpleDark">#512DA8</color>
     <color name="colorDeepPurpleLight">#7E57C2</color>
 
-	<color name="colorIndigo">#3F51B5</color>
+    <color name="colorIndigo">#3F51B5</color>
     <color name="colorIndigoDark">#303F9F</color>
     <color name="colorIndigoLight">#5C6BC0</color>
 
@@ -61,7 +61,7 @@
     <color name="colorYellowDark">#FBC02D</color>
     <color name="colorYellowLight">#FFF176</color>
 
-	<color name="colorAmber">#FFC107</color>
+    <color name="colorAmber">#FFC107</color>
     <color name="colorAmberDark">#FFA000</color>
     <color name="colorAmberLight">#FFCA28</color>
 

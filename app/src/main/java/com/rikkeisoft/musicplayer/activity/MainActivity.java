@@ -170,26 +170,16 @@ public class MainActivity extends BaseActivity {
         songsModel.getItems().setValue(songs);
 
         //
-        List<AlbumItem> albumItems = new ArrayList<>();
-        for(int i = 0; i < 9; i++) {
-            AlbumItem albumItem = new AlbumItem();
-            albumItem.setName("album " + i);
-            albumItems.add(albumItem);
-        }
+        List<AlbumItem> albums = Loader.loadAlbums(this);
 
         AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
-        albumsModel.getItems().setValue(albumItems);
+        albumsModel.getItems().setValue(albums);
 
         //
-        List<ArtistItem> artistItems = new ArrayList<>();
-        for(int i = 0; i < 9; i++) {
-            ArtistItem artistItem = new ArtistItem();
-            artistItem.setName("artist " + i);
-            artistItems.add(artistItem);
-        }
+        List<ArtistItem> artists = Loader.loadArtists(this);
 
         ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
-        artistsModel.getItems().setValue(artistItems);
+        artistsModel.getItems().setValue(artists);
     }
 
     @Override

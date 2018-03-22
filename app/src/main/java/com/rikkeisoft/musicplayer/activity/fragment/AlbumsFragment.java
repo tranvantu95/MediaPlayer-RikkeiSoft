@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.SongsActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.AlbumsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
@@ -36,7 +37,9 @@ public class AlbumsFragment extends BaseListFragment<AlbumItem> {
         recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-
+                AlbumItem album = recyclerAdapter.getItems().get(position);
+                getActivity().startActivity(SongsActivity.createIntent(
+                        getActivity(), album.getId(), SongsActivity.SONGS_OF_ALBUM));
             }
         });
 

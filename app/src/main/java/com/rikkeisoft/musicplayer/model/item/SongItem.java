@@ -1,6 +1,9 @@
 package com.rikkeisoft.musicplayer.model.item;
 
+import android.content.Context;
+
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.List;
 
@@ -12,6 +15,9 @@ public class SongItem extends BaseItem {
     private String artistId;
     private String artistName;
     private int duration;
+
+    private AlbumItem album;
+    private ArtistItem artist;
 
     public String getPath() {
         return path;
@@ -59,5 +65,25 @@ public class SongItem extends BaseItem {
 
     public void setDuration(String duration) {
         this.duration = Integer.parseInt(duration);
+    }
+
+    public AlbumItem getAlbum(Context context) {
+        if(album == null) setAlbum(Loader.findAlbum(context, getAlbumId()));
+
+        return album;
+    }
+
+    public void setAlbum(AlbumItem album) {
+        this.album = album;
+    }
+
+    public ArtistItem getArtist(Context context) {
+        if(artist == null) setArtist(Loader.findArtist(context, getArtistId()));
+
+        return artist;
+    }
+
+    public void setArtist(ArtistItem artist) {
+        this.artist = artist;
     }
 }
