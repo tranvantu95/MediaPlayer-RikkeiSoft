@@ -32,8 +32,7 @@ public class SongsFragment extends BaseListFragment<SongItem> {
 
         baseListModel = ViewModelProviders.of(getActivity()).get(SongsModel.class);
 
-        recyclerAdapter = new SongsRecyclerAdapter();
-        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        recyclerAdapter = new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
 

@@ -4,22 +4,28 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.fragment.AlbumsFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.ArtistsFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
+import com.rikkeisoft.musicplayer.utils.AppUtils;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
 
-    private SongsFragment songsFragment;
-    private AlbumsFragment albumsFragment;
-    private ArtistsFragment artistsFragment;
+    private Fragment songsFragment;
+    private Fragment albumsFragment;
+    private Fragment artistsFragment;
 
     public MainPagerAdapter(FragmentManager fm) {
         super(fm);
 
-        songsFragment = SongsFragment.newInstance();
-        albumsFragment = AlbumsFragment.newInstance();
-        artistsFragment = ArtistsFragment.newInstance();
+        songsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 0);
+        albumsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 1);
+        artistsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 2);
+
+        if(songsFragment == null) songsFragment = SongsFragment.newInstance();
+        if(albumsFragment == null) albumsFragment = AlbumsFragment.newInstance();
+        if(artistsFragment == null) artistsFragment = ArtistsFragment.newInstance();
     }
 
     @Override

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -14,9 +13,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.base.BaseActivity;
+import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.ArtistsModel;
@@ -27,19 +27,14 @@ import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends AppbarActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
 
-    AppBarLayout appbar;
-    Toolbar toolbar;
-    TabLayout tabs;
-
-    ViewPager viewPager;
-    MainPagerAdapter pagerAdapter;
+    private ViewPager viewPager;
+    private MainPagerAdapter pagerAdapter;
 
 
     @Override
@@ -53,10 +48,9 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    void init() {
-        findView();
-
-        setSupportActionBar(toolbar);
+    @Override
+    protected void init() {
+        super.init();
 
         pagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -67,17 +61,11 @@ public class MainActivity extends BaseActivity {
         setTitleTap(2, R.string.artists);
     }
 
-    void findView() {
-        appbar = findViewById(R.id.appbar);
-        toolbar = findViewById(R.id.toolbar);
-        tabs = findViewById(R.id.tabs);
+    @Override
+    protected void findView() {
+        super.findView();
 
         viewPager = findViewById(R.id.view_pager);
-    }
-
-    void setTitleTap(int index, int resStringId) {
-        TabLayout.Tab tab = tabs.getTabAt(index);
-        if(tab != null) tab.setText(getString(resStringId));
     }
 
     @Override
@@ -184,5 +172,13 @@ public class MainActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

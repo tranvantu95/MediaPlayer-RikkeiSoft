@@ -32,8 +32,7 @@ public class ArtistsFragment extends BaseListFragment<ArtistItem> {
 
         baseListModel = ViewModelProviders.of(getActivity()).get(ArtistsModel.class);
 
-        recyclerAdapter = new ArtistsRecyclerAdapter();
-        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        recyclerAdapter = new ArtistsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
 

@@ -11,17 +11,15 @@ import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 
 public class ArtistsRecyclerAdapter extends BaseRecyclerAdapter<ArtistItem, ArtistsRecyclerAdapter.ViewHolder> {
 
+    public ArtistsRecyclerAdapter(OnItemClickListener onItemClickListener) {
+        super(onItemClickListener);
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_artist_main, parent, false);
         return new ViewHolder(view);
     }
-
-//    @Override
-//    public void onBindViewHolder(ViewHolder holder, int position) {
-//        super.onBindViewHolder(holder, position);
-//
-//    }
 
     public static class ViewHolder extends BaseRecyclerAdapter.ViewHolder<ArtistItem> {
 

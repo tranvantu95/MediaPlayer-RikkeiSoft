@@ -13,6 +13,10 @@ public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.Vi
 
     private OnItemClickListener onItemClickListener;
 
+    public BaseRecyclerAdapter(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
     public List<Item> getItems() {
         return items;
     }

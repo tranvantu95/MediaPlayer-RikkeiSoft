@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Appbar-->
+    <item type="id" name="appbar"/>
+    <item type="id" name="toolbar"/>
+    <item type="id" name="tabs"/>
+    <item type="id" name="app_bar_image"/>
+
+    <!--List-->
+    <item type="id" name="list_view"/>
+    <item type="id" name="recycler_view"/>
+    <item type="id" name="view_pager"/>
+
+    <!--Layout-->
+    <item type="id" name="root"/>
+    <item type="id" name="content"/>
+    <item type="id" name="container"/>
+    <item type="id" name="fragment_container"/>
+
+</resources>
