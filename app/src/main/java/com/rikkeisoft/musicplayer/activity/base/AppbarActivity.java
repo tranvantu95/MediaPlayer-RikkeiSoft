@@ -39,6 +39,7 @@ public class AppbarActivity extends BaseActivity {
 
     // ActionBar
     protected void setupActionBar() {
+        toolbar.setContentInsetStartWithNavigation(0);
         setSupportActionBar(toolbar);
     }
 
@@ -47,6 +48,10 @@ public class AppbarActivity extends BaseActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    public void setTittle(int resStringId) {
+        setTittle(getString(resStringId));
     }
 
     public void setTittle(String string){

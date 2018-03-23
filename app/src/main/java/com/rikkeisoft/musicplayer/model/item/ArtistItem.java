@@ -9,11 +9,22 @@ import java.util.List;
 
 public class ArtistItem extends BaseItem {
 
+    private int numberOfAlbums;
+
     private List<AlbumItem> albums;
     private List<SongItem> songs;
 
+    public int getNumberOfAlbums() {
+        return numberOfAlbums;
+    }
+
+    public void setNumberOfAlbums(int numberOfAlbums) {
+        this.numberOfAlbums = numberOfAlbums;
+    }
+
+    //
     public List<AlbumItem> getAlbums(Context context) {
-        if(albums == null) setAlbums(Loader.findAlbums(context, getId()));
+        if(albums == null) setAlbums(Loader.findAlbums(context, this));
 
         return albums;
     }
@@ -23,7 +34,7 @@ public class ArtistItem extends BaseItem {
     }
 
     public List<SongItem> getSongs(Context context) {
-        if(songs == null) setSongs(Loader.findSongsOfArtist(context, getId()));
+        if(songs == null) setSongs(Loader.findSongsOfArtist(context, this));
 
         return songs;
     }

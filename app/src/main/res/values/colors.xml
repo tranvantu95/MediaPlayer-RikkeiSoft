@@ -85,4 +85,8 @@
     <color name="colorBlueGreyDark">#455A64</color>
     <color name="colorBlueGreyLight">#78909C</color>
 
+    <!---->
+    <color name="bg_window">#FAFAFA</color>
+    <color name="bg_title_album">#64ffffff</color>
+
 </resources>

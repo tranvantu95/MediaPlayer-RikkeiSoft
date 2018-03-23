@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
@@ -34,7 +35,7 @@ public class MainActivity extends AppbarActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
 
     private ViewPager viewPager;
-    private MainPagerAdapter pagerAdapter;
+    private FragmentPagerAdapter pagerAdapter;
 
 
     @Override

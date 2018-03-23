@@ -3,12 +3,14 @@ package com.rikkeisoft.musicplayer.activity.fragment;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.ArtistActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.ArtistsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
@@ -35,9 +37,12 @@ public class ArtistsFragment extends BaseListFragment<ArtistItem> {
         recyclerAdapter = new ArtistsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-
+                ArtistItem artist = recyclerAdapter.getItems().get(position);
+                getActivity().startActivity(ArtistActivity.createIntent(getContext(), artist.getId()));
             }
         });
+
+        layoutManager = new LinearLayoutManager(getContext());
 
         init();
     }

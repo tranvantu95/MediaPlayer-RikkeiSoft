@@ -10,22 +10,19 @@ import com.rikkeisoft.musicplayer.activity.fragment.ArtistsFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
 
-public class MainPagerAdapter extends FragmentPagerAdapter {
+public class ArtistPagerAdapter extends FragmentPagerAdapter {
 
     private Fragment songsFragment;
     private Fragment albumsFragment;
-    private Fragment artistsFragment;
 
-    public MainPagerAdapter(FragmentManager fm) {
+    public ArtistPagerAdapter(FragmentManager fm) {
         super(fm);
 
         songsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 0);
         albumsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 1);
-        artistsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 2);
 
         if(songsFragment == null) songsFragment = SongsFragment.newInstance();
         if(albumsFragment == null) albumsFragment = AlbumsFragment.newInstance();
-        if(artistsFragment == null) artistsFragment = ArtistsFragment.newInstance();
     }
 
     @Override
@@ -37,9 +34,6 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return albumsFragment;
 
-            case 2:
-                return artistsFragment;
-
             default:
                 return null;
         }
@@ -47,6 +41,6 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 2;
     }
 }

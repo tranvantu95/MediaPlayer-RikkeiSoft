@@ -20,7 +20,9 @@ public class BaseListFragment<Item> extends Fragment {
     protected BaseListModel<Item> baseListModel;
 
     protected RecyclerView recyclerView;
+    protected RecyclerView.LayoutManager layoutManager;
     protected BaseRecyclerAdapter<Item, ? > recyclerAdapter;
+    protected RecyclerView.ItemDecoration itemDecoration;
 
 //    public static BaseListFragment newInstance() {
 //        BaseListFragment fragment = new BaseListFragment();
@@ -54,8 +56,9 @@ public class BaseListFragment<Item> extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
+        if(itemDecoration != null) recyclerView.addItemDecoration(itemDecoration);
     }
 
 //    @Override
@@ -69,6 +72,7 @@ public class BaseListFragment<Item> extends Fragment {
 
         recyclerView.setLayoutManager(null);
         recyclerView.setAdapter(null);
+        if(itemDecoration != null) recyclerView.removeItemDecoration(itemDecoration);
         recyclerView = null;
     }
 }

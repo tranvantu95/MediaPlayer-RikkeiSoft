@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore.Audio.*;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
@@ -22,6 +23,13 @@ public class Loader {
     private static List<AlbumItem> albums;
 
     private static List<ArtistItem> artists;
+
+    //
+    public static void clearCache() {
+        songs = null;
+        albums = null;
+        artists = null;
+    }
 
     //
     public static SongItem findSong(Context context, String songId) {
@@ -44,47 +52,63 @@ public class Loader {
 
     //
     @NonNull
-    public static List<SongItem> findSongsOfAlbum(Context context, String albumId) {
-        return findSongs(context, albumId, new IdSelector<SongItem>() {
+    public static List<SongItem> findSongsOfAlbum(Context context, AlbumItem albumItem) {
+        return findSongs(context, albumItem, new FindItems<SongItem, AlbumItem>() {
             @Override
-            public String getId(SongItem songItem) {
-                return songItem.getAlbumId();
+            public String getId(SongItem song) {
+                return song.getAlbumId();
+            }
+
+            @Override
+            public void linked(SongItem songItem, AlbumItem albumItem) {
+                songItem.setAlbum(albumItem);
             }
         });
     }
 
     @NonNull
-    public static List<SongItem> findSongsOfArtist(Context context, String artistId) {
-        return findSongs(context, artistId, new IdSelector<SongItem>() {
+    public static List<SongItem> findSongsOfArtist(Context context, ArtistItem artistItem) {
+        return findSongs(context, artistItem, new FindItems<SongItem, ArtistItem>() {
             @Override
-            public String getId(SongItem songItem) {
-                return songItem.getArtistId();
+            public String getId(SongItem song) {
+                return song.getArtistId();
+            }
+
+            @Override
+            public void linked(SongItem songItem, ArtistItem artistItem) {
+                songItem.setArtist(artistItem);
             }
         });
     }
 
     @NonNull
-    public static List<AlbumItem> findAlbums(Context context, String artistId) {
+    public static List<AlbumItem> findAlbums(Context context, ArtistItem artistItem) {
         if(albums == null) loadAlbums(context);
 
-        return findItems(albums, artistId, new IdSelector<AlbumItem>() {
+        return findItems(albums, artistItem, new FindItems<AlbumItem, ArtistItem>() {
             @Override
             public String getId(AlbumItem albumItem) {
                 return albumItem.getArtistId();
             }
+
+            @Override
+            public void linked(AlbumItem albumItem, ArtistItem artistItem) {
+                albumItem.setArtist(artistItem);
+            }
         });
     }
 
     //
     @NonNull
-    public static List<SongItem> findSongs(Context context, String id, IdSelector<SongItem> idSelector) {
+    private static <Item2 extends BaseItem> List<SongItem> findSongs(
+            Context context, Item2 item2, FindItems<SongItem, Item2> findItems) {
         if(songs == null) loadSongs(context);
 
-        return findItems(songs, id, idSelector);
+        return findItems(songs, item2, findItems);
     }
 
     //
-    public static <Item extends BaseItem> Item findItem(List<Item> items, String id) {
+    private static <Item extends BaseItem> Item findItem(List<Item> items, String id) {
         for(int i = items.size() - 1; i >= 0; i--) {
             Item item = items.get(i);
             if(id.equals(item.getId())) return item;
@@ -94,26 +118,24 @@ public class Loader {
     }
 
     @NonNull
-    public static <Item extends BaseItem> List<Item> findItems(List<Item> items, String id, IdSelector<Item> idSelector) {
+    private static <Item extends BaseItem, Item2 extends BaseItem> List<Item> findItems(
+            List<Item> items, Item2 item2, FindItems<Item, Item2> findItems) {
         List<Item> _items = new ArrayList<>();
 
         for(int i = items.size() - 1; i >= 0; i--) {
             Item item = items.get(i);
-            if(id.equals(idSelector.getId(item))) _items.add(item);
+            if(item2.getId().equals(findItems.getId(item))) {
+                findItems.linked(item, item2);
+                _items.add(item);
+            }
         }
 
         return _items;
     }
 
-    public interface IdSelector<Item> {
+    public interface FindItems<Item, Item2> {
         String getId(Item item);
-    }
-
-    //
-    public static void clearCache() {
-        songs = null;
-        albums = null;
-        artists = null;
+        void linked(Item item, Item2 item2);
     }
 
     //
@@ -123,15 +145,15 @@ public class Loader {
         Uri uri = Media.EXTERNAL_CONTENT_URI;
 
         String[] projection = {
-                Media.DATA,
-//                Media.DISPLAY_NAME,
                 Media._ID,     // song id
                 Media.TITLE,   // song name
                 Media.ALBUM_ID,
                 Media.ALBUM,
                 Media.ARTIST_ID,
                 Media.ARTIST,
-                Media.DURATION
+                Media.DURATION,
+                Media.DATA,
+//                Media.DISPLAY_NAME,
         };
 
         String selection = Media.IS_MUSIC + " != 0";
@@ -151,19 +173,23 @@ public class Loader {
             songs = new ArrayList<>();
             Loader.songs = songs;
 
+            Log.d("debug", "song----------------------");
+
             while(cursor.moveToNext()) {
-                SongItem songItem = new SongItem();
+                SongItem song = new SongItem();
 
-                songItem.setPath(cursor.getString(0));
-                songItem.setId(cursor.getString(1));
-                songItem.setName(cursor.getString(2));
-                songItem.setAlbumId(cursor.getString(3));
-                songItem.setAlbumName(cursor.getString(4));
-                songItem.setArtistId(cursor.getString(5));
-                songItem.setArtistName(cursor.getString(6));
-                songItem.setDuration(cursor.getString(7));
+                int i = 0;
 
-                songs.add(songItem);
+                song.setId(cursor.getString(i));
+                song.setName(cursor.getString(++i));
+                song.setAlbumId(cursor.getString(++i));
+                song.setAlbumName(cursor.getString(++i));
+                song.setArtistId(cursor.getString(++i)); //Log.d("debug", song.getArtistId());
+                song.setArtistName(cursor.getString(++i));
+                song.setDuration(cursor.getString(++i));
+                song.setPath(cursor.getString(++i));
+
+                songs.add(song);
             }
 
             cursor.close();
@@ -180,7 +206,9 @@ public class Loader {
         String[] projection = {
                 Albums._ID,
                 Albums.ALBUM,
-                Albums.ARTIST
+                Media.ARTIST_ID,
+                Albums.ARTIST,
+                Artists.Albums.ALBUM_ART
         };
 
 //        String selection = Media.IS_MUSIC + " != 0";
@@ -200,12 +228,18 @@ public class Loader {
             albums = new ArrayList<>();
             Loader.albums = albums;
 
+            Log.d("debug", "album----------------------");
+
             while(cursor.moveToNext()) {
                 AlbumItem album = new AlbumItem();
 
-                album.setId(cursor.getString(0));
-                album.setName(cursor.getString(1));
-                album.setArtistName(cursor.getString(2));
+                int i = 0;
+
+                album.setId(cursor.getString(i));
+                album.setName(cursor.getString(++i));
+                album.setArtistId(cursor.getString(++i));
+                album.setArtistName(cursor.getString(++i));
+                album.setAlbumArt(cursor.getString(++i)); //Log.d("debug", album.getAlbumArt());
 
                 albums.add(album);
             }
@@ -223,7 +257,8 @@ public class Loader {
 
         String[] projection = {
                 Artists._ID,
-                Artists.ARTIST
+                Artists.ARTIST,
+                Artists.NUMBER_OF_ALBUMS
         };
 
 //        String selection = Media.IS_MUSIC + " != 0";
@@ -246,8 +281,11 @@ public class Loader {
             while(cursor.moveToNext()) {
                 ArtistItem artist = new ArtistItem();
 
-                artist.setId(cursor.getString(0));
-                artist.setName(cursor.getString(1));
+                int i = 0;
+
+                artist.setId(cursor.getString(i));
+                artist.setName(cursor.getString(++i));
+                artist.setNumberOfAlbums(cursor.getInt(++i));
 
                 artists.add(artist);
             }

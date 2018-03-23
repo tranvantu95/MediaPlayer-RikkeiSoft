@@ -5,12 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
+import com.rikkeisoft.musicplayer.custom.adapter.pager.ArtistPagerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
+import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
@@ -19,12 +25,15 @@ import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.List;
 
-public class AlbumActivity extends AppbarActivity {
+public class ArtistActivity extends AppbarActivity {
 
     public static final String ID = "id";
 
+    private ViewPager viewPager;
+    private FragmentPagerAdapter pagerAdapter;
+
     public static Intent createIntent(Context context, String id) {
-        Intent intent = new Intent(context, AlbumActivity.class);
+        Intent intent = new Intent(context, ArtistActivity.class);
         intent.putExtra(ID, id);
         return intent;
     }
@@ -32,18 +41,30 @@ public class AlbumActivity extends AppbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_album);
+        setContentView(R.layout.activity_artist);
 
         init();
 
-        findAlbum();
+        findArtist();
     }
 
     @Override
     protected void init() {
         super.init();
 
-        addFragment();
+        pagerAdapter = new ArtistPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        tabs.setupWithViewPager(viewPager);
+
+        setTitleTap(0, R.string.songs);
+        setTitleTap(1, R.string.albums);
+    }
+
+    @Override
+    protected void findView() {
+        super.findView();
+
+        viewPager = findViewById(R.id.view_pager);
     }
 
     @Override
@@ -52,34 +73,29 @@ public class AlbumActivity extends AppbarActivity {
         showHomeButton();
     }
 
-    private void addFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
-
-        if(songsFragment == null) {
-            songsFragment = SongsFragment.newInstance();
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, songsFragment, "SongsFragment")
-                    .commit();
-        }
-    }
-
-    private void findAlbum() {
-        AlbumItem album = Loader.findAlbum(this, getIntent().getStringExtra(ID));
-        setSongs(album.getSongs(this));
-
-        ivAppbar.setImageBitmap(album.getBmAlbumArt());
-        setTitle(album.getName());
-    }
-
-    private void initArtist() {
+    private void findArtist() {
         ArtistItem artist = Loader.findArtist(this, getIntent().getStringExtra(ID));
         setSongs(artist.getSongs(this));
+
+        if(artist.getNumberOfAlbums() > 0)
+            if(artist.getAlbums(this).size() > 0)
+                setAlbums(artist.getAlbums(this));
+        else ivAppbar.setImageBitmap(null);
+
+        setTitle(artist.getName()); Log.d("debug", artist.getName());
     }
 
     private void setSongs(List<SongItem> songs) {
         SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
         songsModel.getItems().setValue(songs);
+    }
+
+    private void setAlbums(List<AlbumItem> albums) {
+        AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
+        albumsModel.getItems().setValue(albums);
+
+//        if(albums.get(0).getBmAlbumArt() != null)
+            ivAppbar.setImageBitmap(albums.get(0).getBmAlbumArt());
     }
 
     @Override
