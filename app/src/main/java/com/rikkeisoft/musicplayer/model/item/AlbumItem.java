@@ -54,8 +54,8 @@ public class AlbumItem extends BaseItem {
         this.artistName = artistName;
     }
 
-    public ArtistItem getArtist(Context context) {
-        if(artist == null) setArtist(Loader.findArtist(context, getArtistId()));
+    public ArtistItem getArtist() {
+        if(artist == null) setArtist(Loader.getInstance().findArtist(getArtistId()));
 
         return artist;
     }
@@ -64,8 +64,8 @@ public class AlbumItem extends BaseItem {
         this.artist = artist;
     }
 
-    public List<SongItem> getSongs(Context context) {
-        if(songs == null) setSongs(Loader.findSongsOfAlbum(context, this));
+    public List<SongItem> getSongs() {
+        if(songs == null) setSongs(Loader.getInstance().findSongsOfAlbum(this));
 
         return songs;
     }

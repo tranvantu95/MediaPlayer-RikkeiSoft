@@ -23,8 +23,8 @@ public class ArtistItem extends BaseItem {
     }
 
     //
-    public List<AlbumItem> getAlbums(Context context) {
-        if(albums == null) setAlbums(Loader.findAlbums(context, this));
+    public List<AlbumItem> getAlbums() {
+        if(albums == null) setAlbums(Loader.getInstance().findAlbums(this));
 
         return albums;
     }
@@ -33,8 +33,8 @@ public class ArtistItem extends BaseItem {
         this.albums = albums;
     }
 
-    public List<SongItem> getSongs(Context context) {
-        if(songs == null) setSongs(Loader.findSongsOfArtist(context, this));
+    public List<SongItem> getSongs() {
+        if(songs == null) setSongs(Loader.getInstance().findSongsOfArtist(this));
 
         return songs;
     }

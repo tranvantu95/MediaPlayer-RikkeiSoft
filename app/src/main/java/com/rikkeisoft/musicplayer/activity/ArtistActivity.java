@@ -26,6 +26,8 @@ public class ArtistActivity extends AppbarActivity {
 
     public static final String ID = "id";
 
+    private ArtistItem artist;
+
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
@@ -41,8 +43,6 @@ public class ArtistActivity extends AppbarActivity {
         setContentView(R.layout.activity_artist);
 
         init();
-
-        findArtist();
     }
 
     @Override
@@ -70,16 +70,28 @@ public class ArtistActivity extends AppbarActivity {
         showHomeButton();
     }
 
+    @Override
+    protected void onPermissionGranted() {
+        super.onPermissionGranted();
+
+        findArtist();
+    }
+
     private void findArtist() {
-        ArtistItem artist = Loader.findArtist(this, getIntent().getStringExtra(ID));
-        setSongs(artist.getSongs(this));
+        if(artist == null) artist = Loader.getInstance().findArtist(getIntent().getStringExtra(ID));
+        if(artist == null) {
+            finish();
+            return;
+        }
+
+        setTitle(artist.getName());
+
+        setSongs(artist.getSongs());
 
         if(artist.getNumberOfAlbums() > 0)
-            if(artist.getAlbums(this).size() > 0)
-                setAlbums(artist.getAlbums(this));
-        else appbarImage.setImageBitmap(null);
+            if(artist.getAlbums().size() > 0)
+                setAlbums(artist.getAlbums());
 
-        setTitle(artist.getName()); Log.d("debug", artist.getName());
     }
 
     private void setSongs(List<SongItem> songs) {

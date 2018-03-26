@@ -22,6 +22,8 @@ public class AlbumActivity extends AppbarActivity {
 
     public static final String ID = "id";
 
+    private AlbumItem album;
+
     public static Intent createIntent(Context context, String id) {
         Intent intent = new Intent(context, AlbumActivity.class);
         intent.putExtra(ID, id);
@@ -69,11 +71,16 @@ public class AlbumActivity extends AppbarActivity {
     }
 
     private void findAlbum() {
-        AlbumItem album = Loader.findAlbum(this, getIntent().getStringExtra(ID));
-        setSongs(album.getSongs(this));
+        if(album == null) album = Loader.getInstance().findAlbum(getIntent().getStringExtra(ID));
+        if(album == null) {
+            finish();
+            return;
+        }
 
-        appbarImage.setImageBitmap(album.getBmAlbumArt());
+        if(album.getBmAlbumArt() != null) appbarImage.setImageBitmap(album.getBmAlbumArt());
         setTitle(album.getName());
+
+        setSongs(album.getSongs());
     }
 
     private void setSongs(List<SongItem> songs) {

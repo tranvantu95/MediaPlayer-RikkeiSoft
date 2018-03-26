@@ -74,22 +74,20 @@ public class MainActivity extends AppbarActivity {
     }
 
     private void loadData() {
-        Log.d("debug", "loadData");
-
         //
-        List<SongItem> songs = Loader.loadSongs(this);
+        List<SongItem> songs = Loader.getInstance().getSongs();
 
         BaseListModel<SongItem> songsModel = ViewModelProviders.of(this).get(SongsModel.class);
         songsModel.getItems().setValue(songs);
 
         //
-        List<AlbumItem> albums = Loader.loadAlbums(this);
+        List<AlbumItem> albums = Loader.getInstance().getAlbums();
 
         AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
         albumsModel.getItems().setValue(albums);
 
         //
-        List<ArtistItem> artists = Loader.loadArtists(this);
+        List<ArtistItem> artists = Loader.getInstance().getArtists();
 
         ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
         artistsModel.getItems().setValue(artists);

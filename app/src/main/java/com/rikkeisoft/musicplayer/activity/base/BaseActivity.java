@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -42,6 +43,8 @@ public class BaseActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
         shouldShowRequestPermissionRationale = sharedPreferences.getBoolean(
                 "shouldShowRequestPermissionRationale", false);
+
+        Loader.initialize(this);
     }
 
     @Override

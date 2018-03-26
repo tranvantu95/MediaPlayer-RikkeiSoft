@@ -18,42 +18,67 @@ import java.util.List;
 
 public class Loader {
 
-    private static List<SongItem> songs;
+    // initialize
+    private static Loader instance;
 
-    private static List<AlbumItem> albums;
+    public static Loader getInstance() {
+        return instance;
+    }
 
-    private static List<ArtistItem> artists;
+    public static void initialize(Context context) {
+        if(instance == null) instance = new Loader(context.getContentResolver());
+    }
+
+    private ContentResolver contentResolver;
+
+    private Loader(ContentResolver contentResolver) {
+        this.contentResolver = contentResolver;
+    }
 
     //
-    public static void clearCache() {
+    private List<SongItem> songs;
+
+    private List<AlbumItem> albums;
+
+    private List<ArtistItem> artists;
+
+    //
+    public List<SongItem> getSongs() {
+        return songs != null ? songs : loadSongs();
+    }
+
+    public List<AlbumItem> getAlbums() {
+        return albums != null ? albums : loadAlbums();
+    }
+
+    public List<ArtistItem> getArtists() {
+        return artists != null ? artists : loadArtists();
+    }
+
+    //
+    public void clearCache() {
         songs = null;
         albums = null;
         artists = null;
     }
 
     //
-    public static SongItem findSong(Context context, String songId) {
-        if(songs == null) loadSongs(context);
-
-        return findItem(songs, songId);
+    public SongItem findSong(String songId) {
+        return findItem(getSongs(), songId);
     }
 
-    public static AlbumItem findAlbum(Context context, String albumId) {
-        if(albums == null) loadAlbums(context);
-
-        return findItem(albums, albumId);
+    public AlbumItem findAlbum(String albumId) {
+        return findItem(getAlbums(), albumId);
     }
 
-    public static ArtistItem findArtist(Context context, String artistId) {
-        if(artists == null) loadArtists(context);
-
-        return findItem(artists, artistId);
+    public ArtistItem findArtist(String artistId) {
+        return findItem(getArtists(), artistId);
     }
 
     //
     @NonNull
-    public static List<SongItem> findSongsOfAlbum(Context context, AlbumItem albumItem) {
-        return findSongs(context, albumItem, new FindItems<SongItem, AlbumItem>() {
+    public List<SongItem> findSongsOfAlbum(AlbumItem albumItem) {
+        return findSongs(albumItem, new FindItems<SongItem, AlbumItem>() {
             @Override
             public String getId(SongItem song) {
                 return song.getAlbumId();
@@ -67,8 +92,8 @@ public class Loader {
     }
 
     @NonNull
-    public static List<SongItem> findSongsOfArtist(Context context, ArtistItem artistItem) {
-        return findSongs(context, artistItem, new FindItems<SongItem, ArtistItem>() {
+    public List<SongItem> findSongsOfArtist(ArtistItem artistItem) {
+        return findSongs(artistItem, new FindItems<SongItem, ArtistItem>() {
             @Override
             public String getId(SongItem song) {
                 return song.getArtistId();
@@ -82,10 +107,8 @@ public class Loader {
     }
 
     @NonNull
-    public static List<AlbumItem> findAlbums(Context context, ArtistItem artistItem) {
-        if(albums == null) loadAlbums(context);
-
-        return findItems(albums, artistItem, new FindItems<AlbumItem, ArtistItem>() {
+    public List<AlbumItem> findAlbums(ArtistItem artistItem) {
+        return findItems(getAlbums(), artistItem, new FindItems<AlbumItem, ArtistItem>() {
             @Override
             public String getId(AlbumItem albumItem) {
                 return albumItem.getArtistId();
@@ -100,11 +123,8 @@ public class Loader {
 
     //
     @NonNull
-    private static <Item2 extends BaseItem> List<SongItem> findSongs(
-            Context context, Item2 item2, FindItems<SongItem, Item2> findItems) {
-        if(songs == null) loadSongs(context);
-
-        return findItems(songs, item2, findItems);
+    private <Item2 extends BaseItem> List<SongItem> findSongs(Item2 item2, FindItems<SongItem, Item2> findItems) {
+        return findItems(getSongs(), item2, findItems);
     }
 
     //
@@ -133,16 +153,17 @@ public class Loader {
         return _items;
     }
 
-    public interface FindItems<Item, Item2> {
+    private interface FindItems<Item, Item2> {
         String getId(Item item);
         void linked(Item item, Item2 item2);
     }
 
     //
-    public static List<SongItem> loadSongs(Context context) {
+    @NonNull
+    private List<SongItem> loadSongs() {
         Log.d("debug", "loadSongs");
 
-        if(Loader.songs != null) return Loader.songs;
+        songs = new ArrayList<>();
 
         Uri uri = Media.EXTERNAL_CONTENT_URI;
 
@@ -160,7 +181,7 @@ public class Loader {
 
         String selection = Media.IS_MUSIC + " != 0";
 
-        ContentResolver contentResolver = context.getContentResolver();
+//        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
                 uri,
@@ -169,12 +190,7 @@ public class Loader {
                 null,
                 null);
 
-        List<SongItem> songs = null;
-
         if(cursor != null) {
-            songs = new ArrayList<>();
-            Loader.songs = songs;
-
             while(cursor.moveToNext()) {
                 SongItem song = new SongItem();
 
@@ -198,10 +214,11 @@ public class Loader {
         return songs;
     }
 
-    public static List<AlbumItem> loadAlbums(Context context) {
+    @NonNull
+    private List<AlbumItem> loadAlbums() {
         Log.d("debug", "loadAlbums");
 
-        if(Loader.albums != null) return Loader.albums;
+        albums = new ArrayList<>();
 
         Uri uri = Albums.EXTERNAL_CONTENT_URI;
 
@@ -213,7 +230,7 @@ public class Loader {
                 Artists.Albums.ALBUM_ART
         };
 
-        ContentResolver contentResolver = context.getContentResolver();
+//        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
                 uri,
@@ -222,12 +239,7 @@ public class Loader {
                 null,
                 null);
 
-        List<AlbumItem> albums = null;
-
         if(cursor != null) {
-            albums = new ArrayList<>();
-            Loader.albums = albums;
-
             while(cursor.moveToNext()) {
                 AlbumItem album = new AlbumItem();
 
@@ -248,10 +260,11 @@ public class Loader {
         return albums;
     }
 
-    public static List<ArtistItem> loadArtists(Context context) {
+    @NonNull
+    private List<ArtistItem> loadArtists() {
         Log.d("debug", "loadArtists");
 
-        if(Loader.artists != null) return Loader.artists;
+        artists = new ArrayList<>();
 
         Uri uri = Artists.EXTERNAL_CONTENT_URI;
 
@@ -261,7 +274,7 @@ public class Loader {
                 Artists.NUMBER_OF_ALBUMS
         };
 
-        ContentResolver contentResolver = context.getContentResolver();
+//        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
                 uri,
@@ -270,12 +283,7 @@ public class Loader {
                 null,
                 null);
 
-        List<ArtistItem> artists = null;
-
         if(cursor != null) {
-            artists = new ArrayList<>();
-            Loader.artists = artists;
-
             while(cursor.moveToNext()) {
                 ArtistItem artist = new ArtistItem();
 
