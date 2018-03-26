@@ -43,6 +43,13 @@ public class Loader {
     private List<ArtistItem> artists;
 
     //
+    public void clearCache() {
+        songs = null;
+        albums = null;
+        artists = null;
+    }
+
+    //
     public List<SongItem> getSongs() {
         return songs != null ? songs : loadSongs();
     }
@@ -53,13 +60,6 @@ public class Loader {
 
     public List<ArtistItem> getArtists() {
         return artists != null ? artists : loadArtists();
-    }
-
-    //
-    public void clearCache() {
-        songs = null;
-        albums = null;
-        artists = null;
     }
 
     //
@@ -146,7 +146,7 @@ public class Loader {
             Item item = items.get(i);
             if(item2.getId().equals(findItems.getId(item))) {
                 findItems.linked(item, item2);
-                _items.add(item);
+                _items.add(0, item);
             }
         }
 
@@ -181,6 +181,8 @@ public class Loader {
 
         String selection = Media.IS_MUSIC + " != 0";
 
+        String sortOder = Media.TITLE + " ASC";
+
 //        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
@@ -188,7 +190,7 @@ public class Loader {
                 projection,
                 selection,
                 null,
-                null);
+                sortOder);
 
         if(cursor != null) {
             while(cursor.moveToNext()) {
@@ -230,6 +232,8 @@ public class Loader {
                 Artists.Albums.ALBUM_ART
         };
 
+        String sortOder = Albums.ALBUM + " ASC";
+
 //        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
@@ -237,7 +241,7 @@ public class Loader {
                 projection,
                 null,
                 null,
-                null);
+                sortOder);
 
         if(cursor != null) {
             while(cursor.moveToNext()) {
@@ -274,6 +278,8 @@ public class Loader {
                 Artists.NUMBER_OF_ALBUMS
         };
 
+        String sortOder = Artists.ARTIST + " ASC";
+
 //        ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = contentResolver.query(
@@ -281,7 +287,7 @@ public class Loader {
                 projection,
                 null,
                 null,
-                null);
+                sortOder);
 
         if(cursor != null) {
             while(cursor.moveToNext()) {

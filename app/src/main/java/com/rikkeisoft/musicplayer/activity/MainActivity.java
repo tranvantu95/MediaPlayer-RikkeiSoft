@@ -1,17 +1,9 @@
 package com.rikkeisoft.musicplayer.activity;
 
-import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,16 +13,14 @@ import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.ArtistsModel;
-import com.rikkeisoft.musicplayer.model.base.BaseListModel;
-import com.rikkeisoft.musicplayer.model.item.AlbumItem;
-import com.rikkeisoft.musicplayer.model.item.ArtistItem;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.List;
 
 public class MainActivity extends AppbarActivity {
+
+    public static boolean running;
 
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
@@ -40,10 +30,16 @@ public class MainActivity extends AppbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Log.d("debug", "onCreate MainActivity");
+        running = true;
 
         init();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        running = false;
     }
 
     @Override
@@ -73,24 +69,32 @@ public class MainActivity extends AppbarActivity {
         loadData();
     }
 
+    @Override
+    protected void onReceiverMediaChange() {
+        super.onReceiverMediaChange();
+
+        loadData();
+    }
+
+    @Override
+    protected void onMediaChange() {
+        super.onMediaChange();
+
+        notifyMediaChange();
+    }
+
     private void loadData() {
         //
-        List<SongItem> songs = Loader.getInstance().getSongs();
-
-        BaseListModel<SongItem> songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsModel.getItems().setValue(songs);
+        SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
+        songsModel.getItems().setValue(Loader.getInstance().getSongs());
 
         //
-        List<AlbumItem> albums = Loader.getInstance().getAlbums();
-
         AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
-        albumsModel.getItems().setValue(albums);
+        albumsModel.getItems().setValue(Loader.getInstance().getAlbums());
 
         //
-        List<ArtistItem> artists = Loader.getInstance().getArtists();
-
         ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
-        artistsModel.getItems().setValue(artists);
+        artistsModel.getItems().setValue(Loader.getInstance().getArtists());
     }
 
     @Override
@@ -106,4 +110,5 @@ public class MainActivity extends AppbarActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }

@@ -1,12 +1,16 @@
 package com.rikkeisoft.musicplayer.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
@@ -19,6 +23,8 @@ import com.rikkeisoft.musicplayer.utils.Loader;
 import java.util.List;
 
 public class AlbumActivity extends AppbarActivity {
+
+    public static boolean running;
 
     public static final String ID = "id";
 
@@ -35,7 +41,17 @@ public class AlbumActivity extends AppbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album);
 
+        running = true;
+
         init();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        running = false;
     }
 
     @Override
@@ -58,6 +74,21 @@ public class AlbumActivity extends AppbarActivity {
         findAlbum();
     }
 
+    @Override
+    protected void onReceiverMediaChange() {
+        super.onReceiverMediaChange();
+
+        album = null;
+        findAlbum();
+    }
+
+    @Override
+    protected void onMediaChange() {
+        super.onMediaChange();
+
+        if(!MainActivity.running) super.notifyMediaChange();
+    }
+
     private void addFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
@@ -77,8 +108,9 @@ public class AlbumActivity extends AppbarActivity {
             return;
         }
 
-        if(album.getBmAlbumArt() != null) appbarImage.setImageBitmap(album.getBmAlbumArt());
         setTitle(album.getName());
+
+        if(album.getAlbumArtBitmap() != null) appbarImage.setImageBitmap(album.getAlbumArtBitmap());
 
         setSongs(album.getSongs());
     }

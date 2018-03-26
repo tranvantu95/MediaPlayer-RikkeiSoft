@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
@@ -77,6 +76,21 @@ public class ArtistActivity extends AppbarActivity {
         findArtist();
     }
 
+    @Override
+    protected void onReceiverMediaChange() {
+        super.onReceiverMediaChange();
+
+        artist = null;
+        findArtist();
+    }
+
+    @Override
+    protected void onMediaChange() {
+        super.onMediaChange();
+
+        if(!MainActivity.running && !AlbumActivity.running) super.notifyMediaChange();
+    }
+
     private void findArtist() {
         if(artist == null) artist = Loader.getInstance().findArtist(getIntent().getStringExtra(ID));
         if(artist == null) {
@@ -88,10 +102,7 @@ public class ArtistActivity extends AppbarActivity {
 
         setSongs(artist.getSongs());
 
-        if(artist.getNumberOfAlbums() > 0)
-            if(artist.getAlbums().size() > 0)
-                setAlbums(artist.getAlbums());
-
+        setAlbums(artist.getAlbums());
     }
 
     private void setSongs(List<SongItem> songs) {
@@ -103,8 +114,8 @@ public class ArtistActivity extends AppbarActivity {
         AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
         albumsModel.getItems().setValue(albums);
 
-//        if(albums.get(0).getBmAlbumArt() != null)
-            appbarImage.setImageBitmap(albums.get(0).getBmAlbumArt());
+        if(!albums.isEmpty() && albums.get(0).getAlbumArtBitmap() != null)
+            appbarImage.setImageBitmap(albums.get(0).getAlbumArtBitmap());
     }
 
     @Override

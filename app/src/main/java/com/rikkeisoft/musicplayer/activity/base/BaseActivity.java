@@ -4,14 +4,19 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,16 +26,100 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.MainActivity;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
 public class BaseActivity extends AppCompatActivity {
 
-    private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
-    protected String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
+    // Media change listener
+    private static final String ACTION_MEDIA_CHANGE = "com.rikkeisoft.musicplayer.action.MEDIA_CHANGE";
+    private ContentObserver onMediaChange;
+    private BroadcastReceiver onReceiverMediaChange;
 
-    protected boolean shouldShowRequestPermissionRationale;
-    protected boolean showSettings;
+    private void registerOnMediaChange() {
+        if(onMediaChange != null) return;
+
+        onMediaChange = new ContentObserver(new Handler()) {
+            private long latestTime = System.currentTimeMillis();
+
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                super.onChange(selfChange, uri);
+
+                if(System.currentTimeMillis() - latestTime > 1000) {
+                    latestTime = System.currentTimeMillis();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            onMediaChange();
+                        }
+                    }, 1000);
+                }
+
+            }
+        };
+
+        getContentResolver().registerContentObserver(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true, onMediaChange);
+    }
+
+    private void unregisterOnMediaChange() {
+        if(onMediaChange != null) {
+            getContentResolver().unregisterContentObserver(onMediaChange);
+            onMediaChange = null;
+        }
+    }
+
+    private void registerOnReceiverMediaChange() {
+        if(onReceiverMediaChange != null) return;
+
+        onReceiverMediaChange = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onReceiverMediaChange();
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(ACTION_MEDIA_CHANGE);
+        registerReceiver(onReceiverMediaChange, filter);
+    }
+
+    private void unregisterOnReceiverMediaChange() {
+        if(onReceiverMediaChange != null) {
+            unregisterReceiver(onReceiverMediaChange);
+            onReceiverMediaChange = null;
+        }
+    }
+
+    private void sendBroadcastMediaChange() {
+        Intent intent = new Intent(ACTION_MEDIA_CHANGE);
+        sendBroadcast(intent);
+    }
+
+    protected void notifyMediaChange() {
+        Log.d("debug", "notifyMediaChange " + getClass().getSimpleName());
+        Loader.getInstance().clearCache();
+        sendBroadcastMediaChange();
+    }
+
+    protected void onMediaChange() {
+        Log.d("debug", "onMediaChange " + getClass().getSimpleName());
+
+    }
+
+    protected void onReceiverMediaChange() {
+        Log.d("debug", "onReceiverMediaChange " + getClass().getSimpleName());
+
+    }
+
+    // Permission
+    private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
+    private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
+
+    private boolean shouldShowRequestPermissionRationale;
+    private boolean showSettings;
 
     private Dialog requestPermissionRationale;
 
@@ -45,6 +134,14 @@ public class BaseActivity extends AppCompatActivity {
                 "shouldShowRequestPermissionRationale", false);
 
         Loader.initialize(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterOnMediaChange();
+        unregisterOnReceiverMediaChange();
     }
 
     @Override
@@ -143,6 +240,9 @@ public class BaseActivity extends AppCompatActivity {
     protected void onPermissionGranted() {
         Log.d("debug", "onPermissionGranted");
         hideRequestPermissionRationale();
+
+        registerOnMediaChange();
+        registerOnReceiverMediaChange();
     }
 
     protected void onPermissionDenied() {

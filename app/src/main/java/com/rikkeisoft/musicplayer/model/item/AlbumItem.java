@@ -1,6 +1,5 @@
 package com.rikkeisoft.musicplayer.model.item;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -12,7 +11,7 @@ import java.util.List;
 public class AlbumItem extends BaseItem {
 
     private String albumArt;
-    private Bitmap bmAlbumArt;
+    private Bitmap albumArtBitmap;
 
     private String artistId;
     private String artistName;
@@ -28,14 +27,14 @@ public class AlbumItem extends BaseItem {
         this.albumArt = albumArt;
     }
 
-    public Bitmap getBmAlbumArt() {
-        if(bmAlbumArt == null && getAlbumArt() != null)
-            setBmAlbumArt(BitmapFactory.decodeFile(getAlbumArt()));
-        return bmAlbumArt;
+    public Bitmap getAlbumArtBitmap() {
+        if(albumArtBitmap == null && getAlbumArt() != null)
+            setAlbumArtBitmap(BitmapFactory.decodeFile(getAlbumArt()));
+        return albumArtBitmap;
     }
 
-    public void setBmAlbumArt(Bitmap bmAlbumArt) {
-        this.bmAlbumArt = bmAlbumArt;
+    public void setAlbumArtBitmap(Bitmap albumArtBitmap) {
+        this.albumArtBitmap = albumArtBitmap;
     }
 
     public String getArtistId() {

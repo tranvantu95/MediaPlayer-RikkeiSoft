@@ -1,6 +1,5 @@
 package com.rikkeisoft.musicplayer.custom.adapter;
 
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +40,7 @@ public class AlbumsRecyclerAdapter extends BaseRecyclerAdapter<AlbumItem, Albums
         public void setItem(AlbumItem albumItem) {
             super.setItem(albumItem);
 
-            imAlbumArt.setImageBitmap(albumItem.getBmAlbumArt());
+            imAlbumArt.setImageBitmap(albumItem.getAlbumArtBitmap());
 
             tvAlbumName.setText(albumItem.getName());
             tvArtistName.setText(albumItem.getArtistName());
