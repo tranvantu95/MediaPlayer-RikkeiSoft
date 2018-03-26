@@ -31,11 +31,12 @@ public class BaseListFragment<Item> extends Fragment {
 //        return fragment;
 //    }
 
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//    }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Log.d("debug", "onCreate " + getClass().getSimpleName());
+    }
 
     protected void init() {
         baseListModel.getItems().observe(this, new Observer<List<Item>>() {

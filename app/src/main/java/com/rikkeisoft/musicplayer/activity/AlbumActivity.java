@@ -13,7 +13,6 @@ import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
-import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
@@ -35,8 +34,6 @@ public class AlbumActivity extends AppbarActivity {
         setContentView(R.layout.activity_album);
 
         init();
-
-        findAlbum();
     }
 
     @Override
@@ -52,12 +49,19 @@ public class AlbumActivity extends AppbarActivity {
         showHomeButton();
     }
 
+    @Override
+    protected void onPermissionGranted() {
+        super.onPermissionGranted();
+
+        findAlbum();
+    }
+
     private void addFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
+        if(songsFragment == null) songsFragment = SongsFragment.newInstance();
 
-        if(songsFragment == null) {
-            songsFragment = SongsFragment.newInstance();
+        if(!songsFragment.isAdded()) {
             fragmentManager.beginTransaction()
                     .add(R.id.fragment_container, songsFragment, "SongsFragment")
                     .commit();
@@ -68,13 +72,8 @@ public class AlbumActivity extends AppbarActivity {
         AlbumItem album = Loader.findAlbum(this, getIntent().getStringExtra(ID));
         setSongs(album.getSongs(this));
 
-        ivAppbar.setImageBitmap(album.getBmAlbumArt());
+        appbarImage.setImageBitmap(album.getBmAlbumArt());
         setTitle(album.getName());
-    }
-
-    private void initArtist() {
-        ArtistItem artist = Loader.findArtist(this, getIntent().getStringExtra(ID));
-        setSongs(artist.getSongs(this));
     }
 
     private void setSongs(List<SongItem> songs) {

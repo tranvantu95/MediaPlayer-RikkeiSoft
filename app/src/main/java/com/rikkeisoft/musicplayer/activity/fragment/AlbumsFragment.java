@@ -31,8 +31,6 @@ public class AlbumsFragment extends BaseListFragment<AlbumItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("debug", "onCreate AlbumsFragment");
-
         baseListModel = ViewModelProviders.of(getActivity()).get(AlbumsModel.class);
 
         recyclerAdapter = new AlbumsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {

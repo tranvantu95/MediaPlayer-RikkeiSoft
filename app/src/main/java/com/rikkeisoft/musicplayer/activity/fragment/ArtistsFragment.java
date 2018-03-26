@@ -30,8 +30,6 @@ public class ArtistsFragment extends BaseListFragment<ArtistItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("debug", "onCreate ArtistsFragment");
-
         baseListModel = ViewModelProviders.of(getActivity()).get(ArtistsModel.class);
 
         recyclerAdapter = new ArtistsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {

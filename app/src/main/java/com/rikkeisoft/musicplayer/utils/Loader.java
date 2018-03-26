@@ -140,6 +140,8 @@ public class Loader {
 
     //
     public static List<SongItem> loadSongs(Context context) {
+        Log.d("debug", "loadSongs");
+
         if(Loader.songs != null) return Loader.songs;
 
         Uri uri = Media.EXTERNAL_CONTENT_URI;
@@ -173,8 +175,6 @@ public class Loader {
             songs = new ArrayList<>();
             Loader.songs = songs;
 
-            Log.d("debug", "song----------------------");
-
             while(cursor.moveToNext()) {
                 SongItem song = new SongItem();
 
@@ -199,6 +199,8 @@ public class Loader {
     }
 
     public static List<AlbumItem> loadAlbums(Context context) {
+        Log.d("debug", "loadAlbums");
+
         if(Loader.albums != null) return Loader.albums;
 
         Uri uri = Albums.EXTERNAL_CONTENT_URI;
@@ -210,8 +212,6 @@ public class Loader {
                 Albums.ARTIST,
                 Artists.Albums.ALBUM_ART
         };
-
-//        String selection = Media.IS_MUSIC + " != 0";
 
         ContentResolver contentResolver = context.getContentResolver();
 
@@ -227,8 +227,6 @@ public class Loader {
         if(cursor != null) {
             albums = new ArrayList<>();
             Loader.albums = albums;
-
-            Log.d("debug", "album----------------------");
 
             while(cursor.moveToNext()) {
                 AlbumItem album = new AlbumItem();
@@ -251,6 +249,8 @@ public class Loader {
     }
 
     public static List<ArtistItem> loadArtists(Context context) {
+        Log.d("debug", "loadArtists");
+
         if(Loader.artists != null) return Loader.artists;
 
         Uri uri = Artists.EXTERNAL_CONTENT_URI;
@@ -260,8 +260,6 @@ public class Loader {
                 Artists.ARTIST,
                 Artists.NUMBER_OF_ALBUMS
         };
-
-//        String selection = Media.IS_MUSIC + " != 0";
 
         ContentResolver contentResolver = context.getContentResolver();
 

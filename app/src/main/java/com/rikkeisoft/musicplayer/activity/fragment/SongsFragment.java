@@ -29,8 +29,6 @@ public class SongsFragment extends BaseListFragment<SongItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("debug", "onCreate SongsFragment");
-
         baseListModel = ViewModelProviders.of(getActivity()).get(SongsModel.class);
 
         recyclerAdapter = new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {

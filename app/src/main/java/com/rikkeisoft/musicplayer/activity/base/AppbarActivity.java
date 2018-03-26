@@ -1,11 +1,8 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -17,7 +14,7 @@ public class AppbarActivity extends BaseActivity {
     protected AppBarLayout appbar;
     protected Toolbar toolbar;
     protected TabLayout tabs;
-    protected ImageView ivAppbar;
+    protected ImageView appbarImage;
 
 //    @Override
 //    protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,7 +31,7 @@ public class AppbarActivity extends BaseActivity {
         appbar = findViewById(R.id.appbar);
         toolbar = findViewById(R.id.toolbar);
         tabs = findViewById(R.id.tabs);
-        ivAppbar = findViewById(R.id.app_bar_image);
+        appbarImage = findViewById(R.id.app_bar_image);
     }
 
     // ActionBar

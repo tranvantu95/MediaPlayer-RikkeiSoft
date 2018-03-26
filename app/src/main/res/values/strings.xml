@@ -4,7 +4,12 @@
     <string name="app_name">Beauty Music</string>
     <string name="title_activity_album">AlbumActivity</string>
 
-    <!--Main Activity-->
+    <!--Permission-->
+    <string name="title_request_permissions">Yêu cầu quyền</string>
+    <string name="button_grant_permissions">Cấp quyền</string>
+    <string name="message_read_external_storage_permission">Ứng dụng sẽ không hoạt động
+        nếu không được cấp quyền truy cập bộ nhớ thiết bị</string>
+    <string name="exit_app">Thoát ứng dụng</string>
 
     <!--Tabs Main Activity-->
     <string name="songs">Songs</string>
