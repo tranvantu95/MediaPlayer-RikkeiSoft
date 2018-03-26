@@ -65,6 +65,7 @@ public class AlbumActivity extends AppbarActivity {
     protected void setupActionBar() {
         super.setupActionBar();
         showHomeButton();
+        setTitle("");
     }
 
     @Override
@@ -86,7 +87,7 @@ public class AlbumActivity extends AppbarActivity {
     protected void onMediaChange() {
         super.onMediaChange();
 
-        if(!MainActivity.running) super.notifyMediaChange();
+        if(!MainActivity.running) notifyMediaChange();
     }
 
     private void addFragment() {

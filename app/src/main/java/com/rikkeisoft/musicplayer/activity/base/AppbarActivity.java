@@ -51,7 +51,7 @@ public class AppbarActivity extends BaseActivity {
         setTittle(getString(resStringId));
     }
 
-    public void setTittle(String string){
+    public void setTittle(String string) {
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {
             actionBar.setTitle(string);

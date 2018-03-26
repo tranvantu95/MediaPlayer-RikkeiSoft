@@ -30,7 +30,7 @@
 
         <activity
             android:name=".activity.ArtistActivity"
-            android:label="@string/title_activity_album"
+            android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>

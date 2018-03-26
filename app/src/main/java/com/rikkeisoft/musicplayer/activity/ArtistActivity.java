@@ -67,6 +67,7 @@ public class ArtistActivity extends AppbarActivity {
     protected void setupActionBar() {
         super.setupActionBar();
         showHomeButton();
+        setTitle("");
     }
 
     @Override
@@ -88,7 +89,7 @@ public class ArtistActivity extends AppbarActivity {
     protected void onMediaChange() {
         super.onMediaChange();
 
-        if(!MainActivity.running && !AlbumActivity.running) super.notifyMediaChange();
+        if(!MainActivity.running && !AlbumActivity.running) notifyMediaChange();
     }
 
     private void findArtist() {

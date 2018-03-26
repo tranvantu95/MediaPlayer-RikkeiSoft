@@ -2,7 +2,8 @@
 
     <!--Title-->
     <string name="app_name">Beauty Music</string>
-    <string name="title_activity_album">AlbumActivity</string>
+    <string name="title_activity_album">Album Activity</string>
+    <string name="title_activity_artist">Artist Activity</string>
 
     <!--Permission-->
     <string name="title_request_permissions">Yêu cầu quyền</string>
