@@ -8,4 +8,22 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="Search" />
+
+    <item
+        android:id="@+id/action_change_type_view"
+        android:title="Type View">
+
+        <menu>
+
+            <item android:id="@+id/action_list"
+                android:title="List View"/>
+
+            <item android:id="@+id/action_grid"
+                android:title="Grid View" />
+
+        </menu>
+
+    </item>
+
+
 </menu>

@@ -1,7 +1,8 @@
 <resources>
 
     <dimen name="song_item_image_size">72dp</dimen>
-    <dimen name="album_item_divider">4dp</dimen>
+    <dimen name="list_item_divider">2dp</dimen>
+    <dimen name="grid_item_divider">4dp</dimen>
 
 
 </resources>

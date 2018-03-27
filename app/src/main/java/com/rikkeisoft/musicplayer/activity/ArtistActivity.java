@@ -6,11 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
+import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.ArtistPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
@@ -21,7 +20,7 @@ import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.List;
 
-public class ArtistActivity extends AppbarActivity {
+public class ArtistActivity extends MyActivity {
 
     public static final String ID = "id";
 
@@ -118,14 +117,10 @@ public class ArtistActivity extends AppbarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+
             default:
                 return super.onOptionsItemSelected(item);
         }

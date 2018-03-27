@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
 public class BaseActivity extends AppCompatActivity {
@@ -64,7 +65,6 @@ public class BaseActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
     private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
 
-    private boolean shouldShowRequestPermissionRationale;
     private boolean showSettings;
 
     private Dialog requestPermissionRationale;
@@ -75,9 +75,6 @@ public class BaseActivity extends AppCompatActivity {
 
         Log.d("debug", "onCreate " + getClass().getSimpleName());
 
-        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-        shouldShowRequestPermissionRationale = sharedPreferences.getBoolean(
-                "shouldShowRequestPermissionRationale", false);
     }
 
     @Override
@@ -91,8 +88,8 @@ public class BaseActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-        editor.putBoolean("shouldShowRequestPermissionRationale", shouldShowRequestPermissionRationale);
+        SharedPreferences.Editor editor = getSharedPreferences(MyApplication.DATA, MODE_PRIVATE).edit();
+        editor.putBoolean("shouldShowRequestPermissionRationale", General.shouldShowRequestPermissionRationale);
         editor.apply();
     }
 
@@ -135,7 +132,7 @@ public class BaseActivity extends AppCompatActivity {
             // permissions this app might request.
         }
 
-        shouldShowRequestPermissionRationale = true;
+        General.shouldShowRequestPermissionRationale = true;
     }
 
     protected void checkPermission() {
@@ -154,7 +151,7 @@ public class BaseActivity extends AppCompatActivity {
             }
             else {
                 // No explanation needed; request the permission
-                if(shouldShowRequestPermissionRationale) onAutoDenyPermission();
+                if(General.shouldShowRequestPermissionRationale) onAutoDenyPermission();
                 else requestPermissions();
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an

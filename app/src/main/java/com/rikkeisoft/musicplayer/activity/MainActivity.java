@@ -4,23 +4,17 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
+import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.MainPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
-import java.util.List;
-
-public class MainActivity extends AppbarActivity {
-
-    public static boolean running;
+public class MainActivity extends MyActivity {
 
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
@@ -30,16 +24,12 @@ public class MainActivity extends AppbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        running = true;
-
         init();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        running = false;
     }
 
     @Override
@@ -91,14 +81,10 @@ public class MainActivity extends AppbarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+
             default:
                 return super.onOptionsItemSelected(item);
         }

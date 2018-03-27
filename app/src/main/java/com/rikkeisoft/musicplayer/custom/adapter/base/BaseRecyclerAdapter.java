@@ -3,6 +3,8 @@ package com.rikkeisoft.musicplayer.custom.adapter.base;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.rikkeisoft.musicplayer.model.base.BaseListModel;
+
 import java.util.ArrayList;
 import java.util.List;
 
