@@ -76,13 +76,6 @@ public class MainActivity extends AppbarActivity {
         loadData();
     }
 
-    @Override
-    protected void onMediaChange() {
-        super.onMediaChange();
-
-        notifyMediaChange();
-    }
-
     private void loadData() {
         //
         SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);

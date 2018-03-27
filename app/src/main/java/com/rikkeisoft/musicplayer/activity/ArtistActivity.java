@@ -85,13 +85,6 @@ public class ArtistActivity extends AppbarActivity {
         findArtist();
     }
 
-    @Override
-    protected void onMediaChange() {
-        super.onMediaChange();
-
-        if(!MainActivity.running && !AlbumActivity.running) notifyMediaChange();
-    }
-
     private void findArtist() {
         if(artist == null) artist = Loader.getInstance().findArtist(getIntent().getStringExtra(ID));
         if(artist == null) {

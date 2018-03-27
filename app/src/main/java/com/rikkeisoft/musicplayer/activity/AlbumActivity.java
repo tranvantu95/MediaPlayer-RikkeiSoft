@@ -83,13 +83,6 @@ public class AlbumActivity extends AppbarActivity {
         findAlbum();
     }
 
-    @Override
-    protected void onMediaChange() {
-        super.onMediaChange();
-
-        if(!MainActivity.running) notifyMediaChange();
-    }
-
     private void addFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");

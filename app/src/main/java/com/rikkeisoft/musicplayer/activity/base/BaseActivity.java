@@ -26,51 +26,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.MainActivity;
-import com.rikkeisoft.musicplayer.utils.AppUtils;
+import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
 public class BaseActivity extends AppCompatActivity {
 
     // Media change listener
-    private static final String ACTION_MEDIA_CHANGE = "com.rikkeisoft.musicplayer.action.MEDIA_CHANGE";
-    private ContentObserver onMediaChange;
     private BroadcastReceiver onReceiverMediaChange;
-
-    private void registerOnMediaChange() {
-        if(onMediaChange != null) return;
-
-        onMediaChange = new ContentObserver(new Handler()) {
-            private long latestTime = System.currentTimeMillis();
-
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                super.onChange(selfChange, uri);
-
-                if(System.currentTimeMillis() - latestTime > 1000) {
-                    latestTime = System.currentTimeMillis();
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            onMediaChange();
-                        }
-                    }, 1000);
-                }
-
-            }
-        };
-
-        getContentResolver().registerContentObserver(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true, onMediaChange);
-    }
-
-    private void unregisterOnMediaChange() {
-        if(onMediaChange != null) {
-            getContentResolver().unregisterContentObserver(onMediaChange);
-            onMediaChange = null;
-        }
-    }
 
     private void registerOnReceiverMediaChange() {
         if(onReceiverMediaChange != null) return;
@@ -82,7 +44,7 @@ public class BaseActivity extends AppCompatActivity {
             }
         };
 
-        IntentFilter filter = new IntentFilter(ACTION_MEDIA_CHANGE);
+        IntentFilter filter = new IntentFilter(MyApplication.ACTION_MEDIA_CHANGE);
         registerReceiver(onReceiverMediaChange, filter);
     }
 
@@ -91,22 +53,6 @@ public class BaseActivity extends AppCompatActivity {
             unregisterReceiver(onReceiverMediaChange);
             onReceiverMediaChange = null;
         }
-    }
-
-    private void sendBroadcastMediaChange() {
-        Intent intent = new Intent(ACTION_MEDIA_CHANGE);
-        sendBroadcast(intent);
-    }
-
-    protected void notifyMediaChange() {
-        Log.d("debug", "notifyMediaChange " + getClass().getSimpleName());
-        Loader.getInstance().clearCache();
-        sendBroadcastMediaChange();
-    }
-
-    protected void onMediaChange() {
-        Log.d("debug", "onMediaChange " + getClass().getSimpleName());
-
     }
 
     protected void onReceiverMediaChange() {
@@ -140,7 +86,6 @@ public class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        unregisterOnMediaChange();
         unregisterOnReceiverMediaChange();
     }
 
@@ -241,7 +186,6 @@ public class BaseActivity extends AppCompatActivity {
         Log.d("debug", "onPermissionGranted");
         hideRequestPermissionRationale();
 
-        registerOnMediaChange();
         registerOnReceiverMediaChange();
     }
 
