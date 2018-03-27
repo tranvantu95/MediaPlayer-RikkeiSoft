@@ -10,15 +10,16 @@ import java.util.List;
 
 public class AlbumItem extends BaseItem {
 
-    private String albumArt;
-    private Bitmap albumArtBitmap;
-
-    private String artistId;
+    // media info
+    private int artistId;
     private String artistName;
+    private String albumArt;
 
+    // linked
     private ArtistItem artist;
     private List<SongItem> songs;
 
+    // method
     public String getAlbumArt() {
         return albumArt;
     }
@@ -27,21 +28,11 @@ public class AlbumItem extends BaseItem {
         this.albumArt = albumArt;
     }
 
-    public Bitmap getAlbumArtBitmap() {
-        if(albumArtBitmap == null && getAlbumArt() != null)
-            setAlbumArtBitmap(BitmapFactory.decodeFile(getAlbumArt()));
-        return albumArtBitmap;
-    }
-
-    public void setAlbumArtBitmap(Bitmap albumArtBitmap) {
-        this.albumArtBitmap = albumArtBitmap;
-    }
-
-    public String getArtistId() {
+    public int getArtistId() {
         return artistId;
     }
 
-    public void setArtistId(String artistId) {
+    public void setArtistId(int artistId) {
         this.artistId = artistId;
     }
 
@@ -51,6 +42,14 @@ public class AlbumItem extends BaseItem {
 
     public void setArtistName(String artistName) {
         this.artistName = artistName;
+    }
+
+    @Override
+    public Bitmap getBitmap() {
+        if(bitmap == null && getAlbumArt() != null)
+            setBitmap(BitmapFactory.decodeFile(getAlbumArt()));
+
+        return bitmap;
     }
 
     public ArtistItem getArtist() {

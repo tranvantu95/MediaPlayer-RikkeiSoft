@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_collapseMode="parallax"
-                android:src="@drawable/aaa"
+                app:srcCompat="@drawable/im_artist"
                 android:adjustViewBounds="true"/>
 
             <android.support.v7.widget.Toolbar

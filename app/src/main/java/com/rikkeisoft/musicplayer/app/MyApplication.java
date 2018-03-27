@@ -70,6 +70,8 @@ public class MyApplication extends Application {
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        Loader.initialize(this);
+
         registerOnMediaChange();
     }
 

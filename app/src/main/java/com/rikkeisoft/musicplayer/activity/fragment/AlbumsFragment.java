@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import com.rikkeisoft.musicplayer.activity.AlbumActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.AlbumsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.view.MyItemDecoration;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 
@@ -51,7 +49,7 @@ public class AlbumsFragment extends BaseListFragment<AlbumItem> {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_albums, container, false);
+        return inflater.inflate(R.layout.fragment_grid, container, false);
     }
 
     @Override

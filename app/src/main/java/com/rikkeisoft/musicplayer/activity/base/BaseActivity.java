@@ -78,8 +78,6 @@ public class BaseActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
         shouldShowRequestPermissionRationale = sharedPreferences.getBoolean(
                 "shouldShowRequestPermissionRationale", false);
-
-        Loader.initialize(this);
     }
 
     @Override

@@ -63,15 +63,15 @@ public class Loader {
     }
 
     //
-    public SongItem findSong(String songId) {
+    public SongItem findSong(int songId) {
         return findItem(getSongs(), songId);
     }
 
-    public AlbumItem findAlbum(String albumId) {
+    public AlbumItem findAlbum(int albumId) {
         return findItem(getAlbums(), albumId);
     }
 
-    public ArtistItem findArtist(String artistId) {
+    public ArtistItem findArtist(int artistId) {
         return findItem(getArtists(), artistId);
     }
 
@@ -80,7 +80,7 @@ public class Loader {
     public List<SongItem> findSongsOfAlbum(AlbumItem albumItem) {
         return findSongs(albumItem, new FindItems<SongItem, AlbumItem>() {
             @Override
-            public String getId(SongItem song) {
+            public int getId(SongItem song) {
                 return song.getAlbumId();
             }
 
@@ -95,7 +95,7 @@ public class Loader {
     public List<SongItem> findSongsOfArtist(ArtistItem artistItem) {
         return findSongs(artistItem, new FindItems<SongItem, ArtistItem>() {
             @Override
-            public String getId(SongItem song) {
+            public int getId(SongItem song) {
                 return song.getArtistId();
             }
 
@@ -110,7 +110,7 @@ public class Loader {
     public List<AlbumItem> findAlbums(ArtistItem artistItem) {
         return findItems(getAlbums(), artistItem, new FindItems<AlbumItem, ArtistItem>() {
             @Override
-            public String getId(AlbumItem albumItem) {
+            public int getId(AlbumItem albumItem) {
                 return albumItem.getArtistId();
             }
 
@@ -128,10 +128,10 @@ public class Loader {
     }
 
     //
-    private static <Item extends BaseItem> Item findItem(List<Item> items, String id) {
+    private static <Item extends BaseItem> Item findItem(List<Item> items, int id) {
         for(int i = items.size() - 1; i >= 0; i--) {
             Item item = items.get(i);
-            if(id.equals(item.getId())) return item;
+            if(id == item.getId()) return item;
         }
 
         return null;
@@ -144,7 +144,7 @@ public class Loader {
 
         for(int i = items.size() - 1; i >= 0; i--) {
             Item item = items.get(i);
-            if(item2.getId().equals(findItems.getId(item))) {
+            if(item2.getId() == findItems.getId(item)) {
                 findItems.linked(item, item2);
                 _items.add(0, item);
             }
@@ -154,7 +154,7 @@ public class Loader {
     }
 
     private interface FindItems<Item, Item2> {
-        String getId(Item item);
+        int getId(Item item);
         void linked(Item item, Item2 item2);
     }
 
@@ -198,13 +198,13 @@ public class Loader {
 
                 int i = 0;
 
-                song.setId(cursor.getString(i));
+                song.setId(cursor.getInt(i));
                 song.setName(cursor.getString(++i));
-                song.setAlbumId(cursor.getString(++i));
+                song.setAlbumId(cursor.getInt(++i));
                 song.setAlbumName(cursor.getString(++i));
-                song.setArtistId(cursor.getString(++i)); //Log.d("debug", song.getArtistId());
+                song.setArtistId(cursor.getInt(++i)); //Log.d("debug", song.getArtistId());
                 song.setArtistName(cursor.getString(++i));
-                song.setDuration(cursor.getString(++i));
+                song.setDuration(cursor.getInt(++i));
                 song.setPath(cursor.getString(++i));
 
                 songs.add(song);
@@ -249,9 +249,9 @@ public class Loader {
 
                 int i = 0;
 
-                album.setId(cursor.getString(i));
+                album.setId(cursor.getInt(i));
                 album.setName(cursor.getString(++i));
-                album.setArtistId(cursor.getString(++i));
+                album.setArtistId(cursor.getInt(++i));
                 album.setArtistName(cursor.getString(++i));
                 album.setAlbumArt(cursor.getString(++i)); //Log.d("debug", album.getAlbumArt());
 
@@ -275,7 +275,8 @@ public class Loader {
         String[] projection = {
                 Artists._ID,
                 Artists.ARTIST,
-                Artists.NUMBER_OF_ALBUMS
+                Artists.NUMBER_OF_ALBUMS,
+                Artists.NUMBER_OF_TRACKS
         };
 
         String sortOder = Artists.ARTIST + " ASC";
@@ -295,9 +296,10 @@ public class Loader {
 
                 int i = 0;
 
-                artist.setId(cursor.getString(i));
+                artist.setId(cursor.getInt(i));
                 artist.setName(cursor.getString(++i));
                 artist.setNumberOfAlbums(cursor.getInt(++i));
+                artist.setNumberOfSongs(cursor.getInt(++i));
 
                 artists.add(artist);
             }

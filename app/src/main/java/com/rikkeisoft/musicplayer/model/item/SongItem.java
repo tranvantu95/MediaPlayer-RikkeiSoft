@@ -1,24 +1,25 @@
 package com.rikkeisoft.musicplayer.model.item;
 
-import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
-import java.util.List;
-
 public class SongItem extends BaseItem {
 
-    private String path;
-    private String albumId;
+    // media info
+    private int albumId;
     private String albumName;
-    private String artistId;
+    private int artistId;
     private String artistName;
     private int duration;
+    private String path;
 
+    // linked
     private AlbumItem album;
     private ArtistItem artist;
 
+    // method
     public String getPath() {
         return path;
     }
@@ -27,11 +28,11 @@ public class SongItem extends BaseItem {
         this.path = path;
     }
 
-    public String getAlbumId() {
+    public int getAlbumId() {
         return albumId;
     }
 
-    public void setAlbumId(String albumId) {
+    public void setAlbumId(int albumId) {
         this.albumId = albumId;
     }
 
@@ -43,11 +44,11 @@ public class SongItem extends BaseItem {
         this.albumName = albumName;
     }
 
-    public String getArtistId() {
+    public int getArtistId() {
         return artistId;
     }
 
-    public void setArtistId(String artistId) {
+    public void setArtistId(int artistId) {
         this.artistId = artistId;
     }
 
@@ -63,8 +64,15 @@ public class SongItem extends BaseItem {
         return duration;
     }
 
-    public void setDuration(String duration) {
-        this.duration = Integer.parseInt(duration);
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    @Override
+    public Bitmap getBitmap() {
+        if(bitmap == null) setBitmap(getAlbum().getBitmap());
+
+        return bitmap;
     }
 
     public AlbumItem getAlbum() {

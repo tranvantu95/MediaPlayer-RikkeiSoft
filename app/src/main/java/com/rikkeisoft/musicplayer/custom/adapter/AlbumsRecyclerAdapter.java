@@ -18,32 +18,33 @@ public class AlbumsRecyclerAdapter extends BaseRecyclerAdapter<AlbumItem, Albums
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album_main, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album, parent, false);
         return new ViewHolder(view);
     }
 
     public static class ViewHolder extends BaseRecyclerAdapter.ViewHolder<AlbumItem> {
 
-        private ImageView imAlbumArt;
-        private TextView tvAlbumName;
-        private TextView tvArtistName;
+        private TextView albumName;
+        private TextView artistName;
+        private ImageView albumImage;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            imAlbumArt = itemView.findViewById(R.id.album_art);
-            tvAlbumName = itemView.findViewById(R.id.album_name);
-            tvArtistName = itemView.findViewById(R.id.artist_name);
+            albumName = itemView.findViewById(R.id.album_name);
+            artistName = itemView.findViewById(R.id.artist_name);
+            albumImage = itemView.findViewById(R.id.album_image);
         }
 
         @Override
         public void setItem(AlbumItem albumItem) {
             super.setItem(albumItem);
 
-            imAlbumArt.setImageBitmap(albumItem.getAlbumArtBitmap());
+            albumName.setText(albumItem.getName());
+            artistName.setText(albumItem.getArtistName());
 
-            tvAlbumName.setText(albumItem.getName());
-            tvArtistName.setText(albumItem.getArtistName());
+            if(albumItem.getBitmap() != null) albumImage.setImageBitmap(albumItem.getBitmap());
+            else albumImage.setImageDrawable(albumImage.getContext().getResources().getDrawable(R.drawable.im_album));
         }
     }
 }

@@ -30,7 +30,7 @@ public class ArtistActivity extends AppbarActivity {
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
-    public static Intent createIntent(Context context, String id) {
+    public static Intent createIntent(Context context, int id) {
         Intent intent = new Intent(context, ArtistActivity.class);
         intent.putExtra(ID, id);
         return intent;
@@ -86,13 +86,21 @@ public class ArtistActivity extends AppbarActivity {
     }
 
     private void findArtist() {
-        if(artist == null) artist = Loader.getInstance().findArtist(getIntent().getStringExtra(ID));
+        int id = getIntent().getIntExtra(ID, -1);
+        if(id == -1) {
+            finish();
+            return;
+        }
+
+        if(artist == null) artist = Loader.getInstance().findArtist(id);
         if(artist == null) {
             finish();
             return;
         }
 
         setTitle(artist.getName());
+
+        if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
 
         setSongs(artist.getSongs());
 
@@ -107,9 +115,6 @@ public class ArtistActivity extends AppbarActivity {
     private void setAlbums(List<AlbumItem> albums) {
         AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
         albumsModel.getItems().setValue(albums);
-
-        if(!albums.isEmpty() && albums.get(0).getAlbumArtBitmap() != null)
-            appbarImage.setImageBitmap(albums.get(0).getAlbumArtBitmap());
     }
 
     @Override

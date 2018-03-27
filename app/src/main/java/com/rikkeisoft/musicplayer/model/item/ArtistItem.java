@@ -1,6 +1,7 @@
 package com.rikkeisoft.musicplayer.model.item;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
@@ -9,11 +10,15 @@ import java.util.List;
 
 public class ArtistItem extends BaseItem {
 
+    // media info
     private int numberOfAlbums;
+    private int numberOfSongs;
 
+    // linked
     private List<AlbumItem> albums;
     private List<SongItem> songs;
 
+    // method
     public int getNumberOfAlbums() {
         return numberOfAlbums;
     }
@@ -22,7 +27,21 @@ public class ArtistItem extends BaseItem {
         this.numberOfAlbums = numberOfAlbums;
     }
 
-    //
+    public int getNumberOfSongs() {
+        return numberOfSongs;
+    }
+
+    public void setNumberOfSongs(int numberOfSongs) {
+        this.numberOfSongs = numberOfSongs;
+    }
+
+    @Override
+    public Bitmap getBitmap() {
+        if(bitmap == null && !getAlbums().isEmpty()) setBitmap(getAlbums().get(0).getBitmap());
+
+        return bitmap;
+    }
+
     public List<AlbumItem> getAlbums() {
         if(albums == null) setAlbums(Loader.getInstance().findAlbums(this));
 

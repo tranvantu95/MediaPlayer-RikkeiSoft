@@ -1,16 +1,12 @@
 package com.rikkeisoft.musicplayer.activity;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
@@ -30,7 +26,7 @@ public class AlbumActivity extends AppbarActivity {
 
     private AlbumItem album;
 
-    public static Intent createIntent(Context context, String id) {
+    public static Intent createIntent(Context context, int id) {
         Intent intent = new Intent(context, AlbumActivity.class);
         intent.putExtra(ID, id);
         return intent;
@@ -96,7 +92,13 @@ public class AlbumActivity extends AppbarActivity {
     }
 
     private void findAlbum() {
-        if(album == null) album = Loader.getInstance().findAlbum(getIntent().getStringExtra(ID));
+        int id = getIntent().getIntExtra(ID, -1);
+        if(id == -1) {
+            finish();
+            return;
+        }
+
+        if(album == null) album = Loader.getInstance().findAlbum(id);
         if(album == null) {
             finish();
             return;
@@ -104,7 +106,7 @@ public class AlbumActivity extends AppbarActivity {
 
         setTitle(album.getName());
 
-        if(album.getAlbumArtBitmap() != null) appbarImage.setImageBitmap(album.getAlbumArtBitmap());
+        if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
 
         setSongs(album.getSongs());
     }

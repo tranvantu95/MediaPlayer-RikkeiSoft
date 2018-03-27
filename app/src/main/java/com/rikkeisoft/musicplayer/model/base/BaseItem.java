@@ -1,21 +1,24 @@
 package com.rikkeisoft.musicplayer.model.base;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseItem {
+public abstract class BaseItem {
 
-    private String id;
+    private int id;
 
     private String name;
 
-    public String getId() {
+    protected Bitmap bitmap;
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -27,4 +30,9 @@ public class BaseItem {
         this.name = name;
     }
 
+    public abstract Bitmap getBitmap();
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
 }
