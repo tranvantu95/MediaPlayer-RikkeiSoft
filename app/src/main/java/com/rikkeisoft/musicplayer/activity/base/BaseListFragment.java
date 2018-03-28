@@ -27,14 +27,6 @@ public class BaseListFragment<Item, Model extends BaseListModel<Item>,
 
     protected int divider;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        Log.d("debug", "onCreate " + getClass().getSimpleName());
-
-    }
-
     protected void init() {
         model.getItems().observe(this, new Observer<List<Item>>() {
             @Override
@@ -47,6 +39,12 @@ public class BaseListFragment<Item, Model extends BaseListModel<Item>,
         });
     }
 
+    protected void updateRecyclerView() {
+        recyclerView.setPadding(divider, divider, divider, divider);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdapter);
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -54,9 +52,7 @@ public class BaseListFragment<Item, Model extends BaseListModel<Item>,
         recyclerView = view.findViewById(R.id.recycler_view);
         if(itemDecoration != null) recyclerView.addItemDecoration(itemDecoration);
 
-        recyclerView.setPadding(divider, divider, divider, divider);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(recyclerAdapter);
+        updateRecyclerView();
     }
 
     @Override

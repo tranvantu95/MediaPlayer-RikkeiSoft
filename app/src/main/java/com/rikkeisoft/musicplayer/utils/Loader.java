@@ -114,6 +114,13 @@ public class Loader {
 
         for(int i = albums.size() - 1; i >= 0; i--) {
             AlbumItem album = albums.get(i);
+
+            if(album.getArtistId() == artist.getId()) {
+                result.add(0, album);
+                album.setArtist(artist);
+                continue;
+            }
+
             List<SongItem> songs = album.getSongs();
 
             for(int j = songs.size() - 1; j >= 0; j--) {
@@ -237,6 +244,7 @@ public class Loader {
                 Albums._ID,
                 Albums.ALBUM,
                 Albums.ALBUM_ART,
+                Media.ARTIST_ID,
                 Albums.ARTIST,
         };
 
@@ -260,6 +268,7 @@ public class Loader {
                 album.setId(cursor.getInt(i));
                 album.setName(cursor.getString(++i));
                 album.setAlbumArt(cursor.getString(++i)); //Log.d("debug", album.getAlbumArt());
+                album.setArtistId(cursor.getInt(++i));
                 album.setArtistName(cursor.getString(++i));
 
                 albums.add(album);

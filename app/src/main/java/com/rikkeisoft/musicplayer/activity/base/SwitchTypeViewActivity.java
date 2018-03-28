@@ -110,11 +110,16 @@ public class SwitchTypeViewActivity extends AppbarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        typeViewMenu = menu.findItem(R.id.type_view).getSubMenu();
-
-        setChecked(typeView);
-
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if(menu.findItem(R.id.type_view) != null) {
+            typeViewMenu = menu.findItem(R.id.type_view).getSubMenu();
+            setChecked(typeView);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -125,7 +130,7 @@ public class SwitchTypeViewActivity extends AppbarActivity {
 
             case R.id.type_list:
             case R.id.type_grid: {
-                if(item.isChecked()) return true;
+//                if(item.isChecked()) return true;
                 clearChecked(typeViewMenu);
                 setChecked(item, true);
 
@@ -138,4 +143,5 @@ public class SwitchTypeViewActivity extends AppbarActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }

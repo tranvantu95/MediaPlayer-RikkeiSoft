@@ -11,9 +11,9 @@ import java.util.List;
 public class AlbumItem extends BaseItem {
 
     // media info
+    private String albumArt;
     private int artistId;
     private String artistName;
-    private String albumArt;
 
     // linked
     private ArtistItem artist;

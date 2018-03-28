@@ -28,6 +28,9 @@ public class SwitchTypeViewFragment<Item> extends BaseListFragment<Item, SwitchT
                 if(integer != null) setTypeView(integer);
             }
         });
+
+        layoutManager = linearLayoutManager;
+        divider = dividerList;
     }
 
     private int switchDivider(int typeView) {
@@ -64,12 +67,7 @@ public class SwitchTypeViewFragment<Item> extends BaseListFragment<Item, SwitchT
         layoutManager = switchLayoutManager(typeView);
         divider = switchDivider(typeView);
 
-        if(recyclerView == null) return;
-
-        int rightPadding = typeView == SwitchTypeViewRecyclerAdapter.LIST_VIEW ? 0 : divider;
-        recyclerView.setPadding(divider, divider, rightPadding, divider);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(recyclerAdapter);
+        if(recyclerView != null) updateRecyclerView();
     }
 
 }
