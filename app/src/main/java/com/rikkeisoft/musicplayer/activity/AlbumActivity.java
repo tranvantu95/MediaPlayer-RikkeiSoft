@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
 import com.rikkeisoft.musicplayer.model.SongsModel;
@@ -57,25 +58,10 @@ public class AlbumActivity extends MyActivity {
         setTitle("");
     }
 
-    @Override
-    protected void onPermissionGranted() {
-        super.onPermissionGranted();
-
-        findAlbum();
-    }
-
-    @Override
-    protected void onReceiverMediaChange() {
-        super.onReceiverMediaChange();
-
-        album = null;
-        findAlbum();
-    }
-
     private void addFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
-        if(songsFragment == null) songsFragment = SongsFragment.newInstance();
+        if(songsFragment == null) songsFragment = SongsFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
 
         if(!songsFragment.isAdded()) {
             fragmentManager.beginTransaction()
@@ -84,7 +70,16 @@ public class AlbumActivity extends MyActivity {
         }
     }
 
-    private void findAlbum() {
+    @Override
+    protected void onReceiverMediaChange() {
+        super.onReceiverMediaChange();
+
+        album = null;
+        loadData();
+    }
+
+    @Override
+    protected void loadData() {
         int id = getIntent().getIntExtra(ID, -1);
         if(id == -1) {
             finish();
@@ -101,12 +96,15 @@ public class AlbumActivity extends MyActivity {
 
         if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
 
-        setSongs(album.getSongs());
+        //
+        getModel(SongsModel.class).getItems().setValue(album.getSongs());
     }
 
-    private void setSongs(List<SongItem> songs) {
-        SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsModel.getItems().setValue(songs);
+    @Override
+    protected void onChangeTypeView(int typeView) {
+        super.onChangeTypeView(typeView);
+
+        getModel(SongsModel.class).getTypeView().setValue(typeView);
     }
 
     @Override

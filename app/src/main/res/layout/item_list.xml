@@ -10,7 +10,7 @@
         android:id="@+id/image"
         android:layout_width="@dimen/song_item_image_size"
         android:layout_height="@dimen/song_item_image_size"
-        android:padding="@dimen/list_item_divider"
+        android:padding="@dimen/divider_list"
         app:srcCompat="@drawable/im_song"/>
 
     <FrameLayout

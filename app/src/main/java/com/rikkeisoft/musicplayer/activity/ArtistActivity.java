@@ -70,21 +70,15 @@ public class ArtistActivity extends MyActivity {
     }
 
     @Override
-    protected void onPermissionGranted() {
-        super.onPermissionGranted();
-
-        findArtist();
-    }
-
-    @Override
     protected void onReceiverMediaChange() {
         super.onReceiverMediaChange();
 
         artist = null;
-        findArtist();
+        loadData();
     }
 
-    private void findArtist() {
+    @Override
+    protected void loadData() {
         int id = getIntent().getIntExtra(ID, -1);
         if(id == -1) {
             finish();
@@ -101,19 +95,17 @@ public class ArtistActivity extends MyActivity {
 
         if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
 
-        setSongs(artist.getSongs());
-
-        setAlbums(artist.getAlbums());
+        //
+        getModel(SongsModel.class).getItems().setValue(artist.getSongs());
+        getModel(AlbumsModel.class).getItems().setValue(artist.getAlbums());
     }
 
-    private void setSongs(List<SongItem> songs) {
-        SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsModel.getItems().setValue(songs);
-    }
+    @Override
+    protected void onChangeTypeView(int typeView) {
+        super.onChangeTypeView(typeView);
 
-    private void setAlbums(List<AlbumItem> albums) {
-        AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
-        albumsModel.getItems().setValue(albums);
+        getModel(SongsModel.class).getTypeView().setValue(typeView);
+        getModel(AlbumsModel.class).getTypeView().setValue(typeView);
     }
 
     @Override

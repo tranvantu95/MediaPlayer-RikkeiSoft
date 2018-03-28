@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.AlbumsFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.ArtistsFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
@@ -21,8 +22,8 @@ public class ArtistPagerAdapter extends FragmentPagerAdapter {
         songsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 0);
         albumsFragment = AppUtils.getPagerFragment(fm, R.id.view_pager, 1);
 
-        if(songsFragment == null) songsFragment = SongsFragment.newInstance();
-        if(albumsFragment == null) albumsFragment = AlbumsFragment.newInstance();
+        if(songsFragment == null) songsFragment = SongsFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
+        if(albumsFragment == null) albumsFragment = AlbumsFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
     }
 
     @Override

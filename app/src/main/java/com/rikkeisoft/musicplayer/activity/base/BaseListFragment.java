@@ -4,25 +4,20 @@ import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.base.ListGridRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.base.BaseListModel;
-import com.rikkeisoft.musicplayer.model.base.ListGridModel;
 
 import java.util.List;
 
-public class BaseListFragment<Item> extends Fragment {
+public class BaseListFragment<Item, Model extends BaseListModel<Item>,
+        RecyclerAdapter extends BaseRecyclerAdapter<Item, ? >> extends BaseFragment<Model> {
 
-    protected BaseListModel<Item> baseListModel;
-
-    protected BaseRecyclerAdapter<Item, ? > recyclerAdapter;
+    protected RecyclerAdapter recyclerAdapter;
 
     protected RecyclerView recyclerView;
 
@@ -41,11 +36,13 @@ public class BaseListFragment<Item> extends Fragment {
     }
 
     protected void init() {
-        baseListModel.getItems().observe(this, new Observer<List<Item>>() {
+        model.getItems().observe(this, new Observer<List<Item>>() {
             @Override
             public void onChanged(@Nullable List<Item> items) {
-                recyclerAdapter.setItems(items);
-                recyclerAdapter.notifyDataSetChanged();
+                if(items != null) {
+                    recyclerAdapter.setItems(items);
+                    recyclerAdapter.notifyDataSetChanged();
+                }
             }
         });
     }
@@ -57,6 +54,7 @@ public class BaseListFragment<Item> extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         if(itemDecoration != null) recyclerView.addItemDecoration(itemDecoration);
 
+        recyclerView.setPadding(divider, divider, divider, divider);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
     }

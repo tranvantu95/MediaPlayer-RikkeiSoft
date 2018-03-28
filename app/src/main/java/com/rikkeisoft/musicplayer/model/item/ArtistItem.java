@@ -37,7 +37,13 @@ public class ArtistItem extends BaseItem {
 
     @Override
     public Bitmap getBitmap() {
-        if(bitmap == null && !getAlbums().isEmpty()) setBitmap(getAlbums().get(0).getBitmap());
+        if(bitmap == null && !getAlbums().isEmpty()) {
+            for(int i = getAlbums().size() - 1; i >= 0; i--)
+                if(getAlbums().get(i).getBitmap() != null) {
+                    setBitmap(getAlbums().get(i).getBitmap());
+                    break;
+                }
+        }
 
         return bitmap;
     }

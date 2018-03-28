@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -251,4 +253,10 @@ public class BaseActivity extends AppCompatActivity {
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(homeIntent);
     }
+
+    // Model
+    protected  <Model extends ViewModel> Model getModel(Class<Model> modelClass) {
+        return ViewModelProviders.of(this).get(modelClass);
+    }
+
 }

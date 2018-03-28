@@ -10,7 +10,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
-import com.rikkeisoft.musicplayer.model.base.ListGridModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchTypeViewModel;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 
@@ -87,7 +87,7 @@ public class MyApplication extends Application {
         SharedPreferences sharedPreferences = getSharedPreferences(DATA, MODE_PRIVATE);
         General.shouldShowRequestPermissionRationale = sharedPreferences.getBoolean(
                 "shouldShowRequestPermissionRationale", false);
-        General.typeView = sharedPreferences.getInt("typeView", ListGridModel.LIST);
+        General.typeView = sharedPreferences.getInt("typeView", SwitchTypeViewModel.LIST);
 
     }
 

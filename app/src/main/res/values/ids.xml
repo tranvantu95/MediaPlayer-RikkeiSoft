@@ -18,4 +18,9 @@
     <item type="id" name="container"/>
     <item type="id" name="fragment_container"/>
 
+    <!--Switch Type View-->
+    <item type="id" name="type_view" />
+    <item type="id" name="type_list" />
+    <item type="id" name="type_grid" />
+
 </resources>

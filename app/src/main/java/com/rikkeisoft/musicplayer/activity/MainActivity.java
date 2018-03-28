@@ -53,31 +53,26 @@ public class MainActivity extends MyActivity {
     }
 
     @Override
-    protected void onPermissionGranted() {
-        super.onPermissionGranted();
-
-        loadData();
-    }
-
-    @Override
     protected void onReceiverMediaChange() {
         super.onReceiverMediaChange();
 
         loadData();
     }
 
-    private void loadData() {
-        //
-        SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsModel.getItems().setValue(Loader.getInstance().getSongs());
+    @Override
+    protected void loadData() {
+        getModel(SongsModel.class).getItems().setValue(Loader.getInstance().getSongs());
+        getModel(AlbumsModel.class).getItems().setValue(Loader.getInstance().getAlbums());
+        getModel(ArtistsModel.class).getItems().setValue(Loader.getInstance().getArtists());
+    }
 
-        //
-        AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
-        albumsModel.getItems().setValue(Loader.getInstance().getAlbums());
+    @Override
+    protected void onChangeTypeView(int typeView) {
+        super.onChangeTypeView(typeView);
 
-        //
-        ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
-        artistsModel.getItems().setValue(Loader.getInstance().getArtists());
+        getModel(SongsModel.class).getTypeView().setValue(typeView);
+        getModel(AlbumsModel.class).getTypeView().setValue(typeView);
+        getModel(ArtistsModel.class).getTypeView().setValue(typeView);
     }
 
     @Override

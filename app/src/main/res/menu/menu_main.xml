@@ -10,15 +10,15 @@
         android:title="Search" />
 
     <item
-        android:id="@+id/action_change_type_view"
+        android:id="@id/type_view"
         android:title="Type View">
 
         <menu>
 
-            <item android:id="@+id/action_list"
+            <item android:id="@id/type_list"
                 android:title="List View"/>
 
-            <item android:id="@+id/action_grid"
+            <item android:id="@id/type_grid"
                 android:title="Grid View" />
 
         </menu>

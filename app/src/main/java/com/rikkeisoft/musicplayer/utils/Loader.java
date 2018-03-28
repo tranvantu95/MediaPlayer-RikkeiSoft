@@ -107,18 +107,27 @@ public class Loader {
     }
 
     @NonNull
-    public List<AlbumItem> findAlbums(ArtistItem artistItem) {
-        return findItems(getAlbums(), artistItem, new FindItems<AlbumItem, ArtistItem>() {
-            @Override
-            public int getId(AlbumItem albumItem) {
-                return albumItem.getArtistId();
-            }
+    public List<AlbumItem> findAlbums(ArtistItem artist) {
+        List<AlbumItem> result = new ArrayList<>();
 
-            @Override
-            public void linked(AlbumItem albumItem, ArtistItem artistItem) {
-                albumItem.setArtist(artistItem);
+        List<AlbumItem> albums = getAlbums();
+
+        for(int i = albums.size() - 1; i >= 0; i--) {
+            AlbumItem album = albums.get(i);
+            List<SongItem> songs = album.getSongs();
+
+            for(int j = songs.size() - 1; j >= 0; j--) {
+                SongItem song = songs.get(j);
+
+                if(song.getArtistId() == artist.getId()) {
+                    result.add(0, album);
+                    album.setArtist(artist);
+                    break;
+                }
             }
-        });
+        }
+
+        return result;
     }
 
     //
@@ -227,9 +236,8 @@ public class Loader {
         String[] projection = {
                 Albums._ID,
                 Albums.ALBUM,
-                Media.ARTIST_ID,
+                Albums.ALBUM_ART,
                 Albums.ARTIST,
-                Artists.Albums.ALBUM_ART
         };
 
         String sortOder = Albums.ALBUM + " ASC";
@@ -251,9 +259,8 @@ public class Loader {
 
                 album.setId(cursor.getInt(i));
                 album.setName(cursor.getString(++i));
-                album.setArtistId(cursor.getInt(++i));
-                album.setArtistName(cursor.getString(++i));
                 album.setAlbumArt(cursor.getString(++i)); //Log.d("debug", album.getAlbumArt());
+                album.setArtistName(cursor.getString(++i));
 
                 albums.add(album);
             }

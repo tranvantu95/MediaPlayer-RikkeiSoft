@@ -9,16 +9,27 @@ import android.widget.TextView;
 import com.rikkeisoft.musicplayer.R;
 
 public abstract class MyRecyclerAdapter<Item, V extends MyRecyclerAdapter.ViewHolder<Item>>
-        extends ListGridRecyclerAdapter<Item, V> {
+        extends SwitchTypeViewRecyclerAdapter<Item, V> {
 
     public MyRecyclerAdapter(OnItemClickListener onItemClickListener) {
         super(onItemClickListener);
     }
 
+    private int getLayoutId() {
+        switch (getTypeView()) {
+            case LIST_VIEW:
+                return R.layout.item_list;
+
+            case GRID_VIEW:
+                return R.layout.item_grid;
+
+            default:
+                return R.layout.item_list;
+        }
+    }
+
     protected View getView(ViewGroup parent) {
-        return LayoutInflater.from(parent.getContext()).inflate(
-                getTypeView() == LIST_VIEW ? R.layout.item_list : R.layout.item_grid,
-                parent, false);
+        return LayoutInflater.from(parent.getContext()).inflate(getLayoutId(), parent, false);
     }
 
     public static class ViewHolder<Item> extends BaseRecyclerAdapter.ViewHolder<Item> {

@@ -1,5 +1,7 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
 
-public class MyFragment<Item> extends ListGridFragment<Item> {
+public class MyFragment<Item> extends SwitchTypeViewFragment<Item> {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -19,8 +21,8 @@ public class MyFragment<Item> extends ListGridFragment<Item> {
         linearLayoutManager = new LinearLayoutManager(getContext());
         gridLayoutManager = new GridLayoutManager(getContext(), 2);
 
-        list_divider = getContext().getResources().getDimensionPixelSize(R.dimen.list_item_divider);
-        grid_divider = getContext().getResources().getDimensionPixelSize(R.dimen.grid_item_divider);
+        dividerList = getContext().getResources().getDimensionPixelSize(R.dimen.divider_list);
+        dividerGrid = getContext().getResources().getDimensionPixelSize(R.dimen.divider_grid);
     }
 
     @Nullable

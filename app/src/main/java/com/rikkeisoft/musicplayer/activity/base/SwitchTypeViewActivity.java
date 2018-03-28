@@ -1,6 +1,5 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,13 +12,10 @@ import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
-import com.rikkeisoft.musicplayer.model.AlbumsModel;
-import com.rikkeisoft.musicplayer.model.ArtistsModel;
-import com.rikkeisoft.musicplayer.model.SongsModel;
-import com.rikkeisoft.musicplayer.model.base.ListGridModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchTypeViewModel;
 import com.rikkeisoft.musicplayer.utils.General;
 
-public class ListGridActivity extends AppbarActivity {
+public class SwitchTypeViewActivity extends AppbarActivity {
 
     private Menu typeViewMenu;
 
@@ -47,10 +43,14 @@ public class ListGridActivity extends AppbarActivity {
         editor.apply();
     }
 
+    protected void onChangeTypeView(int typeView) {
+        Log.d("debug", "onChangeTypeView " + getClass().getSimpleName());
+
+    }
+
     private void setTypeView(int typeView, boolean updateMenu) {
         if(this.typeView == typeView) return;
-        Log.d("debug", "setTypeView " + getClass().getSimpleName());
-        this.typeView = General.typeView = typeView;
+        General.typeView = this.typeView = typeView;
 
         //
         if(updateMenu && typeViewMenu != null) {
@@ -59,16 +59,17 @@ public class ListGridActivity extends AppbarActivity {
         }
 
         //
-        SongsModel songsModel = ViewModelProviders.of(this).get(SongsModel.class);
-        songsModel.getTypeView().setValue(typeView);
+        onChangeTypeView(typeView);
+    }
 
-        //
-        AlbumsModel albumsModel = ViewModelProviders.of(this).get(AlbumsModel.class);
-        albumsModel.getTypeView().setValue(typeView);
+    private void setChecked(MenuItem item, boolean isChecked) {
+        if(item == null) return;
 
-        //
-        ArtistsModel artistsModel = ViewModelProviders.of(this).get(ArtistsModel.class);
-        artistsModel.getTypeView().setValue(typeView);
+        SpannableString spannable = new SpannableString(item.getTitle());
+        spannable.setSpan(new ForegroundColorSpan(isChecked ? Color.BLUE : Color.BLACK),
+                0, spannable.length(), 0);
+        item.setTitle(spannable);
+        item.setChecked(isChecked);
     }
 
     private void clearChecked(Menu menu) {
@@ -77,42 +78,58 @@ public class ListGridActivity extends AppbarActivity {
         }
     }
 
-    private void setChecked(MenuItem item, boolean isChecked) {
-        SpannableString spannable = new SpannableString(item.getTitle());
-        spannable.setSpan(new ForegroundColorSpan(isChecked ? Color.BLUE : Color.BLACK),
-                0, spannable.length(), 0);
-        item.setTitle(spannable);
-        item.setChecked(isChecked);
+    private void setChecked(int typeView) {
+        setChecked(typeViewMenu.findItem(typeView), true); // id synchronized
     }
 
-    private void setChecked(int typeView) {
-        int id = typeView == ListGridModel.LIST ? R.id.action_list : R.id.action_grid;
-        setChecked(typeViewMenu.findItem(id), true);
+    private int getTypeViewMenuItemId(int typeView) {
+        switch (typeView) {
+            case SwitchTypeViewModel.LIST:
+                return R.id.type_list;
+
+            case SwitchTypeViewModel.GRID:
+                return R.id.type_grid;
+
+            default:
+                return R.id.type_list;
+        }
+    }
+
+    private int getTypeView(int menuItemId) {
+        switch (menuItemId) {
+            case R.id.type_list:
+                return SwitchTypeViewModel.LIST;
+
+            case R.id.type_grid:
+                return SwitchTypeViewModel.GRID;
+
+            default:
+                return SwitchTypeViewModel.LIST;
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        typeViewMenu = menu.findItem(R.id.action_change_type_view).getSubMenu();
+        typeViewMenu = menu.findItem(R.id.type_view).getSubMenu();
 
-        if(typeView != 0) setChecked(typeView);
+        setChecked(typeView);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
 
-            case R.id.action_list:
-            case R.id.action_grid: {
+        switch (id) {
+
+            case R.id.type_list:
+            case R.id.type_grid: {
                 if(item.isChecked()) return true;
                 clearChecked(typeViewMenu);
                 setChecked(item, true);
 
-                int typeView = item.getItemId() == R.id.action_list
-                        ? ListGridModel.LIST : ListGridModel.GRID;
-
-                setTypeView(typeView, false);
+                setTypeView(id, false); // id synchronized
 
                 return true;
             }
