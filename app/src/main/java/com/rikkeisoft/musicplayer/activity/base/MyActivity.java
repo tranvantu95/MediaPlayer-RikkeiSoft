@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
 
-public class MyActivity extends SwitchTypeViewActivity {
+public abstract class MyActivity extends SwitchListActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -21,7 +21,7 @@ public class MyActivity extends SwitchTypeViewActivity {
         loadData();
     }
 
-    protected void loadData() {}
+    protected abstract void loadData();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

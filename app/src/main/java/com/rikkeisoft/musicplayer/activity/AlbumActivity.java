@@ -60,12 +60,12 @@ public class AlbumActivity extends MyActivity {
 
     private void addFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
-        if(songsFragment == null) songsFragment = SongsFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
+        SongsFragment fragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
+        if(fragment == null) fragment = SongsFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
 
-        if(!songsFragment.isAdded()) {
+        if(!fragment.isAdded()) {
             fragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, songsFragment, "SongsFragment")
+                    .add(R.id.fragment_container, fragment, "SongsFragment")
                     .commit();
         }
     }

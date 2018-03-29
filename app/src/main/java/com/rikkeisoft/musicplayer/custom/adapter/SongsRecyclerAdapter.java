@@ -15,8 +15,8 @@ public class SongsRecyclerAdapter extends MyRecyclerAdapter<SongItem, SongsRecyc
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(getView(parent));
+    protected ViewHolder getViewHolder(View view) {
+        return new ViewHolder(view);
     }
 
     public static class ViewHolder extends MyRecyclerAdapter.ViewHolder<SongItem> {
@@ -36,30 +36,4 @@ public class SongsRecyclerAdapter extends MyRecyclerAdapter<SongItem, SongsRecyc
             else image.setImageDrawable(image.getContext().getResources().getDrawable(R.drawable.im_song));
         }
     }
-
-//    public static class ViewHolder extends BaseRecyclerAdapter.ViewHolder<SongItem> {
-//
-//        private TextView songName;
-//        private TextView artistName;
-//        private ImageView songImage;
-//
-//        public ViewHolder(View itemView) {
-//            super(itemView);
-//
-//            songName = itemView.findViewById(R.id.song_name);
-//            artistName = itemView.findViewById(R.id.artist_name);
-//            songImage = itemView.findViewById(R.id.song_image);
-//        }
-//
-//        @Override
-//        public void setItem(SongItem songItem) {
-//            super.setItem(songItem);
-//
-//            songName.setText(songItem.getName());
-//            artistName.setText(songItem.getArtistName());
-//
-//            if(songItem.getBitmap() != null) songImage.setImageBitmap(songItem.getBitmap());
-//            else songImage.setImageDrawable(songImage.getContext().getResources().getDrawable(R.drawable.im_song));
-//        }
-//    }
 }

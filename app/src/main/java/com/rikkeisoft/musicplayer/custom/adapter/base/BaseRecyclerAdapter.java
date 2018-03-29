@@ -1,7 +1,9 @@
 package com.rikkeisoft.musicplayer.custom.adapter.base;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.model.base.BaseListModel;
 
@@ -34,6 +36,16 @@ public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.Vi
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
+
+    @Override
+    public V onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(getItemLayoutId(), parent, false);
+        return getViewHolder(view);
+    }
+
+    protected abstract int getItemLayoutId();
+
+    protected abstract V getViewHolder(View view);
 
     @Override
     public void onBindViewHolder(V holder, int position) {

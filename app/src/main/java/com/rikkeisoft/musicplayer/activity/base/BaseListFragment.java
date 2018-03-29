@@ -3,9 +3,7 @@ package com.rikkeisoft.musicplayer.activity.base;
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
@@ -14,29 +12,46 @@ import com.rikkeisoft.musicplayer.model.base.BaseListModel;
 
 import java.util.List;
 
-public class BaseListFragment<Item, Model extends BaseListModel<Item>,
-        RecyclerAdapter extends BaseRecyclerAdapter<Item, ? >> extends BaseFragment<Model> {
-
-    protected RecyclerAdapter recyclerAdapter;
+public abstract class BaseListFragment<Item, Model extends BaseListModel<Item>,
+        RecyclerAdapter extends BaseRecyclerAdapter<Item, ? >,
+        LayoutManager extends RecyclerView.LayoutManager> extends BaseFragment<Model> {
 
     protected RecyclerView recyclerView;
 
     protected RecyclerView.ItemDecoration itemDecoration;
 
-    protected RecyclerView.LayoutManager layoutManager;
+    protected LayoutManager layoutManager;
+
+    protected RecyclerAdapter recyclerAdapter;
 
     protected int divider;
 
-    protected void init() {
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        recyclerAdapter = onCreateRecyclerAdapter();
+        layoutManager = onCreateLayoutManager();
+        divider = onCreateDivider();
+
         model.getItems().observe(this, new Observer<List<Item>>() {
             @Override
             public void onChanged(@Nullable List<Item> items) {
-                if(items != null) {
-                    recyclerAdapter.setItems(items);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
+                if (items != null) updateRecyclerAdapter(items);
             }
         });
+    }
+
+    protected abstract RecyclerAdapter onCreateRecyclerAdapter();
+
+    protected abstract LayoutManager onCreateLayoutManager();
+
+    protected abstract int onCreateDivider();
+
+    //
+    protected void updateRecyclerAdapter(List<Item> items) {
+        recyclerAdapter.setItems(items);
+        recyclerAdapter.notifyDataSetChanged();
     }
 
     protected void updateRecyclerView() {

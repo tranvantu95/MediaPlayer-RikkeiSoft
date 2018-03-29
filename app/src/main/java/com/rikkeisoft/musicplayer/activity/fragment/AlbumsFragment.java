@@ -8,7 +8,9 @@ import com.rikkeisoft.musicplayer.activity.AlbumActivity;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.AlbumsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 
 public class AlbumsFragment extends MyFragment<AlbumItem> {
@@ -27,19 +29,22 @@ public class AlbumsFragment extends MyFragment<AlbumItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle args = getArguments();
+    }
 
-        model = getModel(args.getInt("modelOwner"), AlbumsModel.class);
+    @Override
+    protected SwitchListModel<AlbumItem> onCreateModel() {
+        return getModel(getArguments().getInt("modelOwner"), AlbumsModel.class);
+    }
 
-        recyclerAdapter = new AlbumsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
+    @Override
+    protected SwitchRecyclerAdapter<AlbumItem, ?> onCreateRecyclerAdapter() {
+        return new AlbumsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 AlbumItem album = recyclerAdapter.getItems().get(position);
                 getActivity().startActivity(AlbumActivity.createIntent(getContext(), album.getId()));
             }
         });
-
-        init();
     }
 
 }

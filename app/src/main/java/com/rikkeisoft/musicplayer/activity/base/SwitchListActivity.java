@@ -12,10 +12,10 @@ import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
-import com.rikkeisoft.musicplayer.model.base.SwitchTypeViewModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.utils.General;
 
-public class SwitchTypeViewActivity extends AppbarActivity {
+public class SwitchListActivity extends AppbarActivity {
 
     private Menu typeViewMenu;
 
@@ -79,15 +79,16 @@ public class SwitchTypeViewActivity extends AppbarActivity {
     }
 
     private void setChecked(int typeView) {
-        setChecked(typeViewMenu.findItem(typeView), true); // id synchronized
+//        int id = getTypeViewMenuItemId(typeView); // id - typeView synchronized
+        setChecked(typeViewMenu.findItem(typeView), true);
     }
 
     private int getTypeViewMenuItemId(int typeView) {
         switch (typeView) {
-            case SwitchTypeViewModel.LIST:
+            case SwitchListModel.LIST:
                 return R.id.type_list;
 
-            case SwitchTypeViewModel.GRID:
+            case SwitchListModel.GRID:
                 return R.id.type_grid;
 
             default:
@@ -98,13 +99,13 @@ public class SwitchTypeViewActivity extends AppbarActivity {
     private int getTypeView(int menuItemId) {
         switch (menuItemId) {
             case R.id.type_list:
-                return SwitchTypeViewModel.LIST;
+                return SwitchListModel.LIST;
 
             case R.id.type_grid:
-                return SwitchTypeViewModel.GRID;
+                return SwitchListModel.GRID;
 
             default:
-                return SwitchTypeViewModel.LIST;
+                return SwitchListModel.LIST;
         }
     }
 
@@ -115,8 +116,9 @@ public class SwitchTypeViewActivity extends AppbarActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(menu.findItem(R.id.type_view) != null) {
-            typeViewMenu = menu.findItem(R.id.type_view).getSubMenu();
+        MenuItem typeViewMenuItem = menu.findItem(R.id.type_view);
+        if(typeViewMenuItem != null) {
+            typeViewMenu = typeViewMenuItem.getSubMenu();
             setChecked(typeView);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -130,11 +132,12 @@ public class SwitchTypeViewActivity extends AppbarActivity {
 
             case R.id.type_list:
             case R.id.type_grid: {
-//                if(item.isChecked()) return true;
+                if(item.isChecked()) return true;
                 clearChecked(typeViewMenu);
                 setChecked(item, true);
 
-                setTypeView(id, false); // id synchronized
+//                int typeView = getTypeView(id); // id - typeView synchronized
+                setTypeView(id, false);
 
                 return true;
             }

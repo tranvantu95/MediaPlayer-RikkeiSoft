@@ -18,12 +18,13 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarFragment;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 import java.util.List;
 
-public class PlayerFragment extends AppbarFragment implements View.OnClickListener {
+public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.OnClickListener {
 
     public static PlayerFragment newInstance(int modelOwner) {
         PlayerFragment fragment = new PlayerFragment();
@@ -38,42 +39,43 @@ public class PlayerFragment extends AppbarFragment implements View.OnClickListen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Bundle args = getArguments();
-
-        model = getModel(args.getInt("modelOwner"), PlayerModel.class);
+        setHasOptionsMenu(true);
 
         model.getItems().observe(this, new Observer<List<SongItem>>() {
             @Override
             public void onChanged(@Nullable List<SongItem> songItems) {
-                getFragmentModel(SongsModel.class).getItems().setValue(songItems);
+                getFragmentModel(PlaylistModel.class).getItems().setValue(songItems);
             }
         });
 
         addFragment();
     }
 
+    @Override
+    protected PlayerModel onCreateModel() {
+        return model = getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+    }
+
+    @Override
+    protected int getFragmentLayoutId() {
+        return R.layout.fragment_player;
+    }
+
     private void addFragment() {
         FragmentManager fragmentManager = getChildFragmentManager();
-        SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag("SongsFragment");
-        if(songsFragment == null) songsFragment = SongsFragment.newInstance(BaseFragment.PARENT_FRAGMENT_MODEL);
+        PlaylistFragment fragment = (PlaylistFragment) fragmentManager.findFragmentByTag("PlaylistFragment");
+        if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.PARENT_FRAGMENT_MODEL);
 
-        if(!songsFragment.isAdded()) {
+        if(!fragment.isAdded()) {
             fragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, songsFragment, "SongsFragment")
+                    .add(R.id.fragment_container, fragment, "PlaylistFragment")
                     .commit();
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_player, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void initView(View view) {
+        super.initView(view);
         view.setOnClickListener(this);
     }
 

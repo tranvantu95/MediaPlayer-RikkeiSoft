@@ -1,20 +1,17 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.View;
 
-import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 
@@ -34,35 +31,36 @@ public class SongsFragment extends MyFragment<SongItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle args = getArguments();
+    }
 
-        model = getModel(args.getInt("modelOwner"), SongsModel.class);
+    @Override
+    protected SwitchListModel<SongItem> onCreateModel() {
+        return getModel(getArguments().getInt("modelOwner"), SongsModel.class);
+    }
 
-        recyclerAdapter = new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
+    @Override
+    protected SwitchRecyclerAdapter<SongItem, ?> onCreateRecyclerAdapter() {
+        return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 addFragment();
-
             }
         });
-
-        init();
     }
 
     private void addFragment() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        PlayerFragment playerFragment = (PlayerFragment) fragmentManager.findFragmentByTag("PlayerFragment");
+        PlayerFragment fragment = (PlayerFragment) fragmentManager.findFragmentByTag("PlayerFragment");
+        if(fragment == null) fragment = PlayerFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
 
-        if(playerFragment == null) {
-            playerFragment = PlayerFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
-
+        if(!fragment.isAdded()) {
             fragmentManager.beginTransaction()
-                    .add(android.R.id.content, playerFragment, "PlayerFragment")
+                    .add(android.R.id.content, fragment, "PlayerFragment")
                     .addToBackStack(null)
                     .commit();
-
-            getActivityModel(PlayerModel.class).getItems().setValue(model.getItems().getValue());
         }
+
+        getActivityModel(PlayerModel.class).getItems().setValue(model.getItems().getValue());
     }
 
 }

@@ -1,5 +1,6 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
+import android.arch.lifecycle.ViewModel;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -8,15 +9,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.model.PlayerModel;
 
-public class AppbarFragment extends BaseFragment<PlayerModel> {
+public abstract class AppbarFragment<Model extends ViewModel> extends BaseFragment<Model> {
 
     protected AppBarLayout appbar;
     protected Toolbar toolbar;
@@ -26,8 +24,6 @@ public class AppbarFragment extends BaseFragment<PlayerModel> {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        setHasOptionsMenu(true);
 
         initView(view);
     }
