@@ -3,26 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/app_bar_search"
+        android:id="@id/action_search_playlist"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="always"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="Search" />
 
     <item
-        android:title="Sort Type">
-
-        <menu>
-
-            <item
-                android:title="A -> Z"/>
-
-            <item
-                android:title="Z -> A" />
-
-        </menu>
-
-    </item>
+        android:id="@id/action_sort_playlist"
+        android:title="Sort List" />
 
 
 </menu>

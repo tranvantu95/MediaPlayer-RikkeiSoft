@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ArtistItem extends BaseItem {
 
-    // media info
+    // media tvInfo
     private int numberOfAlbums;
     private int numberOfSongs;
 

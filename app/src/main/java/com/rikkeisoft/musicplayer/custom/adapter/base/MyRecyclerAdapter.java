@@ -25,16 +25,16 @@ public abstract class MyRecyclerAdapter<Item, V extends MyRecyclerAdapter.ViewHo
 
     public static class ViewHolder<Item> extends BaseRecyclerAdapter.ViewHolder<Item> {
 
-        protected TextView title;
-        protected TextView info;
-        protected ImageView image;
+        protected TextView tvTitle;
+        protected TextView tvInfo;
+        protected ImageView ivCover;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            title = itemView.findViewById(R.id.title);
-            info = itemView.findViewById(R.id.info);
-            image = itemView.findViewById(R.id.image);
+            tvTitle = itemView.findViewById(R.id.tv_title);
+            tvInfo = itemView.findViewById(R.id.tv_info);
+            ivCover = itemView.findViewById(R.id.iv_cover);
         }
     }
 }

@@ -1,12 +1,10 @@
 package com.rikkeisoft.musicplayer.custom.adapter.base;
 
-import com.rikkeisoft.musicplayer.R;
-
 public abstract class SwitchRecyclerAdapter<Item, V extends BaseRecyclerAdapter.ViewHolder<Item>>
         extends BaseRecyclerAdapter<Item, V> {
 
-    public static final int LIST_VIEW = R.id.type_list;
-    public static final int GRID_VIEW = R.id.type_grid;
+    public static final int LIST_VIEW = 1;
+    public static final int GRID_VIEW = 2;
 
     private int typeView;
 

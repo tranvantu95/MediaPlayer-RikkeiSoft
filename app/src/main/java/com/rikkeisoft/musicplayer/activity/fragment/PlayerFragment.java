@@ -1,30 +1,23 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
-import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.util.Log;
+import android.widget.TextView;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarFragment;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
-import com.rikkeisoft.musicplayer.model.PlaylistModel;
-import com.rikkeisoft.musicplayer.model.SongsModel;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
-
-import java.util.List;
 
 public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.OnClickListener {
+
+    private View btnPlay, btnNext, btnPrevious, btnShuffle, btnRepeat;
+    private TextView tvTime;
 
     public static PlayerFragment newInstance(int modelOwner) {
         PlayerFragment fragment = new PlayerFragment();
@@ -41,19 +34,12 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        model.getItems().observe(this, new Observer<List<SongItem>>() {
-            @Override
-            public void onChanged(@Nullable List<SongItem> songItems) {
-                getFragmentModel(PlaylistModel.class).getItems().setValue(songItems);
-            }
-        });
-
         addFragment();
     }
 
     @Override
     protected PlayerModel onCreateModel() {
-        return model = getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
     }
 
     @Override
@@ -64,7 +50,7 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     private void addFragment() {
         FragmentManager fragmentManager = getChildFragmentManager();
         PlaylistFragment fragment = (PlaylistFragment) fragmentManager.findFragmentByTag("PlaylistFragment");
-        if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.PARENT_FRAGMENT_MODEL);
+        if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
 
         if(!fragment.isAdded()) {
             fragmentManager.beginTransaction()
@@ -82,6 +68,14 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     @Override
     protected void findView(View view) {
         super.findView(view);
+
+        tvTime = view.findViewById(R.id.tv_time);
+
+        view.findViewById(R.id.btn_play).setOnClickListener(this);
+        view.findViewById(R.id.btn_next).setOnClickListener(this);
+        view.findViewById(R.id.btn_previous).setOnClickListener(this);
+        view.findViewById(R.id.btn_shuffle).setOnClickListener(this);
+        view.findViewById(R.id.btn_repeat).setOnClickListener(this);
     }
 
     @Override
@@ -92,7 +86,23 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
 
     @Override
     public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.btn_play:
+                break;
 
+            case R.id.btn_next:
+                break;
+
+            case R.id.btn_previous:
+                break;
+
+            case R.id.btn_shuffle:
+                break;
+
+            case R.id.btn_repeat:
+                break;
+        }
     }
 
     @Override

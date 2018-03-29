@@ -7,7 +7,7 @@ import com.rikkeisoft.musicplayer.utils.Loader;
 
 public class SongItem extends BaseItem {
 
-    // media info
+    // media tvInfo
     private int albumId;
     private String albumName;
     private int artistId;

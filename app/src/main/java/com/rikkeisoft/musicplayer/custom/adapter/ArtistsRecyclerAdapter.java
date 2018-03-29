@@ -1,7 +1,6 @@
 package com.rikkeisoft.musicplayer.custom.adapter;
 
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
@@ -28,16 +27,16 @@ public class ArtistsRecyclerAdapter extends MyRecyclerAdapter<ArtistItem, Artist
         public void setItem(ArtistItem artistItem) {
             super.setItem(artistItem);
 
-            title.setText(artistItem.getName());
+            tvTitle.setText(artistItem.getName());
 
             int na = artistItem.getNumberOfAlbums();
             int ns = artistItem.getNumberOfSongs();
             String infoString = "" + na + " album" + (na > 1 ? "s" : "") + " | " + ns + " song" + (ns > 1 ? "s" : "");
 
-            info.setText(infoString);
+            tvInfo.setText(infoString);
 
-            if(artistItem.getBitmap() != null) image.setImageBitmap(artistItem.getBitmap());
-            else image.setImageDrawable(image.getContext().getResources().getDrawable(R.drawable.im_artist));
+            if(artistItem.getBitmap() != null) ivCover.setImageBitmap(artistItem.getBitmap());
+            else ivCover.setImageDrawable(ivCover.getContext().getResources().getDrawable(R.drawable.im_artist));
         }
     }
 }

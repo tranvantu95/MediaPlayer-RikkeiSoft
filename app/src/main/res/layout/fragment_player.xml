@@ -42,6 +42,7 @@
                     android:gravity="center_horizontal">
 
                     <TextView
+                        android:id="@id/tv_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00:00"
@@ -54,12 +55,14 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
+                            android:id="@id/btn_shuffle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="8dp"
                             app:srcCompat="@drawable/ic_shuffle"/>
 
                         <ImageView
+                            android:id="@id/btn_repeat"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="8dp"
@@ -70,6 +73,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@id/btn_previous"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
@@ -78,6 +82,7 @@
                     app:srcCompat="@drawable/ic_skip_previous"/>
 
                 <ImageView
+                    android:id="@id/btn_next"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="8dp"
@@ -110,6 +115,7 @@
     </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@id/btn_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"

@@ -18,9 +18,27 @@
     <item type="id" name="container"/>
     <item type="id" name="fragment_container"/>
 
+    <!--Menu-->
+    <item type="id" name="action_search_global" />
+    <item type="id" name="action_search_playlist" />
+    <item type="id" name="action_sort_playlist" />
+
     <!--Switch Type View-->
     <item type="id" name="type_view" />
     <item type="id" name="type_list" />
     <item type="id" name="type_grid" />
+
+    <!--Item Layout-->
+    <item type="id" name="tv_title" />
+    <item type="id" name="tv_info" />
+    <item type="id" name="iv_cover" />
+
+    <!--Player-->
+    <item type="id" name="btn_play" />
+    <item type="id" name="btn_next" />
+    <item type="id" name="btn_previous" />
+    <item type="id" name="btn_shuffle" />
+    <item type="id" name="btn_repeat" />
+    <item type="id" name="tv_time" />
 
 </resources>

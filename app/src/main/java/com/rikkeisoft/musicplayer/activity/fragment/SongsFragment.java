@@ -43,12 +43,12 @@ public class SongsFragment extends MyFragment<SongItem> {
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                addFragment();
+                addFragment(position);
             }
         });
     }
 
-    private void addFragment() {
+    private void addFragment(int position) {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         PlayerFragment fragment = (PlayerFragment) fragmentManager.findFragmentByTag("PlayerFragment");
         if(fragment == null) fragment = PlayerFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
@@ -60,7 +60,9 @@ public class SongsFragment extends MyFragment<SongItem> {
                     .commit();
         }
 
-        getActivityModel(PlayerModel.class).getItems().setValue(model.getItems().getValue());
+        PlayerModel playerModel = getActivityModel(PlayerModel.class);
+        playerModel.getItems().setValue(model.getItems().getValue());
+        playerModel.getPlayingPosition().setValue(position);
     }
 
 }

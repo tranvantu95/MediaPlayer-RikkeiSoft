@@ -3,6 +3,8 @@ package com.rikkeisoft.musicplayer.activity.base;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -31,7 +33,7 @@ public class SwitchListActivity extends AppbarActivity {
     protected void onStart() {
         super.onStart();
 
-        setTypeView(General.typeView, true);
+        setTypeView(General.typeView);
     }
 
     @Override
@@ -44,21 +46,16 @@ public class SwitchListActivity extends AppbarActivity {
     }
 
     protected void onChangeTypeView(int typeView) {
-        Log.d("debug", "onChangeTypeView " + getClass().getSimpleName());
+        Log.d("debug", "onChangeTypeView " + typeView + " " + getClass().getSimpleName());
 
     }
 
-    private void setTypeView(int typeView, boolean updateMenu) {
+    private void setTypeView(int typeView) {
         if(this.typeView == typeView) return;
         General.typeView = this.typeView = typeView;
 
-        //
-        if(updateMenu && typeViewMenu != null) {
-            clearChecked(typeViewMenu);
-            setChecked(typeView);
-        }
+        setChecked(typeView);
 
-        //
         onChangeTypeView(typeView);
     }
 
@@ -72,15 +69,19 @@ public class SwitchListActivity extends AppbarActivity {
         item.setChecked(isChecked);
     }
 
-    private void clearChecked(Menu menu) {
+    private void clearChecked(@NonNull Menu menu) {
         for(int i = menu.size() - 1; i >= 0; i--) {
             setChecked(menu.getItem(i), false);
         }
     }
 
     private void setChecked(int typeView) {
-//        int id = getTypeViewMenuItemId(typeView); // id - typeView synchronized
-        setChecked(typeViewMenu.findItem(typeView), true);
+        if(typeViewMenu == null) return;
+
+        clearChecked(typeViewMenu);
+
+        int id = getTypeViewMenuItemId(typeView);
+        setChecked(typeViewMenu.findItem(id), true);
     }
 
     private int getTypeViewMenuItemId(int typeView) {
@@ -115,12 +116,13 @@ public class SwitchListActivity extends AppbarActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(final Menu menu) {
         MenuItem typeViewMenuItem = menu.findItem(R.id.type_view);
         if(typeViewMenuItem != null) {
             typeViewMenu = typeViewMenuItem.getSubMenu();
             setChecked(typeView);
         }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -132,12 +134,11 @@ public class SwitchListActivity extends AppbarActivity {
 
             case R.id.type_list:
             case R.id.type_grid: {
-                if(item.isChecked()) return true;
-                clearChecked(typeViewMenu);
-                setChecked(item, true);
+                if(item.isChecked()) return true;   // #Bug 01: a little bug if use fragment options menu:
+                                                    // typeViewMenu incorrect -> clearChecked incorrect
 
-//                int typeView = getTypeView(id); // id - typeView synchronized
-                setTypeView(id, false);
+                int typeView = getTypeView(id);
+                setTypeView(typeView);
 
                 return true;
             }
