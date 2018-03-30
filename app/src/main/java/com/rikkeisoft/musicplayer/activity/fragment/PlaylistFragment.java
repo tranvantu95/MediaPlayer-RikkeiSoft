@@ -17,14 +17,14 @@ import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.service.MusicService;
 import com.rikkeisoft.musicplayer.utils.MusicPlayer;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
 
 public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         PlaylistRecyclerAdapter, LinearLayoutManager> {
 
-    private MusicService musicService;
-    private MusicPlayer musicPlayer;
+    private PlaylistPlayer playlistPlayer;
 
     public static PlaylistFragment newInstance(int modelOwner) {
         PlaylistFragment fragment = new PlaylistFragment();
@@ -40,15 +40,12 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        model.getPlayingPosition().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null) gotoPos(integer);
-            }
-        });
-
-        musicService = MyApplication.musicService;
-        musicPlayer = musicService.getMusicPlayer();
+//        model.getCurrentIndex().observe(this, new Observer<Integer>() {
+//            @Override
+//            public void onChanged(@Nullable Integer integer) {
+//                if(integer != null) gotoPos(integer);
+//            }
+//        });
 
     }
 
@@ -63,19 +60,18 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
     protected void updateRecyclerAdapter(List<SongItem> songItems) {
         super.updateRecyclerAdapter(songItems);
 
-        musicPlayer.setPlaylist(songItems);
     }
 
     @Override
     protected void updateRecyclerView() {
         super.updateRecyclerView();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                gotoPos(model.getPlayingPosition().getValue());
-            }
-        }, 100);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                gotoPos(model.getCurrentIndex().getValue());
+//            }
+//        }, 100);
     }
 
     @Override
@@ -95,8 +91,7 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         return new PlaylistRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-//                musicPlayer.play(position);
-                musicPlayer.play(position);
+                ((PlayerFragment) getParentFragment()).playlistPlayer.play(position);
             }
         });
     }

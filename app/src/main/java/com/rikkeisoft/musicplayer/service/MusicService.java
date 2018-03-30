@@ -7,18 +7,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.utils.MusicPlayer;
-import com.rikkeisoft.musicplayer.utils.MusicPlayerInterface;
-
-import java.io.FileDescriptor;
 
 public class MusicService extends Service {
 
@@ -76,12 +70,12 @@ public class MusicService extends Service {
 
             @Override
             public void onPause(MusicPlayer musicPlayer) {
-                playerModel.getPaused().setValue(true);
+//                playerModel.getPaused().setValue(true);
             }
 
             @Override
             public void onPlay(MusicPlayer musicPlayer) {
-                playerModel.getPaused().setValue(false);
+//                playerModel.getPaused().setValue(false);
             }
 
             @Override
@@ -91,7 +85,7 @@ public class MusicService extends Service {
 
             @Override
             public void onUpdateTime(MusicPlayer musicPlayer) {
-                playerModel.getCurrentTime().setValue(musicPlayer.getCurrentTime());
+                playerModel.getCurrentPosition().setValue(musicPlayer.getCurrentTime());
             }
         });
 
@@ -220,8 +214,8 @@ public class MusicService extends Service {
 //    }
 //
 //    @Override
-//    public int getCurrentTime() {
-//        return musicPlayer.getCurrentTime();
+//    public int getCurrentPosition() {
+//        return musicPlayer.getCurrentPosition();
 //    }
 //
 //    @Override

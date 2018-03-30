@@ -54,13 +54,21 @@ public class MusicPlayer implements MusicPlayerInterface, MediaPlayer.OnCompleti
 
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
+                Log.d("debug", "onBufferingUpdate " + i);
+
+            }
+        });
     }
 
     public void prepare(String path) {
         try {
             mediaPlayer.reset();
             mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare(); // might take long! (for buffering, etc)
+//            mediaPlayer.prepare(); // might take long! (for buffering, etc)
+            mediaPlayer.prepareAsync();
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -80,7 +88,6 @@ public class MusicPlayer implements MusicPlayerInterface, MediaPlayer.OnCompleti
     public void play(int index) {
         currentIndex = index;
         prepare(index);
-        play();
     }
 
     @Override
@@ -220,6 +227,7 @@ public class MusicPlayer implements MusicPlayerInterface, MediaPlayer.OnCompleti
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         Log.d("debug", "onPrepared " + getClass().getSimpleName());
+        play();
         callback.onPrepared(this);
     }
 

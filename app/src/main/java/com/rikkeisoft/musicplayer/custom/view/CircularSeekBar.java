@@ -785,6 +785,7 @@ public class CircularSeekBar extends View {
 						mOnCircularSeekBarChangeListener.onProgressChanged(this, mProgress, true);
 					}
 				} else {
+					mOnCircularSeekBarChangeListener.onOutsideTrackingTouch(this); // tvt add
 					break;
 				}
 
@@ -900,11 +901,13 @@ public class CircularSeekBar extends View {
 	*/
 	public interface OnCircularSeekBarChangeListener {
 
-		public abstract void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser);
+		public abstract void onProgressChanged(CircularSeekBar seekBar, int progress, boolean fromUser);
 
 		public abstract void onStopTrackingTouch(CircularSeekBar seekBar);
 
 		public abstract void onStartTrackingTouch(CircularSeekBar seekBar);
+
+		public abstract void onOutsideTrackingTouch(CircularSeekBar seekBar); // tvt add
 	}
 
 	/**

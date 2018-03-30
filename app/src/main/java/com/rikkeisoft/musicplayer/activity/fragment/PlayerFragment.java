@@ -20,17 +20,18 @@ import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.service.MusicService;
 import com.rikkeisoft.musicplayer.utils.MusicPlayer;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.OnClickListener {
 
-    private MusicService musicService;
-    private MusicPlayer musicPlayer;
+    public PlaylistPlayer playlistPlayer;
 
     private View btnNext, btnPrevious;
     private TextView tvTime;
     private FloatingActionButton btnPlay;
     private ImageView btnShuffle, btnRepeat;
     private CircularSeekBar seekBar;
+    private boolean userIsSeeking;
 
     public static PlayerFragment newInstance(int modelOwner) {
         PlayerFragment fragment = new PlayerFragment();
@@ -49,9 +50,17 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
 
         addFragment();
 
-        musicService = MyApplication.musicService;
-        musicPlayer = musicService.getMusicPlayer();
+        playlistPlayer = new PlaylistPlayer(MyApplication.playerModel);
+        playlistPlayer.setWakeMode(getContext());
+        playlistPlayer.observe(this);
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        playlistPlayer.release();
+        playlistPlayer = null;
     }
 
     @Override
@@ -82,9 +91,10 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         super.onDestroyView();
 
         model.getDuration().removeObservers(this);
-        model.getCurrentTime().removeObservers(this);
-        model.getPaused().removeObservers(this);
+        model.getCurrentPosition().removeObservers(this);
+        model.getPlaying().removeObservers(this);
         model.getRepeat().removeObservers(this);
+        model.getCurrentIndex().removeObservers(this);
     }
 
     @Override
@@ -95,23 +105,32 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         btnShuffle.setOnClickListener(this);
         btnRepeat.setOnClickListener(this);
 
+        model.getCurrentIndex().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer != null && model.getItems().getValue() != null) {
+                    setTittle(model.getItems().getValue().get(integer).getName());
+
+                    if(model.isFirstPlay()) playlistPlayer.play(integer);
+                }
+            }
+        });
+
         model.getDuration().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
-                if(integer == null) return;
-                seekBar.setMax(integer);
+                if(integer != null) seekBar.setMax(integer);
             }
         });
 
-        model.getCurrentTime().observe(this, new Observer<Integer>() {
+        model.getCurrentPosition().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
-                if(integer == null) return;
-                seekBar.setProgress(integer);
+                if(integer != null && !userIsSeeking) seekBar.setProgress(integer);
             }
         });
 
-        model.getPaused().observe(this, new Observer<Boolean>() {
+        model.getPlaying().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
                 if(aBoolean != null) btnPlay.setImageDrawable(getContext().getResources()
@@ -143,24 +162,37 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         });
 
         seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+            private int userSelectedPosition;
+
             @Override
-            public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(CircularSeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser) {
-                    musicPlayer.seekTo(progress);
+                    userSelectedPosition = progress;
                 }
 
                 tvTime.setText(MusicPlayer.formatTime(progress));
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(CircularSeekBar seekBar) {
-
             }
 
             @Override
             public void onStartTrackingTouch(CircularSeekBar seekBar) {
+                userIsSeeking = true;
+            }
 
+            @Override
+            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+                updateSeek();
+            }
+
+            @Override
+            public void onOutsideTrackingTouch(CircularSeekBar seekBar) {
+                updateSeek();
+            }
+
+            private void updateSeek() {
+                if(userIsSeeking) {
+                    userIsSeeking = false;
+                    playlistPlayer.seekTo(userSelectedPosition);
+                }
             }
         });
 
@@ -191,23 +223,23 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         int id = view.getId();
         switch (id) {
             case R.id.btn_play:
-                musicPlayer.togglePause();
+                playlistPlayer.togglePlay();
                 break;
 
             case R.id.btn_next:
-                musicPlayer.next();
+                playlistPlayer.next();
                 break;
 
             case R.id.btn_previous:
-                musicPlayer.previous();
+                playlistPlayer.previous();
                 break;
 
             case R.id.btn_shuffle:
-                musicPlayer.toggleShuffle();
+                playlistPlayer.toggleShuffle();
                 break;
 
             case R.id.btn_repeat:
-                musicPlayer.toggleRepeat();
+                playlistPlayer.toggleRepeat();
                 break;
         }
     }

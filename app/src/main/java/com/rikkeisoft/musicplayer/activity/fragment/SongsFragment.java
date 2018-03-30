@@ -64,7 +64,8 @@ public class SongsFragment extends MyFragment<SongItem> {
 //        PlayerModel playerModel = getActivityModel(PlayerModel.class);
         PlayerModel playerModel = MyApplication.playerModel;
         playerModel.getItems().setValue(model.getItems().getValue());
-        playerModel.getPlayingPosition().setValue(position);
+        playerModel.getCurrentIndex().setValue(position);
+        playerModel.setFirstPlay(true);
     }
 
 }

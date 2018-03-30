@@ -7,12 +7,12 @@ import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 public class PlayerModel extends BaseListModel<SongItem> {
 
-    private MutableLiveData<Integer> playingPosition;
+    private MutableLiveData<Integer> currentIndex;
 
-    public MutableLiveData<Integer> getPlayingPosition() {
-        if(playingPosition == null) playingPosition = new MutableLiveData<>();
+    public MutableLiveData<Integer> getCurrentIndex() {
+        if(currentIndex == null) currentIndex = new MutableLiveData<>();
 
-        return playingPosition;
+        return currentIndex;
     }
 
     private MutableLiveData<Integer> duration;
@@ -23,20 +23,28 @@ public class PlayerModel extends BaseListModel<SongItem> {
         return duration;
     }
 
-    private MutableLiveData<Integer> currentTime;
+    private MutableLiveData<Integer> currentPosition;
 
-    public MutableLiveData<Integer> getCurrentTime() {
-        if(currentTime == null) currentTime = new MutableLiveData<>();
+    public MutableLiveData<Integer> getCurrentPosition() {
+        if(currentPosition == null) currentPosition = new MutableLiveData<>();
 
-        return currentTime;
+        return currentPosition;
     }
 
-    private MutableLiveData<Boolean> paused;
+    private MutableLiveData<Boolean> playing;
 
-    public MutableLiveData<Boolean> getPaused() {
-        if(paused == null) paused = new MutableLiveData<>();
+    public MutableLiveData<Boolean> getPlaying() {
+        if(playing == null) playing = new MutableLiveData<>();
 
-        return paused;
+        return playing;
+    }
+
+    private MutableLiveData<Boolean> shuffle;
+
+    public MutableLiveData<Boolean> getShuffle() {
+        if(shuffle == null) shuffle = new MutableLiveData<>();
+
+        return shuffle;
     }
 
     private MutableLiveData<Integer> repeat;
@@ -47,6 +55,13 @@ public class PlayerModel extends BaseListModel<SongItem> {
         return repeat;
     }
 
+    private boolean firstPlay;
 
+    public boolean isFirstPlay() {
+        return firstPlay;
+    }
 
+    public void setFirstPlay(boolean firstPlay) {
+        this.firstPlay = firstPlay;
+    }
 }

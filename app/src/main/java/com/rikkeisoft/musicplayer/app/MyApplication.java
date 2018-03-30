@@ -130,6 +130,12 @@ public class MyApplication extends Application {
 
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
+//        try {
+//            Thread.sleep(3000);
+//        }catch (Exception e) {
+//
+//        }
+
 //        startService(intent);
 //        stopService(intent);
     }
