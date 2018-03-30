@@ -10,13 +10,21 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
+import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.adapter.PlaylistRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.service.MusicService;
+import com.rikkeisoft.musicplayer.utils.MusicPlayer;
+
+import java.util.List;
 
 public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         PlaylistRecyclerAdapter, LinearLayoutManager> {
+
+    private MusicService musicService;
+    private MusicPlayer musicPlayer;
 
     public static PlaylistFragment newInstance(int modelOwner) {
         PlaylistFragment fragment = new PlaylistFragment();
@@ -38,13 +46,24 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
                 if(integer != null) gotoPos(integer);
             }
         });
+
+        musicService = MyApplication.musicService;
+        musicPlayer = musicService.getMusicPlayer();
+
     }
 
     private void gotoPos(Integer position) {
         Log.d("debug", "gotoPos " + position);
         Log.d("debug", "getItemCount " + recyclerAdapter.getItemCount());
         if(position != null && position > 0 && position < recyclerAdapter.getItemCount())
-            recyclerView.smoothScrollToPosition(position);
+            if(recyclerView != null) recyclerView.smoothScrollToPosition(position);
+    }
+
+    @Override
+    protected void updateRecyclerAdapter(List<SongItem> songItems) {
+        super.updateRecyclerAdapter(songItems);
+
+        musicPlayer.setPlaylist(songItems);
     }
 
     @Override
@@ -63,12 +82,12 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        gotoPos()
     }
 
     @Override
     protected PlayerModel onCreateModel() {
-        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+//        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+        return MyApplication.playerModel;
     }
 
     @Override
@@ -76,7 +95,8 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         return new PlaylistRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-
+//                musicPlayer.play(position);
+                musicPlayer.play(position);
             }
         });
     }

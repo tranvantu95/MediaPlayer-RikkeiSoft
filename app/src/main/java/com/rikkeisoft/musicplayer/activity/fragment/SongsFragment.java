@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
+import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
@@ -60,7 +61,8 @@ public class SongsFragment extends MyFragment<SongItem> {
                     .commit();
         }
 
-        PlayerModel playerModel = getActivityModel(PlayerModel.class);
+//        PlayerModel playerModel = getActivityModel(PlayerModel.class);
+        PlayerModel playerModel = MyApplication.playerModel;
         playerModel.getItems().setValue(model.getItems().getValue());
         playerModel.getPlayingPosition().setValue(position);
     }

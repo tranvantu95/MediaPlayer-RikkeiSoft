@@ -1,18 +1,31 @@
 package com.rikkeisoft.musicplayer.app;
 
 import android.app.Application;
+import android.app.IntentService;
+import android.arch.lifecycle.Observer;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.service.MusicService;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
+
+import java.util.List;
 
 public class MyApplication extends Application {
 
@@ -69,6 +82,11 @@ public class MyApplication extends Application {
         sendBroadcast(intent);
     }
 
+    //
+    public static PlayerModel playerModel;
+
+    public static MusicService musicService;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -89,6 +107,31 @@ public class MyApplication extends Application {
                 "shouldShowRequestPermissionRationale", false);
         General.typeView = sharedPreferences.getInt("typeView", SwitchListModel.LIST);
 
+        //
+        playerModel = new PlayerModel();
+
+        //
+        Intent intent = new Intent(this, MusicService.class);
+
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                MusicService.LocalBinder binder = (MusicService.LocalBinder) iBinder;
+                musicService = binder.getService();
+
+                musicService.setPlayerModel(playerModel);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+
+            }
+        };
+
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+//        startService(intent);
+//        stopService(intent);
     }
 
 }

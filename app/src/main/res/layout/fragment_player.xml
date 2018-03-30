@@ -34,6 +34,21 @@
                     app:srcCompat="@drawable/ic_disk"
                     android:adjustViewBounds="true"/>
 
+                <com.rikkeisoft.musicplayer.custom.view.CircularSeekBar
+                    android:id="@id/seek_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="40dp"
+                    app:start_angle="270"
+                    app:end_angle="270"
+                    app:circle_x_radius="100dp"
+                    app:circle_y_radius="100dp"
+                    app:progress="25"
+                    app:max="100"
+                    app:pointer_alpha_ontouch="100"
+                    app:pointer_color="#0174DF"
+                    app:pointer_halo_color="#880174DF"/>
+
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="wrap_content"

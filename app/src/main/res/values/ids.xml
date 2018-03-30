@@ -40,5 +40,6 @@
     <item type="id" name="btn_shuffle" />
     <item type="id" name="btn_repeat" />
     <item type="id" name="tv_time" />
+    <item type="id" name="seek_bar" />
 
 </resources>

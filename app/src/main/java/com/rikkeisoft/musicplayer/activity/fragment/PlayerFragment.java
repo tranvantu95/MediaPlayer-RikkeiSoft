@@ -1,23 +1,36 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarFragment;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
+import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.service.MusicService;
+import com.rikkeisoft.musicplayer.utils.MusicPlayer;
 
 public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.OnClickListener {
 
-    private View btnPlay, btnNext, btnPrevious, btnShuffle, btnRepeat;
+    private MusicService musicService;
+    private MusicPlayer musicPlayer;
+
+    private View btnNext, btnPrevious;
     private TextView tvTime;
+    private FloatingActionButton btnPlay;
+    private ImageView btnShuffle, btnRepeat;
+    private CircularSeekBar seekBar;
 
     public static PlayerFragment newInstance(int modelOwner) {
         PlayerFragment fragment = new PlayerFragment();
@@ -35,11 +48,16 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         setHasOptionsMenu(true);
 
         addFragment();
+
+        musicService = MyApplication.musicService;
+        musicPlayer = musicService.getMusicPlayer();
+
     }
 
     @Override
     protected PlayerModel onCreateModel() {
-        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+//        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
+        return MyApplication.playerModel;
     }
 
     @Override
@@ -60,9 +78,92 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        model.getDuration().removeObservers(this);
+        model.getCurrentTime().removeObservers(this);
+        model.getPaused().removeObservers(this);
+        model.getRepeat().removeObservers(this);
+    }
+
+    @Override
     protected void initView(View view) {
         super.initView(view);
         view.setOnClickListener(this);
+        btnPlay.setOnClickListener(this);
+        btnShuffle.setOnClickListener(this);
+        btnRepeat.setOnClickListener(this);
+
+        model.getDuration().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer == null) return;
+                seekBar.setMax(integer);
+            }
+        });
+
+        model.getCurrentTime().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer == null) return;
+                seekBar.setProgress(integer);
+            }
+        });
+
+        model.getPaused().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if(aBoolean != null) btnPlay.setImageDrawable(getContext().getResources()
+                        .getDrawable(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play));
+            }
+        });
+
+        model.getRepeat().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer != null) {
+                    int id;
+                    switch (integer) {
+                        case MusicPlayer.REPEAT_PLAYLIST:
+                            id = R.drawable.ic_repeat;
+                            break;
+
+                        case MusicPlayer.REPEAT_SONG:
+                            id = R.drawable.ic_repeat_once;
+                            break;
+
+                        default:
+                            id = R.drawable.ic_repeat_off;
+                    }
+
+                    btnRepeat.setImageDrawable(getContext().getResources().getDrawable(id));
+                }
+            }
+        });
+
+        seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    musicPlayer.seekTo(progress);
+                }
+
+                tvTime.setText(MusicPlayer.formatTime(progress));
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
+            }
+        });
+
     }
 
     @Override
@@ -70,12 +171,13 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         super.findView(view);
 
         tvTime = view.findViewById(R.id.tv_time);
+        seekBar = view.findViewById(R.id.seek_bar);
+        btnPlay = view.findViewById(R.id.btn_play);
+        btnShuffle = view.findViewById(R.id.btn_shuffle);
+        btnRepeat = view.findViewById(R.id.btn_repeat);
 
-        view.findViewById(R.id.btn_play).setOnClickListener(this);
         view.findViewById(R.id.btn_next).setOnClickListener(this);
         view.findViewById(R.id.btn_previous).setOnClickListener(this);
-        view.findViewById(R.id.btn_shuffle).setOnClickListener(this);
-        view.findViewById(R.id.btn_repeat).setOnClickListener(this);
     }
 
     @Override
@@ -89,18 +191,23 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
         int id = view.getId();
         switch (id) {
             case R.id.btn_play:
+                musicPlayer.togglePause();
                 break;
 
             case R.id.btn_next:
+                musicPlayer.next();
                 break;
 
             case R.id.btn_previous:
+                musicPlayer.previous();
                 break;
 
             case R.id.btn_shuffle:
+                musicPlayer.toggleShuffle();
                 break;
 
             case R.id.btn_repeat:
+                musicPlayer.toggleRepeat();
                 break;
         }
     }

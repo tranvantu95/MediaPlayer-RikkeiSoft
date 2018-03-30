@@ -218,10 +218,10 @@ public class Loader {
                 song.setName(cursor.getString(++i));
                 song.setAlbumId(cursor.getInt(++i));
                 song.setAlbumName(cursor.getString(++i));
-                song.setArtistId(cursor.getInt(++i)); //Log.d("debug", song.getArtistId());
+                song.setArtistId(cursor.getInt(++i));
                 song.setArtistName(cursor.getString(++i));
                 song.setDuration(cursor.getInt(++i));
-                song.setPath(cursor.getString(++i));
+                song.setPath(cursor.getString(++i)); //Log.d("debug", song.getPath());
 
                 songs.add(song);
             }
