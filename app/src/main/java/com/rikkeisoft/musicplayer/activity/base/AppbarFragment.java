@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ public abstract class AppbarFragment<Model extends ViewModel> extends BaseFragme
     protected Toolbar toolbar;
     protected TabLayout tabs;
     protected ImageView appbarImage;
+    protected CollapsingToolbarLayout collapsingToolbar;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -62,6 +64,19 @@ public abstract class AppbarFragment<Model extends ViewModel> extends BaseFragme
         if(actionBar != null) {
             actionBar.setTitle(string);
         }
+    }
+
+    // Collapsing
+    public void setCollapsingTitle(int resStringId) {
+        setCollapsingTitle(getString(resStringId));
+    }
+
+    public void setCollapsingTitle(String string) {
+        collapsingToolbar.setTitle(string);
+    }
+
+    public void setCollapsingTitleEnable(boolean enable) {
+        collapsingToolbar.setTitleEnabled(enable);
     }
 
     // Tabs

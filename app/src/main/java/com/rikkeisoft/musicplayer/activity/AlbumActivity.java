@@ -55,7 +55,6 @@ public class AlbumActivity extends MyActivity {
     protected void setupActionBar() {
         super.setupActionBar();
         showHomeButton();
-        setTitle("");
     }
 
     private void addFragment() {
@@ -92,7 +91,7 @@ public class AlbumActivity extends MyActivity {
             return;
         }
 
-        setTitle(album.getName());
+        setCollapsingTitle(album.getName());
 
         if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
 

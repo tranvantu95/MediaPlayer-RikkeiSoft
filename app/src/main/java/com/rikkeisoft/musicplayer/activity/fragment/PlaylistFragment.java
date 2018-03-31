@@ -2,29 +2,35 @@ package com.rikkeisoft.musicplayer.activity.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.app.MyApplication;
-import com.rikkeisoft.musicplayer.custom.adapter.PlaylistRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.MusicService;
-import com.rikkeisoft.musicplayer.utils.MusicPlayer;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
 
 public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
-        PlaylistRecyclerAdapter, LinearLayoutManager> {
+        RecyclerView, LinearLayoutManager, SongsRecyclerAdapter> {
 
     private PlaylistPlayer playlistPlayer;
+
+    private PlaylistPlayer.PlayCallback pauseOnIsPlaying = new PlaylistPlayer.PlayCallback() {
+        @Override
+        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.pause();
+        }
+    };
 
     public static PlaylistFragment newInstance(int modelOwner) {
         PlaylistFragment fragment = new PlaylistFragment();
@@ -40,6 +46,8 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        recyclerAdapter.setTypeView(SwitchRecyclerAdapter.LIST_VIEW);
+
 //        model.getCurrentIndex().observe(this, new Observer<Integer>() {
 //            @Override
 //            public void onChanged(@Nullable Integer integer) {
@@ -47,6 +55,25 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
 //            }
 //        });
 
+        model.getCurrentSongId().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer != null) {
+                    recyclerAdapter.setCurrentId(integer);
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        model.getPlaying().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if(aBoolean != null) {
+                    recyclerAdapter.setPlaying(aBoolean);
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     private void gotoPos(Integer position) {
@@ -83,15 +110,15 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
     @Override
     protected PlayerModel onCreateModel() {
 //        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
-        return MyApplication.playerModel;
+        return MyApplication.getPlayerModel();
     }
 
     @Override
-    protected PlaylistRecyclerAdapter onCreateRecyclerAdapter() {
-        return new PlaylistRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
+    protected SongsRecyclerAdapter onCreateRecyclerAdapter() {
+        return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                ((PlayerFragment) getParentFragment()).playlistPlayer.play(position);
+                MyApplication.getPlaylistPlayer().play(position, pauseOnIsPlaying);
             }
         });
     }

@@ -5,13 +5,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.rikkeisoft.musicplayer.model.base.BaseListModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.ViewHolder<Item>>
-        extends RecyclerView.Adapter<V> implements View.OnClickListener {
+public abstract class BaseRecyclerAdapter<Item,
+        RV extends RecyclerView,
+        LM extends RecyclerView.LayoutManager,
+        VH extends BaseRecyclerAdapter.ViewHolder<Item, ?, ?, ?>>
+        extends RecyclerView.Adapter<VH>
+        implements View.OnClickListener {
+
+    protected RV recyclerView;
+
+    protected LM layoutManager;
 
     private List<Item> items = new ArrayList<>();
 
@@ -38,19 +44,27 @@ public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.Vi
     }
 
     @Override
-    public V onCreateViewHolder(ViewGroup parent, int viewType) {
+    public void onAttachedToRecyclerView(android.support.v7.widget.RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        this.recyclerView = (RV) recyclerView;
+        this.layoutManager = (LM) recyclerView.getLayoutManager();
+    }
+
+    @Override
+    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(getItemLayoutId(), parent, false);
         return getViewHolder(view);
     }
 
     protected abstract int getItemLayoutId();
 
-    protected abstract V getViewHolder(View view);
+    protected abstract VH getViewHolder(View view);
 
     @Override
-    public void onBindViewHolder(V holder, int position) {
+    public void onBindViewHolder(VH holder, int position) {
         Item item = items.get(position);
-        holder.setItem(item);
+        holder.setItem(item, position);
 
         holder.itemView.setTag(position);
         holder.itemView.setOnClickListener(this);
@@ -68,16 +82,33 @@ public abstract class BaseRecyclerAdapter<Item, V extends BaseRecyclerAdapter.Vi
         onItemClickListener.onItemClick(view, position);
     }
 
-    public static class ViewHolder<Item> extends RecyclerView.ViewHolder {
+    public static class ViewHolder<Item,
+            RV extends RecyclerView,
+            LM extends RecyclerView.LayoutManager,
+            RA extends BaseRecyclerAdapter<Item, ?, ?, ?>>
+            extends RecyclerView.ViewHolder {
+
+        protected RV recyclerView;
+
+        protected LM layoutManager;
+
+        protected RA recyclerAdapter;
 
         protected Item item;
 
-        public ViewHolder(View itemView) {
+        protected int position;
+
+        public ViewHolder(RV rv, LM lm, RA ra, View itemView) {
             super(itemView);
+
+            this.recyclerView = rv;
+            this.layoutManager = lm;
+            this.recyclerAdapter = ra;
         }
 
-        public void setItem(Item item) {
+        public void setItem(Item item, int position) {
             this.item = item;
+            this.position = position;
         }
     }
 

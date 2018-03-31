@@ -1,11 +1,15 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public abstract class MyActivity extends SwitchListActivity {
 

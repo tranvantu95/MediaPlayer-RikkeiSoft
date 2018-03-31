@@ -78,7 +78,7 @@ public class Loader {
     //
     @NonNull
     public List<SongItem> findSongsOfAlbum(AlbumItem albumItem) {
-        return findSongs(albumItem, new FindItems<SongItem, AlbumItem>() {
+        return findItems(getSongs(), albumItem, new FindItems<SongItem, AlbumItem>() {
             @Override
             public int getId(SongItem song) {
                 return song.getAlbumId();
@@ -93,7 +93,7 @@ public class Loader {
 
     @NonNull
     public List<SongItem> findSongsOfArtist(ArtistItem artistItem) {
-        return findSongs(artistItem, new FindItems<SongItem, ArtistItem>() {
+        return findItems(getSongs(), artistItem, new FindItems<SongItem, ArtistItem>() {
             @Override
             public int getId(SongItem song) {
                 return song.getArtistId();
@@ -138,12 +138,14 @@ public class Loader {
     }
 
     //
-    @NonNull
-    private <Item2 extends BaseItem> List<SongItem> findSongs(Item2 item2, FindItems<SongItem, Item2> findItems) {
-        return findItems(getSongs(), item2, findItems);
+    public static <Item extends BaseItem> int findIndex(List<Item> items, int id) {
+        for(int i = items.size() - 1; i >= 0; i--) {
+            if(id == items.get(i).getId()) return i;
+        }
+
+        return -1;
     }
 
-    //
     private static <Item extends BaseItem> Item findItem(List<Item> items, int id) {
         for(int i = items.size() - 1; i >= 0; i--) {
             Item item = items.get(i);

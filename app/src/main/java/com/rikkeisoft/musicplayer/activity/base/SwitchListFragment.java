@@ -11,11 +11,16 @@ import android.util.Log;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 
-public abstract class SwitchListFragment<Item> extends BaseListFragment<Item, SwitchListModel<Item>,
-        SwitchRecyclerAdapter<Item, ? >, RecyclerView.LayoutManager> {
+public abstract class SwitchListFragment<Item,
+        Model extends SwitchListModel<Item>,
+        RV extends RecyclerView,
+        LLM extends LinearLayoutManager,
+        GLM extends GridLayoutManager,
+        RA extends SwitchRecyclerAdapter<Item, ?, ?, ?, ?>>
+        extends BaseListFragment<Item, Model, RV, RecyclerView.LayoutManager, RA> {
 
-    protected LinearLayoutManager linearLayoutManager;
-    protected GridLayoutManager gridLayoutManager;
+    protected LLM linearLayoutManager;
+    protected GLM gridLayoutManager;
 
     protected int dividerList, dividerGrid;
 
@@ -45,9 +50,9 @@ public abstract class SwitchListFragment<Item> extends BaseListFragment<Item, Sw
         return dividerList;
     }
 
-    protected abstract LinearLayoutManager onCreateLinearLayoutManager();
+    protected abstract LLM onCreateLinearLayoutManager();
 
-    protected abstract GridLayoutManager onCreateGridLayoutManager();
+    protected abstract GLM onCreateGridLayoutManager();
 
     protected abstract int onCreateDividerList();
 

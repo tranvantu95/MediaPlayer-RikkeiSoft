@@ -1,31 +1,26 @@
 package com.rikkeisoft.musicplayer.app;
 
 import android.app.Application;
-import android.app.IntentService;
-import android.arch.lifecycle.Observer;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.MusicService;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
-
-import java.util.List;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class MyApplication extends Application {
 
@@ -83,9 +78,23 @@ public class MyApplication extends Application {
     }
 
     //
-    public static PlayerModel playerModel;
+    private static PlayerModel playerModel;
 
-    public static MusicService musicService;
+    public static PlayerModel getPlayerModel() {
+        return playerModel;
+    }
+
+    private static PlayerService playerService;
+
+    public static PlayerService getPlayerService() {
+        return playerService;
+    }
+
+    private static PlaylistPlayer playlistPlayer;
+
+    public static PlaylistPlayer getPlaylistPlayer() {
+        return playlistPlayer;
+    }
 
     @Override
     public void onCreate() {
@@ -111,15 +120,15 @@ public class MyApplication extends Application {
         playerModel = new PlayerModel();
 
         //
-        Intent intent = new Intent(this, MusicService.class);
+        Intent intent = new Intent(this, PlayerService.class);
 
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                MusicService.LocalBinder binder = (MusicService.LocalBinder) iBinder;
-                musicService = binder.getService();
+                PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
+                playerService = binder.getService();
+                playlistPlayer = playerService.getPlaylistPlayer();
 
-                musicService.setPlayerModel(playerModel);
             }
 
             @Override

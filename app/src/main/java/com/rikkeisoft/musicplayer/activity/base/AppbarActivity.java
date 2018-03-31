@@ -1,6 +1,7 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,7 @@ public class AppbarActivity extends BaseActivity {
     protected Toolbar toolbar;
     protected TabLayout tabs;
     protected ImageView appbarImage;
+    protected CollapsingToolbarLayout collapsingToolbar;
 
     protected void init() {
         findView();
@@ -26,6 +28,7 @@ public class AppbarActivity extends BaseActivity {
         toolbar = findViewById(R.id.toolbar);
         tabs = findViewById(R.id.tabs);
         appbarImage = findViewById(R.id.app_bar_image);
+        collapsingToolbar = findViewById(R.id.collapsing_toolbar);
     }
 
     // ActionBar
@@ -50,6 +53,20 @@ public class AppbarActivity extends BaseActivity {
         if(actionBar != null) {
             actionBar.setTitle(string);
         }
+        else toolbar.setTitle(string);
+    }
+
+    // Collapsing
+    public void setCollapsingTitle(int resStringId) {
+        setCollapsingTitle(getString(resStringId));
+    }
+
+    public void setCollapsingTitle(String string) {
+        collapsingToolbar.setTitle(string);
+    }
+
+    public void setCollapsingTitleEnable(boolean enable) {
+        collapsingToolbar.setTitleEnabled(enable);
     }
 
     // Tabs

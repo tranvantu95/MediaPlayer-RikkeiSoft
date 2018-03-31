@@ -29,8 +29,10 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -71,11 +73,18 @@ public class BaseActivity extends AppCompatActivity {
 
     private Dialog requestPermissionRationale;
 
+    // Player
+    protected PlaylistPlayer playlistPlayer;
+    protected PlayerModel playerModel;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Log.d("debug", "onCreate " + getClass().getSimpleName());
+
+        playlistPlayer = MyApplication.getPlaylistPlayer();
+        playerModel = MyApplication.getPlayerModel();
 
     }
 

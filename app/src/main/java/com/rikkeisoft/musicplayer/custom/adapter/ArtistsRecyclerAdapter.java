@@ -1,5 +1,8 @@
 package com.rikkeisoft.musicplayer.custom.adapter;
 
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
@@ -14,18 +17,20 @@ public class ArtistsRecyclerAdapter extends MyRecyclerAdapter<ArtistItem, Artist
 
     @Override
     protected ViewHolder getViewHolder(View view) {
-        return new ViewHolder(view);
+        return new ViewHolder(recyclerView, layoutManager, linearLayoutManager, gridLayoutManager, this, view);
     }
 
-    public static class ViewHolder extends MyRecyclerAdapter.ViewHolder<ArtistItem> {
+    public static class ViewHolder extends MyRecyclerAdapter.ViewHolder<ArtistItem, ArtistsRecyclerAdapter> {
 
-        public ViewHolder(View itemView) {
-            super(itemView);
+        public ViewHolder(RecyclerView recyclerView, RecyclerView.LayoutManager layoutManager,
+                          LinearLayoutManager linearLayoutManager, GridLayoutManager gridLayoutManager,
+                          ArtistsRecyclerAdapter recyclerAdapter, View itemView) {
+            super(recyclerView, layoutManager, linearLayoutManager, gridLayoutManager, recyclerAdapter, itemView);
         }
 
         @Override
-        public void setItem(ArtistItem artistItem) {
-            super.setItem(artistItem);
+        public void setItem(ArtistItem artistItem, int position) {
+            super.setItem(artistItem, position);
 
             tvTitle.setText(artistItem.getName());
 

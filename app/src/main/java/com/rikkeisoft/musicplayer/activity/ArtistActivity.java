@@ -66,7 +66,6 @@ public class ArtistActivity extends MyActivity {
     protected void setupActionBar() {
         super.setupActionBar();
         showHomeButton();
-        setTitle("");
     }
 
     @Override
@@ -91,7 +90,7 @@ public class ArtistActivity extends MyActivity {
             return;
         }
 
-        setTitle(artist.getName());
+        setCollapsingTitle(artist.getName());
 
         if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
 

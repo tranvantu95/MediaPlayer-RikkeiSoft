@@ -2,10 +2,18 @@ package com.rikkeisoft.musicplayer.activity.base;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
+import com.rikkeisoft.musicplayer.model.base.BaseItem;
+import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 
-public abstract class MyFragment<Item> extends SwitchListFragment<Item> {
+public abstract class MyFragment<Item,
+        Model extends SwitchListModel<Item>,
+        RA extends SwitchRecyclerAdapter<Item, RecyclerView, LinearLayoutManager, GridLayoutManager, ?>>
+        extends SwitchListFragment<Item, Model, RecyclerView, LinearLayoutManager, GridLayoutManager, RA> {
 
     @Override
     protected LinearLayoutManager onCreateLinearLayoutManager() {

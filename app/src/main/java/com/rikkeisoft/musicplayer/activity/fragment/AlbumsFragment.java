@@ -1,19 +1,22 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.activity.AlbumActivity;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
+import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.adapter.AlbumsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 
-public class AlbumsFragment extends MyFragment<AlbumItem> {
+public class AlbumsFragment extends MyFragment<AlbumItem, AlbumsModel, AlbumsRecyclerAdapter> {
 
     public static AlbumsFragment newInstance(int modelOwner) {
         AlbumsFragment fragment = new AlbumsFragment();
@@ -29,15 +32,34 @@ public class AlbumsFragment extends MyFragment<AlbumItem> {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        MyApplication.getPlayerModel().getCurrentAlbumId().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer integer) {
+                if(integer != null) {
+                    recyclerAdapter.setCurrentId(integer);
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        MyApplication.getPlayerModel().getPlaying().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if(aBoolean != null) {
+                    recyclerAdapter.setPlaying(aBoolean);
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @Override
-    protected SwitchListModel<AlbumItem> onCreateModel() {
+    protected AlbumsModel onCreateModel() {
         return getModel(getArguments().getInt("modelOwner"), AlbumsModel.class);
     }
 
     @Override
-    protected SwitchRecyclerAdapter<AlbumItem, ?> onCreateRecyclerAdapter() {
+    protected AlbumsRecyclerAdapter onCreateRecyclerAdapter() {
         return new AlbumsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {

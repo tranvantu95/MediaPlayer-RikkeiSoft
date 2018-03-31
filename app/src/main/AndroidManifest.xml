@@ -13,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -23,19 +22,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.AlbumActivity"
             android:label="@string/title_activity_album"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".activity.ArtistActivity"
             android:label="@string/title_activity_artist"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.PlayerActivity"
+            android:label="@string/title_activity_player"
+            android:theme="@style/AppTheme.NoActionBar"  />
 
-        <service
-            android:name=".service.MusicService" />
+        <service android:name=".service.PlayerService"
+            android:enabled="true"
+            android:exported="true"/>
 
     </application>
 

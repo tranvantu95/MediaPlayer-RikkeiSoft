@@ -15,6 +15,30 @@ public class PlayerModel extends BaseListModel<SongItem> {
         return currentIndex;
     }
 
+    private MutableLiveData<Integer> currentSongId;
+
+    public MutableLiveData<Integer> getCurrentSongId() {
+        if(currentSongId == null) currentSongId = new MutableLiveData<>();
+
+        return currentSongId;
+    }
+
+    private MutableLiveData<Integer> currentAlbumId;
+
+    public MutableLiveData<Integer> getCurrentAlbumId() {
+        if(currentAlbumId == null) currentAlbumId = new MutableLiveData<>();
+
+        return currentAlbumId;
+    }
+
+    private MutableLiveData<Integer> currentArtistId;
+
+    public MutableLiveData<Integer> getCurrentArtistId() {
+        if(currentArtistId == null) currentArtistId = new MutableLiveData<>();
+
+        return currentArtistId;
+    }
+
     private MutableLiveData<Integer> duration;
 
     public MutableLiveData<Integer> getDuration() {
@@ -55,13 +79,4 @@ public class PlayerModel extends BaseListModel<SongItem> {
         return repeat;
     }
 
-    private boolean firstPlay;
-
-    public boolean isFirstPlay() {
-        return firstPlay;
-    }
-
-    public void setFirstPlay(boolean firstPlay) {
-        this.firstPlay = firstPlay;
-    }
 }

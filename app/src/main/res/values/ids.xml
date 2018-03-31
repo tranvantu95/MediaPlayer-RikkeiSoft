@@ -5,6 +5,7 @@
     <item type="id" name="appbar"/>
     <item type="id" name="toolbar"/>
     <item type="id" name="tabs"/>
+    <item type="id" name="collapsing_toolbar"/>
     <item type="id" name="app_bar_image"/>
 
     <!--List-->
@@ -32,6 +33,7 @@
     <item type="id" name="tv_title" />
     <item type="id" name="tv_info" />
     <item type="id" name="iv_cover" />
+    <item type="id" name="iv_status" />
 
     <!--Player-->
     <item type="id" name="btn_play" />

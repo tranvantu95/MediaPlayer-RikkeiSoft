@@ -1,4 +1,4 @@
-package com.rikkeisoft.musicplayer.activity.fragment;
+package com.rikkeisoft.musicplayer.activity;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
@@ -6,24 +6,22 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.base.AppbarFragment;
+import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
+import com.rikkeisoft.musicplayer.activity.fragment.PlaylistFragment;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.utils.Format;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
-public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.OnClickListener {
-
-    public PlaylistPlayer playlistPlayer;
+public class PlayerActivity extends AppbarActivity implements View.OnClickListener {
 
     private View btnNext, btnPrevious;
     private TextView tvTime;
@@ -32,40 +30,18 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     private CircularSeekBar seekBar;
     private boolean userIsSeeking;
 
-    public static PlayerFragment newInstance(int modelOwner) {
-        PlayerFragment fragment = new PlayerFragment();
-
-        Bundle args = new Bundle();
-        args.putInt("modelOwner", modelOwner);
-        fragment.setArguments(args);
-
-        return fragment;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        setContentView(R.layout.activity_player);
+
+        init();
 
         addFragment();
-
-        playlistPlayer = MyApplication.getPlaylistPlayer();
-//        playlistPlayer.observe(this);
-    }
-
-    @Override
-    protected PlayerModel onCreateModel() {
-//        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
-        return MyApplication.getPlayerModel();
-    }
-
-    @Override
-    protected int getFragmentLayoutId() {
-        return R.layout.fragment_player;
     }
 
     private void addFragment() {
-        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         PlaylistFragment fragment = (PlaylistFragment) fragmentManager.findFragmentByTag("PlaylistFragment");
         if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
 
@@ -77,56 +53,45 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    protected void init() {
+        super.init();
 
-        model.getDuration().removeObservers(this);
-        model.getCurrentPosition().removeObservers(this);
-        model.getPlaying().removeObservers(this);
-        model.getRepeat().removeObservers(this);
-        model.getCurrentIndex().removeObservers(this);
-    }
-
-    @Override
-    protected void initView(View view) {
-        super.initView(view);
-        view.setOnClickListener(this);
         btnPlay.setOnClickListener(this);
         btnShuffle.setOnClickListener(this);
         btnRepeat.setOnClickListener(this);
 
-        model.getCurrentIndex().observe(this, new Observer<Integer>() {
+        playerModel.getCurrentIndex().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
-                if(integer != null && model.getItems().getValue() != null) {
-                    setTittle(model.getItems().getValue().get(integer).getName());
+                if(integer != null && playerModel.getItems().getValue() != null) {
+                    setTittle(playerModel.getItems().getValue().get(integer).getName());
                 }
             }
         });
 
-        model.getDuration().observe(this, new Observer<Integer>() {
+        playerModel.getDuration().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
                 if(integer != null) seekBar.setMax(integer);
             }
         });
 
-        model.getCurrentPosition().observe(this, new Observer<Integer>() {
+        playerModel.getCurrentPosition().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
                 if(integer != null && !userIsSeeking) seekBar.setProgress(integer);
             }
         });
 
-        model.getPlaying().observe(this, new Observer<Boolean>() {
+        playerModel.getPlaying().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) btnPlay.setImageDrawable(getContext().getResources()
+                if(aBoolean != null) btnPlay.setImageDrawable(getResources()
                         .getDrawable(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play));
             }
         });
 
-        model.getShuffle().observe(this, new Observer<Boolean>() {
+        playerModel.getShuffle().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
                 if(aBoolean != null) btnShuffle.setImageDrawable(getResources()
@@ -134,7 +99,7 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
             }
         });
 
-        model.getRepeat().observe(this, new Observer<Integer>() {
+        playerModel.getRepeat().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
                 if(integer != null) {
@@ -152,7 +117,7 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
                             id = R.drawable.ic_repeat_off;
                     }
 
-                    btnRepeat.setImageDrawable(getContext().getResources().getDrawable(id));
+                    btnRepeat.setImageDrawable(getResources().getDrawable(id));
                 }
             }
         });
@@ -195,17 +160,17 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     }
 
     @Override
-    protected void findView(View view) {
-        super.findView(view);
+    protected void findView() {
+        super.findView();
 
-        tvTime = view.findViewById(R.id.tv_time);
-        seekBar = view.findViewById(R.id.seek_bar);
-        btnPlay = view.findViewById(R.id.btn_play);
-        btnShuffle = view.findViewById(R.id.btn_shuffle);
-        btnRepeat = view.findViewById(R.id.btn_repeat);
+        tvTime = findViewById(R.id.tv_time);
+        seekBar = findViewById(R.id.seek_bar);
+        btnPlay = findViewById(R.id.btn_play);
+        btnShuffle = findViewById(R.id.btn_shuffle);
+        btnRepeat = findViewById(R.id.btn_repeat);
 
-        view.findViewById(R.id.btn_next).setOnClickListener(this);
-        view.findViewById(R.id.btn_previous).setOnClickListener(this);
+        findViewById(R.id.btn_next).setOnClickListener(this);
+        findViewById(R.id.btn_previous).setOnClickListener(this);
     }
 
     @Override
@@ -241,10 +206,9 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.menu_player, menu);
-        super.onCreateOptionsMenu(menu, inflater);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_player, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -256,4 +220,6 @@ public class PlayerFragment extends AppbarFragment<PlayerModel> implements View.
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }
+

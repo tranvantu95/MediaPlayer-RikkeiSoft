@@ -12,17 +12,20 @@ import com.rikkeisoft.musicplayer.model.base.BaseListModel;
 
 import java.util.List;
 
-public abstract class BaseListFragment<Item, Model extends BaseListModel<Item>,
-        RecyclerAdapter extends BaseRecyclerAdapter<Item, ? >,
-        LayoutManager extends RecyclerView.LayoutManager> extends BaseFragment<Model> {
+public abstract class BaseListFragment<Item,
+        Model extends BaseListModel<Item>,
+        RV extends RecyclerView,
+        LM extends RecyclerView.LayoutManager,
+        RA extends BaseRecyclerAdapter<Item, ?, ?, ?>>
+        extends BaseFragment<Model> {
 
-    protected RecyclerView recyclerView;
+    protected RV recyclerView;
 
     protected RecyclerView.ItemDecoration itemDecoration;
 
-    protected LayoutManager layoutManager;
+    protected LM layoutManager;
 
-    protected RecyclerAdapter recyclerAdapter;
+    protected RA recyclerAdapter;
 
     protected int divider;
 
@@ -42,9 +45,9 @@ public abstract class BaseListFragment<Item, Model extends BaseListModel<Item>,
         });
     }
 
-    protected abstract RecyclerAdapter onCreateRecyclerAdapter();
+    protected abstract LM onCreateLayoutManager();
 
-    protected abstract LayoutManager onCreateLayoutManager();
+    protected abstract RA onCreateRecyclerAdapter();
 
     protected abstract int onCreateDivider();
 
