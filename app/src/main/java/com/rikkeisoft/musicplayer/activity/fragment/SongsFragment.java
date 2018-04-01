@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.activity.PlayerActivity;
+import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.app.MyApplication;
@@ -19,6 +20,7 @@ import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecyclerAdapter> {
 
@@ -32,25 +34,29 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
         return fragment;
     }
 
+    protected PlaylistPlayer playlistPlayer;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MyApplication.getPlayerModel().getCurrentSongId().observe(this, new Observer<Integer>() {
+        model.getPlaylistPlayer().observe(this, new Observer<PlaylistPlayer>() {
+            @Override
+            public void onChanged(@Nullable PlaylistPlayer _playlistPlayer) {
+                playlistPlayer = _playlistPlayer;
+            }
+        });
+    }
+
+    @Override
+    protected void playerModelObserve(PlayerModel playerModel) {
+        super.playerModelObserve(playerModel);
+
+        playerModel.getCurrentSongId().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
                 if(integer != null) {
                     recyclerAdapter.setCurrentId(integer);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
-            }
-        });
-
-        MyApplication.getPlayerModel().getPlaying().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) {
-                    recyclerAdapter.setPlaying(aBoolean);
                     recyclerAdapter.notifyDataSetChanged();
                 }
             }
@@ -67,11 +73,12 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
+                if(playlistPlayer != null) playlistPlayer.setPlaylist(model.getItems().getValue(), position, true);
 
-                MyApplication.getPlayerModel().getItems().setValue(model.getItems().getValue());
-                MyApplication.getPlaylistPlayer().setPlaylist(model.getItems().getValue(), position, true);
+                if(playerModel != null) playerModel.getItems().setValue(model.getItems().getValue());
 
-                getActivity().startActivity(new Intent(getContext(), PlayerActivity.class));
+                getActivity().startActivity(PlayerActivity.createIntent(getContext(),
+                        (getActivity()).getTitle().toString()));
 
 //                addFragment();
             }

@@ -12,12 +12,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -30,17 +32,65 @@ import android.util.Log;
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class BaseActivity extends AppCompatActivity {
 
+    // Player Service
+    protected PlaylistPlayer playlistPlayer;
+    protected PlayerModel playerModel;
+
+    private ServiceConnection playerConnection;
+
+    private void bindPlayerService() {
+        if(playerConnection != null) return;
+        Log.d("debug", "bindPlayerService " + getClass().getSimpleName());
+
+        playerConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
+                PlayerService service = binder.getService();
+
+                playlistPlayer = service.getPlaylistPlayer();
+                playerModel = playlistPlayer.getPlayerModel();
+
+                onPlayerConnected(service, playlistPlayer, playerModel);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                playlistPlayer = null;
+                playerModel = null;
+            }
+        };
+
+        Intent intent = new Intent(this, PlayerService.class);
+        bindService(intent, playerConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void unbindPlayerService() {
+        if(playerConnection != null) {
+            Log.d("debug", "unbindPlayerService " + getClass().getSimpleName());
+            unbindService(playerConnection);
+            playerConnection = null;
+        }
+    }
+
+    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel playerModel) {
+        Log.d("debug", "onPlayerConnected " + getClass().getSimpleName());
+
+    }
+
     // Media change listener
     private BroadcastReceiver onReceiverMediaChange;
 
     private void registerOnReceiverMediaChange() {
         if(onReceiverMediaChange != null) return;
+        Log.d("debug", "registerOnReceiverMediaChange " + getClass().getSimpleName());
 
         onReceiverMediaChange = new BroadcastReceiver() {
             @Override
@@ -55,6 +105,7 @@ public class BaseActivity extends AppCompatActivity {
 
     private void unregisterOnReceiverMediaChange() {
         if(onReceiverMediaChange != null) {
+            Log.d("debug", "unregisterOnReceiverMediaChange " + getClass().getSimpleName());
             unregisterReceiver(onReceiverMediaChange);
             onReceiverMediaChange = null;
         }
@@ -73,18 +124,11 @@ public class BaseActivity extends AppCompatActivity {
 
     private Dialog requestPermissionRationale;
 
-    // Player
-    protected PlaylistPlayer playlistPlayer;
-    protected PlayerModel playerModel;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Log.d("debug", "onCreate " + getClass().getSimpleName());
-
-        playlistPlayer = MyApplication.getPlaylistPlayer();
-        playerModel = MyApplication.getPlayerModel();
 
     }
 
@@ -92,6 +136,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+        unbindPlayerService();
         unregisterOnReceiverMediaChange();
     }
 
@@ -109,11 +154,6 @@ public class BaseActivity extends AppCompatActivity {
         super.onStart();
 
         if(!isShowingGrantPermissionsDialog()) checkPermission();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -147,6 +187,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void checkPermission() {
+        Log.d("debug", "checkPermission " + getClass().getSimpleName());
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this, permissions[0])
                 != PackageManager.PERMISSION_GRANTED) {
@@ -177,25 +218,30 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void requestPermissions() {
+        Log.d("debug", "requestPermissions " + getClass().getSimpleName());
         ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
     }
 
     protected void onAutoDenyPermission() {
+        Log.d("debug", "onAutoDenyPermission " + getClass().getSimpleName());
         showRequestPermissionRationale(true);
     }
 
     protected void onShouldShowRequestPermissionRationale() {
+        Log.d("debug", "onShouldShowRequestPermissionRationale " + getClass().getSimpleName());
         showRequestPermissionRationale(false);
     }
 
     protected void onPermissionGranted() {
-        Log.d("debug", "onPermissionGranted");
+        Log.d("debug", "onPermissionGranted " + getClass().getSimpleName());
         hideRequestPermissionRationale();
 
         registerOnReceiverMediaChange();
+        bindPlayerService();
     }
 
     protected void onPermissionDenied() {
+        Log.d("debug", "onPermissionDenied " + getClass().getSimpleName());
         checkPermission();
     }
 

@@ -13,6 +13,7 @@ import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 
@@ -32,21 +33,17 @@ public class AlbumsFragment extends MyFragment<AlbumItem, AlbumsModel, AlbumsRec
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MyApplication.getPlayerModel().getCurrentAlbumId().observe(this, new Observer<Integer>() {
+    }
+
+    @Override
+    protected void playerModelObserve(PlayerModel playerModel) {
+        super.playerModelObserve(playerModel);
+
+        playerModel.getCurrentAlbumId().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
                 if(integer != null) {
                     recyclerAdapter.setCurrentId(integer);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
-            }
-        });
-
-        MyApplication.getPlayerModel().getPlaying().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) {
-                    recyclerAdapter.setPlaying(aBoolean);
                     recyclerAdapter.notifyDataSetChanged();
                 }
             }

@@ -12,11 +12,15 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.ArtistPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
+import com.rikkeisoft.musicplayer.model.ArtistsModel;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.Loader;
+import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
 
@@ -90,6 +94,7 @@ public class ArtistActivity extends MyActivity {
             return;
         }
 
+        setTitle(artist.getName());
         setCollapsingTitle(artist.getName());
 
         if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
@@ -105,6 +110,15 @@ public class ArtistActivity extends MyActivity {
 
         getModel(SongsModel.class).getTypeView().setValue(typeView);
         getModel(AlbumsModel.class).getTypeView().setValue(typeView);
+    }
+
+    @Override
+    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel playerModel) {
+        super.onPlayerConnected(playerService, playlistPlayer, playerModel);
+
+        getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
+        getModel(SongsModel.class).getPayerModel().setValue(playerModel);
+        getModel(AlbumsModel.class).getPayerModel().setValue(playerModel);
     }
 
     @Override

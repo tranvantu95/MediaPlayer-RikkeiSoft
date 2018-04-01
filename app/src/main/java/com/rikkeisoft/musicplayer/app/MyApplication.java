@@ -78,12 +78,6 @@ public class MyApplication extends Application {
     }
 
     //
-    private static PlayerModel playerModel;
-
-    public static PlayerModel getPlayerModel() {
-        return playerModel;
-    }
-
     private static PlayerService playerService;
 
     public static PlayerService getPlayerService() {
@@ -94,6 +88,12 @@ public class MyApplication extends Application {
 
     public static PlaylistPlayer getPlaylistPlayer() {
         return playlistPlayer;
+    }
+
+    private static PlayerModel playerModel;
+
+    public static PlayerModel getPlayerModel() {
+        return playerModel;
     }
 
     @Override
@@ -117,9 +117,6 @@ public class MyApplication extends Application {
         General.typeView = sharedPreferences.getInt("typeView", SwitchListModel.LIST);
 
         //
-        playerModel = new PlayerModel();
-
-        //
         Intent intent = new Intent(this, PlayerService.class);
 
         ServiceConnection serviceConnection = new ServiceConnection() {
@@ -128,7 +125,7 @@ public class MyApplication extends Application {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
                 playerService = binder.getService();
                 playlistPlayer = playerService.getPlaylistPlayer();
-
+                playerModel = playlistPlayer.getPlayerModel();
             }
 
             @Override
@@ -137,7 +134,7 @@ public class MyApplication extends Application {
             }
         };
 
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
 //        try {
 //            Thread.sleep(3000);

@@ -37,12 +37,12 @@ public class PlaylistPlayer extends MediaPlayer {
     private int repeat;
     private boolean shuffle;
 
+    private List<SongItem> shuffleList;
+    private int currentShuffleIndex;
+
     private int currentIndex, currentId;
 
     private List<SongItem> playlist = new ArrayList<>();
-
-    private List<SongItem> shuffleList;
-    private int currentShuffleIndex;
 
     public void setPlaylist(List<SongItem> playlist, int index, boolean play) {
         if(playlist != null) {
@@ -69,12 +69,17 @@ public class PlaylistPlayer extends MediaPlayer {
 
     private PlayerModel playerModel;
 
+    public PlayerModel getPlayerModel() {
+        return playerModel;
+    }
+
     private SharedPreferences preferences;
 
-    public PlaylistPlayer(@NonNull Context context, @NonNull PlayerModel _playerModel) {
+    public PlaylistPlayer(Context context, PlayerModel _playerModel) {
         super();
 
-        playerModel = _playerModel;
+        if(_playerModel == null) playerModel = new PlayerModel();
+        else playerModel = _playerModel;
 
         setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
 

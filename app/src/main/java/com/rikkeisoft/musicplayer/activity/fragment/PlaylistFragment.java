@@ -2,35 +2,31 @@ package com.rikkeisoft.musicplayer.activity.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.PlayerActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseListFragment;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
+import com.rikkeisoft.musicplayer.custom.view.MyLinearLayoutManager;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.model.PlaylistModel;
+import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
 
-public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
-        RecyclerView, LinearLayoutManager, SongsRecyclerAdapter> {
-
-    private PlaylistPlayer playlistPlayer;
-
-    private PlaylistPlayer.PlayCallback pauseOnIsPlaying = new PlaylistPlayer.PlayCallback() {
-        @Override
-        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
-            playlistPlayer.pause();
-        }
-    };
+public class PlaylistFragment extends SongsFragment {
 
     public static PlaylistFragment newInstance(int modelOwner) {
         PlaylistFragment fragment = new PlaylistFragment();
@@ -42,75 +38,62 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         return fragment;
     }
 
+    private PlaylistModel playlistModel;
+    private MyLinearLayoutManager layoutManager;
+
+    private int currentIndex = -1;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        recyclerAdapter.setTypeView(SwitchRecyclerAdapter.LIST_VIEW);
+        setTypeView(SwitchRecyclerAdapter.LIST_VIEW);
 
-//        model.getCurrentIndex().observe(this, new Observer<Integer>() {
-//            @Override
-//            public void onChanged(@Nullable Integer integer) {
-//                if(integer != null) gotoPos(integer);
-//            }
-//        });
-
-        model.getCurrentSongId().observe(this, new Observer<Integer>() {
+        playlistModel.getTop().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
-                if(integer != null) {
-                    recyclerAdapter.setCurrentId(integer);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
+                if(integer != null) layoutManager.offsetBot = integer;
             }
         });
+    }
 
-        model.getPlaying().observe(this, new Observer<Boolean>() {
+    @Override
+    protected void playerModelObserve(PlayerModel playerModel) {
+        super.playerModelObserve(playerModel);
+
+        playerModel.getCurrentIndex().observe(this, new Observer<Integer>() {
             @Override
-            public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) {
-                    recyclerAdapter.setPlaying(aBoolean);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
+            public void onChanged(@Nullable Integer integer) {
+                if(integer != null) gotoPos(integer);
             }
         });
     }
 
     private void gotoPos(Integer position) {
-        Log.d("debug", "gotoPos " + position);
-        Log.d("debug", "getItemCount " + recyclerAdapter.getItemCount());
-        if(position != null && position > 0 && position < recyclerAdapter.getItemCount())
-            if(recyclerView != null) recyclerView.smoothScrollToPosition(position);
+        currentIndex = position;
+        if(position >= 0 && position < recyclerAdapter.getItemCount() && recyclerView != null) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("debug", "gotoPos " + currentIndex + " " + getClass().getSimpleName());
+                    recyclerView.smoothScrollToPosition(currentIndex);
+                }
+            }, 300);
+        }
     }
 
     @Override
     protected void updateRecyclerAdapter(List<SongItem> songItems) {
         super.updateRecyclerAdapter(songItems);
 
+        gotoPos(currentIndex);
     }
 
     @Override
     protected void updateRecyclerView() {
         super.updateRecyclerView();
 
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                gotoPos(model.getCurrentIndex().getValue());
-//            }
-//        }, 100);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-    }
-
-    @Override
-    protected PlayerModel onCreateModel() {
-//        return getModel(getArguments().getInt("modelOwner"), PlayerModel.class);
-        return MyApplication.getPlayerModel();
+        gotoPos(currentIndex);
     }
 
     @Override
@@ -118,23 +101,27 @@ public class PlaylistFragment extends BaseListFragment<SongItem, PlayerModel,
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                MyApplication.getPlaylistPlayer().play(position, pauseOnIsPlaying);
+                if(playlistPlayer != null) playlistPlayer.play(position, pauseOnIsPlaying);
             }
         });
     }
 
+    private PlaylistPlayer.PlayCallback pauseOnIsPlaying = new PlaylistPlayer.PlayCallback() {
+        @Override
+        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.pause();
+        }
+    };
+
     @Override
-    protected LinearLayoutManager onCreateLayoutManager() {
-        return new LinearLayoutManager(getContext());
+    protected SongsModel onCreateModel() {
+        playlistModel = getModel(getArguments().getInt("modelOwner"), PlaylistModel.class);
+        return playlistModel;
     }
 
     @Override
-    protected int onCreateDivider() {
-        return getContext().getResources().getDimensionPixelSize(R.dimen.divider_list);
-    }
-
-    @Override
-    protected int getFragmentLayoutId() {
-        return R.layout.fragment_list;
+    protected LinearLayoutManager onCreateLinearLayoutManager() {
+        layoutManager = new MyLinearLayoutManager(getContext());
+        return layoutManager;
     }
 }

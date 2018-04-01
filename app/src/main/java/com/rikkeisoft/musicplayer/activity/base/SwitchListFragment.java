@@ -59,7 +59,7 @@ public abstract class SwitchListFragment<Item,
     protected abstract int onCreateDividerGrid();
 
     //
-    private void setTypeView(int typeView) {
+    protected void setTypeView(int typeView) {
         if(recyclerAdapter.getTypeView() == typeView) return;
         Log.d("debug", "setTypeView " + getClass().getSimpleName());
 

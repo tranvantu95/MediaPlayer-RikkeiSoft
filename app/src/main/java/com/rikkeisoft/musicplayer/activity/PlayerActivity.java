@@ -1,8 +1,11 @@
 package com.rikkeisoft.musicplayer.activity;
 
 import android.arch.lifecycle.Observer;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
@@ -17,9 +20,17 @@ import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.PlaylistFragment;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
+import com.rikkeisoft.musicplayer.custom.view.PlayerBehavior;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.model.PlaylistModel;
+import com.rikkeisoft.musicplayer.model.SongsModel;
+import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.Format;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+
+import java.util.List;
 
 public class PlayerActivity extends AppbarActivity implements View.OnClickListener {
 
@@ -30,35 +41,25 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     private CircularSeekBar seekBar;
     private boolean userIsSeeking;
 
+    public static Intent createIntent(Context context, String title) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra("title", title);
+        return intent;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        init();
-
         addFragment();
-    }
 
-    private void addFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        PlaylistFragment fragment = (PlaylistFragment) fragmentManager.findFragmentByTag("PlaylistFragment");
-        if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
-
-        if(!fragment.isAdded()) {
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, fragment, "PlaylistFragment")
-                    .commit();
-        }
+        init();
     }
 
     @Override
-    protected void init() {
-        super.init();
-
-        btnPlay.setOnClickListener(this);
-        btnShuffle.setOnClickListener(this);
-        btnRepeat.setOnClickListener(this);
+    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel _playerModel) {
+        super.onPlayerConnected(playerService, playlistPlayer, _playerModel);
 
         playerModel.getCurrentIndex().observe(this, new Observer<Integer>() {
             @Override
@@ -122,6 +123,37 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             }
         });
 
+        getModel(PlaylistModel.class).getPlaylistPlayer().setValue(playlistPlayer);
+        getModel(PlaylistModel.class).getPayerModel().setValue(playerModel);
+
+        playerModel.getItems().observe(this, new Observer<List<SongItem>>() {
+            @Override
+            public void onChanged(@Nullable List<SongItem> songItems) {
+                getModel(PlaylistModel.class).getItems().setValue(songItems);
+            }
+        });
+    }
+
+    private void addFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        PlaylistFragment fragment = (PlaylistFragment) fragmentManager.findFragmentByTag("PlaylistFragment");
+        if(fragment == null) fragment = PlaylistFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
+
+        if(!fragment.isAdded()) {
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, fragment, "PlaylistFragment")
+                    .commit();
+        }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        btnPlay.setOnClickListener(this);
+        btnShuffle.setOnClickListener(this);
+        btnRepeat.setOnClickListener(this);
+
         seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             private int userSelectedPosition;
 
@@ -152,7 +184,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             private void updateSeek() {
                 if(userIsSeeking) {
                     userIsSeeking = false;
-                    playlistPlayer.seekTo(userSelectedPosition);
+                    if(playlistPlayer != null) playlistPlayer.seekTo(userSelectedPosition);
                 }
             }
         });
@@ -163,6 +195,8 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     protected void findView() {
         super.findView();
 
+        ((TextView) findViewById(R.id.tv_title)).setText(getIntent().getStringExtra("title"));
+
         tvTime = findViewById(R.id.tv_time);
         seekBar = findViewById(R.id.seek_bar);
         btnPlay = findViewById(R.id.btn_play);
@@ -171,6 +205,19 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
 
         findViewById(R.id.btn_next).setOnClickListener(this);
         findViewById(R.id.btn_previous).setOnClickListener(this);
+
+        CoordinatorLayout.Behavior behavior =
+                ((CoordinatorLayout.LayoutParams)
+                        findViewById(R.id.fragment_container).getLayoutParams()).getBehavior();
+
+        if(behavior != null)
+            ((PlayerBehavior) behavior).setCallback(new PlayerBehavior.Callback() {
+                @Override
+                public void onTopChange(int top) {
+                    findViewById(R.id.fragment_container).setPadding(0, 0, 0, top);
+//                    getModel(PlaylistModel.class).getTop().setValue(top);
+                }
+            });
     }
 
     @Override
@@ -184,23 +231,23 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         int id = view.getId();
         switch (id) {
             case R.id.btn_play:
-                playlistPlayer.togglePlay();
+                if(playlistPlayer != null) playlistPlayer.togglePlay();
                 break;
 
             case R.id.btn_next:
-                playlistPlayer.next();
+                if(playlistPlayer != null) playlistPlayer.next();
                 break;
 
             case R.id.btn_previous:
-                playlistPlayer.previous();
+                if(playlistPlayer != null) playlistPlayer.previous();
                 break;
 
             case R.id.btn_shuffle:
-                playlistPlayer.toggleShuffle();
+                if(playlistPlayer != null) playlistPlayer.toggleShuffle();
                 break;
 
             case R.id.btn_repeat:
-                playlistPlayer.toggleRepeat();
+                if(playlistPlayer != null) playlistPlayer.toggleRepeat();
                 break;
         }
     }
