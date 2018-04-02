@@ -15,28 +15,12 @@ public class PlayerModel extends BaseListModel<SongItem> {
         return currentIndex;
     }
 
-    private MutableLiveData<Integer> currentSongId;
+    private MutableLiveData<SongItem> currentSong;
 
-    public MutableLiveData<Integer> getCurrentSongId() {
-        if(currentSongId == null) currentSongId = new MutableLiveData<>();
+    public MutableLiveData<SongItem> getCurrentSong() {
+        if(currentSong == null) currentSong = new MutableLiveData<>();
 
-        return currentSongId;
-    }
-
-    private MutableLiveData<Integer> currentAlbumId;
-
-    public MutableLiveData<Integer> getCurrentAlbumId() {
-        if(currentAlbumId == null) currentAlbumId = new MutableLiveData<>();
-
-        return currentAlbumId;
-    }
-
-    private MutableLiveData<Integer> currentArtistId;
-
-    public MutableLiveData<Integer> getCurrentArtistId() {
-        if(currentArtistId == null) currentArtistId = new MutableLiveData<>();
-
-        return currentArtistId;
+        return currentSong;
     }
 
     private MutableLiveData<Integer> duration;
@@ -77,6 +61,22 @@ public class PlayerModel extends BaseListModel<SongItem> {
         if(repeat == null) repeat = new MutableLiveData<>();
 
         return repeat;
+    }
+
+    private MutableLiveData<String> title;
+
+    public MutableLiveData<String> getTitle() {
+        if(title == null) title = new MutableLiveData<>();
+
+        return title;
+    }
+
+    private MutableLiveData<Boolean> updatePlaylist;
+
+    public MutableLiveData<Boolean> getUpdatePlaylist() {
+        if(updatePlaylist == null) updatePlaylist = new MutableLiveData<>();
+
+        return updatePlaylist;
     }
 
 }

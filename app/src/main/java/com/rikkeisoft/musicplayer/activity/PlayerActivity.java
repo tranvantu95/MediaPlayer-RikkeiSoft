@@ -35,15 +35,14 @@ import java.util.List;
 public class PlayerActivity extends AppbarActivity implements View.OnClickListener {
 
     private View btnNext, btnPrevious;
-    private TextView tvTime;
+    private TextView tvTime, tvTitle;
     private FloatingActionButton btnPlay;
     private ImageView btnShuffle, btnRepeat;
     private CircularSeekBar seekBar;
     private boolean userIsSeeking;
 
-    public static Intent createIntent(Context context, String title) {
+    public static Intent createIntent(Context context) {
         Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra("title", title);
         return intent;
     }
 
@@ -58,15 +57,20 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     }
 
     @Override
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel _playerModel) {
-        super.onPlayerConnected(playerService, playlistPlayer, _playerModel);
+    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer _playlistPlayer, PlayerModel _playerModel) {
+        super.onPlayerConnected(playerService, _playlistPlayer, _playerModel);
 
-        playerModel.getCurrentIndex().observe(this, new Observer<Integer>() {
+        playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null && playerModel.getItems().getValue() != null) {
-                    setTittle(playerModel.getItems().getValue().get(integer).getName());
-                }
+            public void onChanged(@Nullable SongItem songItem) {
+                if(songItem != null) setTittle(songItem.getName());
+            }
+        });
+
+        playerModel.getTitle().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String string) {
+                if(string != null) tvTitle.setText(string);
             }
         });
 
@@ -129,7 +133,24 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         playerModel.getItems().observe(this, new Observer<List<SongItem>>() {
             @Override
             public void onChanged(@Nullable List<SongItem> songItems) {
+
                 getModel(PlaylistModel.class).getItems().setValue(songItems);
+
+                if(playerModel.getUpdatePlaylist().getValue() != null
+                        && playerModel.getUpdatePlaylist().getValue()) {
+
+                    playerModel.getUpdatePlaylist().setValue(false);
+
+                    Integer index = playerModel.getCurrentIndex().getValue();
+                    Boolean playing = playerModel.getPlaying().getValue();
+
+                    playlistPlayer.setPlaylist("Danh sách phát hiện tại",
+                            songItems,
+                            index != null ? index : -1,
+                            playing != null ? playing : false);
+                }
+
+                if(songItems == null || songItems.isEmpty()) finish();
             }
         });
     }
@@ -195,8 +216,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     protected void findView() {
         super.findView();
 
-        ((TextView) findViewById(R.id.tv_title)).setText(getIntent().getStringExtra("title"));
-
+        tvTitle = findViewById(R.id.tv_title);
         tvTime = findViewById(R.id.tv_time);
         seekBar = findViewById(R.id.seek_bar);
         btnPlay = findViewById(R.id.btn_play);

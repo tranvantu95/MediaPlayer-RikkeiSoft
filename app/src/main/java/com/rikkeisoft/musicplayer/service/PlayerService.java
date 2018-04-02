@@ -1,13 +1,16 @@
 package com.rikkeisoft.musicplayer.service;
 
 import android.app.Service;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class PlayerService extends Service {
@@ -41,6 +44,8 @@ public class PlayerService extends Service {
         return playlistPlayer;
     }
 
+    private PlayerModel playerModel;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,6 +58,10 @@ public class PlayerService extends Service {
 //        uiHandler = new Handler();
 
         playlistPlayer = new PlaylistPlayer(getApplicationContext(), MyApplication.getPlayerModel());
+        playerModel = playlistPlayer.getPlayerModel();
+        MyApplication.setPlayerModel(playerModel);
+
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +81,11 @@ public class PlayerService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d("debug", "onUnbind " + getClass().getSimpleName());
+        if(!playlistPlayer.isRunning()) {
+            Log.d("debug", "stopSelf " + getClass().getSimpleName());
+            stopSelf();
+        }
+
         return true;
     }
 

@@ -36,6 +36,7 @@
     <item type="id" name="iv_status" />
 
     <!--Player-->
+    <item type="id" name="player_controller" />
     <item type="id" name="btn_play" />
     <item type="id" name="btn_next" />
     <item type="id" name="btn_previous" />

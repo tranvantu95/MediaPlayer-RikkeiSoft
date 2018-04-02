@@ -38,8 +38,8 @@ public class PlaylistFragment extends SongsFragment {
         return fragment;
     }
 
-    private PlaylistModel playlistModel;
     private MyLinearLayoutManager layoutManager;
+    private PlaylistModel playlistModel;
 
     private int currentIndex = -1;
 
@@ -75,7 +75,7 @@ public class PlaylistFragment extends SongsFragment {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("debug", "gotoPos " + currentIndex + " " + getClass().getSimpleName());
+                    Log.d("debug", "gotoPos " + currentIndex + " PlaylistFragment");
                     recyclerView.smoothScrollToPosition(currentIndex);
                 }
             }, 300);
@@ -101,12 +101,12 @@ public class PlaylistFragment extends SongsFragment {
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                if(playlistPlayer != null) playlistPlayer.play(position, pauseOnIsPlaying);
+                if(playlistPlayer != null) playlistPlayer.play(position, playCallback);
             }
         });
     }
 
-    private PlaylistPlayer.PlayCallback pauseOnIsPlaying = new PlaylistPlayer.PlayCallback() {
+    private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
         @Override
         public void onIsPlaying(PlaylistPlayer playlistPlayer) {
             playlistPlayer.pause();

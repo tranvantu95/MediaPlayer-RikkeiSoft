@@ -4,9 +4,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.MyActivity;
@@ -119,6 +121,13 @@ public class ArtistActivity extends MyActivity {
         getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
         getModel(SongsModel.class).getPayerModel().setValue(playerModel);
         getModel(AlbumsModel.class).getPayerModel().setValue(playerModel);
+    }
+
+    @Override
+    protected int calculateForBottomPlayerController(CoordinatorLayout parent, View child, View dependency) {
+        return -dependency.getTop() * child.getHeight()
+                / (dependency.getHeight() - dependency.findViewById(R.id.toolbar).getHeight()
+                                            - dependency.findViewById(R.id.tabs).getHeight());
     }
 
     @Override

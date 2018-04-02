@@ -16,6 +16,7 @@ import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 public class AlbumsFragment extends MyFragment<AlbumItem, AlbumsModel, AlbumsRecyclerAdapter> {
 
@@ -39,11 +40,11 @@ public class AlbumsFragment extends MyFragment<AlbumItem, AlbumsModel, AlbumsRec
     protected void playerModelObserve(PlayerModel playerModel) {
         super.playerModelObserve(playerModel);
 
-        playerModel.getCurrentAlbumId().observe(this, new Observer<Integer>() {
+        playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null) {
-                    recyclerAdapter.setCurrentId(integer);
+            public void onChanged(@Nullable SongItem songItem) {
+                if(songItem != null) {
+                    recyclerAdapter.setCurrentId(songItem.getAlbumId());
                     recyclerAdapter.notifyDataSetChanged();
                 }
             }

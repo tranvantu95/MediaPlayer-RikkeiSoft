@@ -52,11 +52,11 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
     protected void playerModelObserve(PlayerModel playerModel) {
         super.playerModelObserve(playerModel);
 
-        playerModel.getCurrentSongId().observe(this, new Observer<Integer>() {
+        playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null) {
-                    recyclerAdapter.setCurrentId(integer);
+            public void onChanged(@Nullable SongItem songItem) {
+                if(songItem != null) {
+                    recyclerAdapter.setCurrentId(songItem.getId());
                     recyclerAdapter.notifyDataSetChanged();
                 }
             }
@@ -73,29 +73,28 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                if(playlistPlayer != null) playlistPlayer.setPlaylist(model.getItems().getValue(), position, true);
+                if(playlistPlayer != null) {
+                    String newTitle = getActivity().getTitle().toString();
 
-                if(playerModel != null) playerModel.getItems().setValue(model.getItems().getValue());
+                    if (!newTitle.equals(playlistPlayer.getPlaylistId())) {
 
-                getActivity().startActivity(PlayerActivity.createIntent(getContext(),
-                        (getActivity()).getTitle().toString()));
+                        playlistPlayer.setPlaylist(newTitle, model.getItems().getValue(), position, true);
 
-//                addFragment();
+                        playlistPlayer.getPlayerModel().getItems().setValue(model.getItems().getValue());
+                    }
+                    else playlistPlayer.play(position, playCallback);
+
+                    getActivity().startActivity(PlayerActivity.createIntent(getContext()));
+                }
             }
         });
     }
 
-    private void addFragment() {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        PlayerFragment fragment = (PlayerFragment) fragmentManager.findFragmentByTag("PlayerFragment");
-        if(fragment == null) fragment = PlayerFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
-
-        if(!fragment.isAdded()) {
-            fragmentManager.beginTransaction()
-                    .add(android.R.id.content, fragment, "PlayerFragment")
-                    .addToBackStack(null)
-                    .commit();
+    private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
+        @Override
+        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.resume();
         }
-    }
+    };
 
 }
