@@ -48,13 +48,13 @@ public class PlaylistPlayer extends MediaPlayer {
     public void setPlaylist(String playlistId, List<SongItem> playlist, int index, boolean play) {
         if(playlist != null) {
 
-            callback.onPlaylistChange(this, playlistId, playlist);
-
             this.playlistId = playlistId;
 
             int oldSongId = getCurrentSongId();
 
             this.playlist = playlist;
+
+            callback.onPlaylistChange(this, playlistId, playlist);
 
             setCurrentIndex(index);
 
@@ -125,15 +125,20 @@ public class PlaylistPlayer extends MediaPlayer {
 
     public void initialize(String playlistId, List<SongItem> playlist, SongItem currentSong,
                            int currentIndex, boolean shuffle, int repeat) {
+
         this.playlistId = playlistId;
         if(playlist != null) this.playlist = playlist;
+
         this.currentSong = currentSong;
         this.currentIndex = currentIndex;
+
         this.shuffle = shuffle;
         if(shuffle) createShuffleList();
+
         this.repeat = repeat;
         if(repeat == REPEAT_SONG) setLooping(true);
-//        if(isValidateCurrentIndex()) prepare(currentIndex);
+
+        if(isValidateCurrentIndex()) prepare(currentIndex);
     }
 
     private void setPlaying(boolean playing) {

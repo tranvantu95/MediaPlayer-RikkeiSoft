@@ -76,7 +76,8 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                 if(playlistPlayer != null) {
                     String newTitle = getActivity().getTitle().toString();
 
-                    if (!newTitle.equals(playlistPlayer.getPlaylistId()))
+                    if (!newTitle.equals(playlistPlayer.getPlaylistId())
+                            || position >= playlistPlayer.getPlaylist().size())
                         playlistPlayer.setPlaylist(newTitle, model.getItems().getValue(), position, true);
                     else
                         playlistPlayer.play(position, playCallback);

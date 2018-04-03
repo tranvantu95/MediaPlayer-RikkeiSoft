@@ -5,6 +5,8 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -12,11 +14,16 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.app.MyApplication;
+import com.rikkeisoft.musicplayer.db.MySQLite;
+import com.rikkeisoft.musicplayer.db.Song;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class PlayerService extends Service {
@@ -26,6 +33,8 @@ public class PlayerService extends Service {
     public static final String REPEAT_KEY = "repeat";
     public static final String CURRENT_SONG_ID_KEY = "currentSongId";
     public static final String CURRENT_PLAYLIST_ID_KEY = "currentPlaylistId";
+
+    public static final String CURRENT_PLAYLIST_NAME = "Danh sách phát hiện tại";
 
     private SharedPreferences preferences;
 
@@ -75,13 +84,23 @@ public class PlayerService extends Service {
 //        playerHandler = new PlayerHandler(playerThread.getLooper());
 //        uiHandler = new Handler();
 
-        // load database
-//            db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "app-database").build();
-
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
-        String playlistId = null;
-        List<SongItem> playlist = null;
+        createPlaylistPlayer();
+
+        playlistPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                mediaPlayer.release();
+                createPlaylistPlayer();
+                return true;
+            }
+        });
+    }
+
+    private void createPlaylistPlayer() {
+        String playlistId;
+        List<SongItem> playlist;
         SongItem currentSong = null;
         int currentIndex = -1;
         boolean shuffle = false;
@@ -91,16 +110,38 @@ public class PlayerService extends Service {
             playerModel = new PlayerModel();
             MyApplication.setPlayerModel(playerModel);
 
-//            playlistId = preferences.getString(CURRENT_PLAYLIST_ID_KEY, null);
-//
-//            playlist = Loader.getInstance().getSongs();
-//
-//            int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
-//            if(currentSongId != -1) currentIndex = Loader.findIndex(playlist, currentSongId);
-//            if(currentIndex != -1) currentSong = playlist.get(currentIndex);
-//
-//            shuffle = preferences.getBoolean(SHUFFLE_KEY, false);
-//            repeat = preferences.getInt(REPEAT_KEY, PlaylistPlayer.UN_REPEAT);
+            playlistId = preferences.getString(CURRENT_PLAYLIST_ID_KEY, null);
+
+//            playlist = Loader.getInstance().getSongs(); // test
+            playlist = new ArrayList<>();
+            List<Song> songs = MySQLite.getInstance(getApplicationContext()).getPlaylist(CURRENT_PLAYLIST_NAME);
+            List<SongItem> songItems = new ArrayList<>(Loader.getInstance().getSongs());
+//            Collections.sort(songItems, new Comparator<SongItem>() {
+//                @Override
+//                public int compare(SongItem songItem, SongItem t1) {
+//                    return songItem.getId() - t1.getId();
+//                }
+//            });
+            int size = songItems.size();
+            for(int i = 0; i < size; i++) {
+                SongItem songItem = songItems.get(i);
+                int size2 = songs.size();
+                if(size2 == 0) break;
+                for(int j = 0; j < size2; j++) {
+                    if (songs.get(j).getId() == songItem.getId()) {
+                        playlist.add(songItem);
+                        songs.remove(j);
+                        break;
+                    }
+                }
+            }
+
+            int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
+            if(currentSongId != -1) currentIndex = Loader.findIndex(playlist, currentSongId);
+            if(currentIndex != -1) currentSong = playlist.get(currentIndex);
+
+            shuffle = preferences.getBoolean(SHUFFLE_KEY, false);
+            repeat = preferences.getInt(REPEAT_KEY, PlaylistPlayer.UN_REPEAT);
 
             playerModel.getTitle().setValue(playlistId);
             playerModel.getItems().setValue(playlist);
@@ -200,7 +241,7 @@ public class PlayerService extends Service {
             }
 
             @Override
-            public void onPlaylistChange(PlaylistPlayer playlistPlayer, String playlistId, List<SongItem> playlist) {
+            public void onPlaylistChange(PlaylistPlayer _playlistPlayer, String playlistId, List<SongItem> playlist) {
                 Log.d("debug", "---onPlaylistChange " + playlistId);
                 playerModel.getTitle().setValue(playlistId);
                 playerModel.getItems().setValue(playlist);
@@ -210,13 +251,22 @@ public class PlayerService extends Service {
                 editor.apply();
 
                 //
-//            final Song[] songs = new Song[playlist.size()];
-//            for(int i = 0; i < playlist.size(); i++) {
-//                songs[i] = new Song(playlist.get(i).getId());
-//            }
-//                    db.songDao().deleteAll();
-//                    db.songDao().insertAll(songs);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void[] voids) {
+                        List<Song> songs = new ArrayList<>();
+                        List<SongItem> songItems = playlistPlayer.getPlaylist();
+                        int size = songItems.size();
+                        for(int i = 0; i < size; i++) {
+                            songs.add(new Song(songItems.get(i).getId()));
+                        }
 
+                        MySQLite.getInstance(getApplicationContext()).deletePlaylist(CURRENT_PLAYLIST_NAME);
+                        MySQLite.getInstance(getApplicationContext()).addPlaylist(CURRENT_PLAYLIST_NAME, songs);
+
+                        return null;
+                    }
+                }.execute();
             }
         });
     }
