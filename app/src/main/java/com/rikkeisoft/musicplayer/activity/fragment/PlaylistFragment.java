@@ -108,8 +108,23 @@ public class PlaylistFragment extends SongsFragment {
 
     private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
         @Override
-        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+        public void onNotReady(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPreparing(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPlaying(PlaylistPlayer playlistPlayer) {
             playlistPlayer.pause();
+        }
+
+        @Override
+        public void onPaused(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.resume();
         }
     };
 

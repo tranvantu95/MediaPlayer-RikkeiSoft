@@ -76,13 +76,10 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                 if(playlistPlayer != null) {
                     String newTitle = getActivity().getTitle().toString();
 
-                    if (!newTitle.equals(playlistPlayer.getPlaylistId())) {
-
+                    if (!newTitle.equals(playlistPlayer.getPlaylistId()))
                         playlistPlayer.setPlaylist(newTitle, model.getItems().getValue(), position, true);
-
-                        playlistPlayer.getPlayerModel().getItems().setValue(model.getItems().getValue());
-                    }
-                    else playlistPlayer.play(position, playCallback);
+                    else
+                        playlistPlayer.play(position, playCallback);
 
                     getActivity().startActivity(PlayerActivity.createIntent(getContext()));
                 }
@@ -92,7 +89,22 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
 
     private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
         @Override
-        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+        public void onNotReady(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPreparing(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPlaying(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPaused(PlaylistPlayer playlistPlayer) {
             playlistPlayer.resume();
         }
     };

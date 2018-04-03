@@ -129,7 +129,7 @@ public class MyApplication extends Application {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
                 playerService = binder.getService();
                 playlistPlayer = playerService.getPlaylistPlayer();
-                playerModel = playlistPlayer.getPlayerModel();
+                playerModel = playerService.getPlayerModel();
             }
 
             @Override

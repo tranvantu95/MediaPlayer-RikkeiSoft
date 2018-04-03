@@ -34,9 +34,19 @@ public abstract class MyActivity extends SwitchListActivity {
         bottomPlayerController = new BottomPlayerController((ViewGroup) findViewById(R.id.root),
                 new BottomPlayerController.Callback() {
                     @Override
+                    public void onTogglePlay() {
+                        if(playlistPlayer != null) playlistPlayer.togglePlay();
+                    }
+
+                    @Override
                     public void onClick(View view) {
                         if(playlistPlayer != null && !playlistPlayer.getPlaylist().isEmpty())
                             startActivity(PlayerActivity.createIntent(getApplicationContext()));
+                    }
+
+                    @Override
+                    public void onUpdateProgress(int progress) {
+                        if(playlistPlayer != null) playlistPlayer.seekTo(progress);
                     }
 
                     @Override
@@ -52,8 +62,6 @@ public abstract class MyActivity extends SwitchListActivity {
     protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel _playerModel) {
         super.onPlayerConnected(playerService, playlistPlayer, _playerModel);
 
-        bottomPlayerController.setPlaylistPlayer(playlistPlayer);
-
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
             public void onChanged(@Nullable SongItem songItem) {
@@ -64,6 +72,12 @@ public abstract class MyActivity extends SwitchListActivity {
                     if(songItem.getBitmap() != null)
                         bottomPlayerController.getIvCover().setImageBitmap(songItem.getBitmap());
                     else bottomPlayerController.getIvCover().setImageDrawable(
+                            getResources().getDrawable(R.drawable.im_song));
+                }
+                else {
+                    bottomPlayerController.getTvTitle().setText("");
+                    bottomPlayerController.getTvInfo().setText("");
+                    bottomPlayerController.getIvCover().setImageDrawable(
                             getResources().getDrawable(R.drawable.im_song));
                 }
             }

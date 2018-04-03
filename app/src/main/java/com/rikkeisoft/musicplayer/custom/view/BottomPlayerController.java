@@ -20,12 +20,6 @@ public class BottomPlayerController implements View.OnClickListener {
     private SeekBar seekBar;
     private boolean userIsSeeking;
 
-    private PlaylistPlayer playlistPlayer;
-
-    public void setPlaylistPlayer(PlaylistPlayer playlistPlayer) {
-        this.playlistPlayer = playlistPlayer;
-    }
-
     public BottomPlayerController(ViewGroup parent, Callback _callback) {
         this.callback = _callback;
 
@@ -76,7 +70,7 @@ public class BottomPlayerController implements View.OnClickListener {
             private void updateSeek() {
                 if(userIsSeeking) {
                     userIsSeeking = false;
-                    if(playlistPlayer != null) playlistPlayer.seekTo(userSelectedPosition);
+                    callback.onUpdateProgress(userSelectedPosition);
                 }
             }
         });
@@ -90,7 +84,7 @@ public class BottomPlayerController implements View.OnClickListener {
                 break;
 
             case R.id.btn_play:
-                if(playlistPlayer != null) playlistPlayer.togglePlay();
+                callback.onTogglePlay();
                 break;
 
         }
@@ -121,7 +115,9 @@ public class BottomPlayerController implements View.OnClickListener {
     }
 
     public interface Callback {
+        void onTogglePlay();
         void onClick(View view);
+        void onUpdateProgress(int progress);
         int calculate(CoordinatorLayout parent, View child, View dependency);
     }
 }

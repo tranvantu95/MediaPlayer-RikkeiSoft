@@ -56,7 +56,7 @@ public class BaseActivity extends AppCompatActivity {
                 PlayerService service = binder.getService();
 
                 playlistPlayer = service.getPlaylistPlayer();
-                playerModel = playlistPlayer.getPlayerModel();
+                playerModel = service.getPlayerModel();
 
                 onPlayerConnected(service, playlistPlayer, playerModel);
             }

@@ -1,17 +1,9 @@
 package com.rikkeisoft.musicplayer.utils;
 
-import android.arch.persistence.room.Room;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.rikkeisoft.musicplayer.db.AppDatabase;
-import com.rikkeisoft.musicplayer.db.Song;
-import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 import java.io.IOException;
@@ -21,22 +13,11 @@ import java.util.List;
 
 public class PlaylistPlayer extends MediaPlayer {
 
-    public static final String DATA = "player_data";
-    public static final String SHUFFLE_KEY = "shuffle";
-    public static final String REPEAT_KEY = "repeat";
-    public static final String CURRENT_SONG_ID_KEY = "currentSongId";
-
     public static final int UN_REPEAT = 0;
     public static final int REPEAT_PLAYLIST = 1;
     public static final int REPEAT_SONG = 2;
 
-    private boolean firstPlay = true;
-
     private boolean running;
-
-    public boolean isRunning() {
-        return running;
-    }
 
     private Handler handler;
     private Runnable updateCurrentPosition;
@@ -50,6 +31,7 @@ public class PlaylistPlayer extends MediaPlayer {
     private int currentShuffleIndex;
 
     private int currentIndex = -1;
+    private SongItem currentSong;
 
     private String playlistId;
 
@@ -65,90 +47,40 @@ public class PlaylistPlayer extends MediaPlayer {
 
     public void setPlaylist(String playlistId, List<SongItem> playlist, int index, boolean play) {
         if(playlist != null) {
+
+            callback.onPlaylistChange(this, playlistId, playlist);
+
             this.playlistId = playlistId;
-            playerModel.getTitle().setValue(playlistId);
 
             int oldSongId = getCurrentSongId();
 
             this.playlist = playlist;
 
-            currentIndex = -1;
             setCurrentIndex(index);
 
             if(shuffle) createShuffleList();
 
             if(play) {
-                if (oldSongId == getCurrentSongId()) {
+                if (getCurrentSongId() == oldSongId && oldSongId != -1) {
                     resume();
                 }
                 else {
-                    preparing = ready = false;
+                    setReady(false);
                     play(index, null);
                 }
             }
 
-            //
-//            final Song[] songs = new Song[playlist.size()];
-//            for(int i = 0; i < playlist.size(); i++) {
-//                songs[i] = new Song(playlist.get(i).getId());
-//            }
-//                    db.songDao().deleteAll();
-//                    db.songDao().insertAll(songs);
-
         }
     }
 
-    private PlayerModel playerModel;
+    private Callback callback;
 
-    public PlayerModel getPlayerModel() {
-        return playerModel;
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
 
-    private SharedPreferences preferences;
-
-    private AppDatabase db;
-
-    public PlaylistPlayer(Context context, PlayerModel _playerModel) {
+    public PlaylistPlayer() {
         super();
-
-        setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-
-        preferences = context.getSharedPreferences(DATA, Context.MODE_PRIVATE);
-
-        if(_playerModel != null) {
-            playerModel = _playerModel;
-
-            if(playerModel.getItems().getValue() != null)
-                playlist = playerModel.getItems().getValue();
-
-            if(playerModel.getCurrentIndex().getValue() != null)
-                currentIndex = playerModel.getCurrentIndex().getValue();
-
-        }
-        else {
-            playerModel = new PlayerModel();
-
-            // load database
-//            db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "app-database").build();
-
-            playlist = Loader.getInstance().getSongs(); // test
-            playerModel.getItems().setValue(playlist);
-
-            int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
-            if(currentSongId != -1) {
-                int currentIndex = Loader.findIndex(playlist, currentSongId);
-                if(currentIndex != -1) setCurrentIndex(currentIndex);
-            }
-
-            playerModel.getCurrentPosition().setValue(0);
-        }
-
-        if(isValidateCurrentIndex()) prepare(currentIndex);
-
-        setupShuffle(preferences.getBoolean(SHUFFLE_KEY, false));
-        setupRepeat(preferences.getInt(REPEAT_KEY, PlaylistPlayer.UN_REPEAT));
-
-        playerModel.getPlaying().setValue(false);
 
         //
         handler = new Handler();
@@ -156,7 +88,7 @@ public class PlaylistPlayer extends MediaPlayer {
         updateCurrentPosition = new Runnable() {
             @Override
             public void run() {
-                playerModel.getCurrentPosition().setValue(getCurrentPosition());
+                if(ready) callback.onUpdateCurrentPosition(PlaylistPlayer.this, getCurrentPosition());
                 handler.postDelayed(this, 100);
             }
         };
@@ -176,13 +108,6 @@ public class PlaylistPlayer extends MediaPlayer {
 //            }
 //        });
 
-        setOnSeekCompleteListener(new OnSeekCompleteListener() {
-            @Override
-            public void onSeekComplete(MediaPlayer mediaPlayer) {
-                playerModel.getCurrentPosition().setValue(getCurrentPosition());
-            }
-        });
-
         setOnPreparedListener(new OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
@@ -198,50 +123,54 @@ public class PlaylistPlayer extends MediaPlayer {
         });
     }
 
+    public void initialize(String playlistId, List<SongItem> playlist, SongItem currentSong,
+                           int currentIndex, boolean shuffle, int repeat) {
+        this.playlistId = playlistId;
+        if(playlist != null) this.playlist = playlist;
+        this.currentSong = currentSong;
+        this.currentIndex = currentIndex;
+        this.shuffle = shuffle;
+        if(shuffle) createShuffleList();
+        this.repeat = repeat;
+        if(repeat == REPEAT_SONG) setLooping(true);
+//        if(isValidateCurrentIndex()) prepare(currentIndex);
+    }
+
     private void setPlaying(boolean playing) {
         if(running == playing) return;
         running = playing;
 
-        playerModel.getPlaying().setValue(playing);
-
         if(playing) startUpdateCurrentPosition();
         else stopUpdateCurrentPosition();
+
+        callback.onPlayingChange(this, playing);
     }
 
     private void setReady(boolean ready) {
         if(this.ready == ready) return;
         this.ready = ready;
+
         preparing = false;
-        if(!ready) {
-            playerModel.getCurrentPosition().setValue(0);
-        }
-        else {
-            playerModel.getDuration().setValue(getDuration());
 
-            if(playerModel.getCurrentPosition().getValue() != null)
-                seekTo(playerModel.getCurrentPosition().getValue());
+        if(ready && running) start();
 
-            if(running) start();
-        }
+        callback.onReadyChange(this, ready);
     }
 
     private void setCurrentIndex(int index) {
-        if(currentIndex == index) return;
-        currentIndex = index;
-
-        if(playerModel.getCurrentIndex().getValue() == null
-                || playerModel.getCurrentIndex().getValue() != index)
-            playerModel.getCurrentIndex().setValue(currentIndex);
+        if(currentIndex != index) {
+            currentIndex = index;
+            callback.onCurrentIndexChange(this, index);
+        }
 
         SongItem song = getCurrentSong();
 
-        if(song != null && !song.equals(playerModel.getCurrentSong().getValue())) {
-            playerModel.getCurrentSong().setValue(song);
-
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putInt(CURRENT_SONG_ID_KEY, song.getId());
-            editor.apply();
+        if(currentSong == null && song != null || currentSong != null && !currentSong.equals(song)) {
+            currentSong = song;
+            callback.onCurrentSongChange(this, song);
         }
+
+        if(song == null) stop();
     }
 
     @Override
@@ -260,6 +189,7 @@ public class PlaylistPlayer extends MediaPlayer {
     public void stop() throws IllegalStateException {
         super.stop();
         setReady(false);
+        setPlaying(false);
     }
 
     @Override
@@ -286,6 +216,12 @@ public class PlaylistPlayer extends MediaPlayer {
         preparing = true;
     }
 
+    @Override
+    public void seekTo(int msec) {
+        if(ready) super.seekTo(msec);
+        if(!isPlaying()) callback.onUpdateCurrentPosition(this, msec);
+    }
+
     private String getPath(int index) {
         return playlist.get(index).getPath();
     }
@@ -307,13 +243,19 @@ public class PlaylistPlayer extends MediaPlayer {
             return;
         }
 
-        if(currentIndex == index) {
-            if(preparing) return;
-            if(ready) {
-                if(!isPlaying()) start();
-                else if(callback != null) callback.onIsPlaying(this);
+        if(index == currentIndex) {
+            if(preparing) {
+                if(callback != null) callback.onPreparing(this);
                 return;
             }
+            else if(ready) {
+                if(callback != null) {
+                    if (isPlaying()) callback.onPlaying(this);
+                    else callback.onPaused(this);
+                }
+                return;
+            }
+            else if(callback != null) callback.onNotReady(this);
         }
 
         setCurrentIndex(index);
@@ -324,12 +266,30 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public interface PlayCallback {
-        void onIsPlaying(PlaylistPlayer playlistPlayer);
+        void onNotReady(PlaylistPlayer playlistPlayer);
+        void onPreparing(PlaylistPlayer playlistPlayer);
+        void onPlaying(PlaylistPlayer playlistPlayer);
+        void onPaused(PlaylistPlayer playlistPlayer);
     }
 
     private PlayCallback playCallback = new PlayCallback() {
         @Override
-        public void onIsPlaying(PlaylistPlayer playlistPlayer) {
+        public void onNotReady(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.seekTo(0);
+        }
+
+        @Override
+        public void onPreparing(PlaylistPlayer playlistPlayer) {
+
+        }
+
+        @Override
+        public void onPlaying(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.replay();
+        }
+
+        @Override
+        public void onPaused(PlaylistPlayer playlistPlayer) {
             playlistPlayer.replay();
         }
     };
@@ -353,10 +313,10 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     private void next(boolean fromUser) {
-        if(repeat == REPEAT_SONG) {
-            replay();
-            return;
-        }
+//        if(repeat == REPEAT_SONG) {
+//            replay();
+//            return;
+//        }
 
         if(!shuffle) {
             if(currentIndex < playlist.size() - 1) {
@@ -390,10 +350,10 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public void previous() {
-        if(repeat == REPEAT_SONG) {
-            replay();
-            return;
-        }
+//        if(repeat == REPEAT_SONG) {
+//            replay();
+//            return;
+//        }
 
         if(getCurrentPosition() > 3000) replay();
         else if(!shuffle) {
@@ -420,16 +380,12 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public void replay() {
-        if(!ready) play(currentIndex, null);
-        else {
-            seekTo(0);
-            if(!isPlaying()) start();
-        }
+        seekTo(0);
+        resume();
     }
 
     public void togglePlay() {
-        if(!ready) play(currentIndex, null);
-        else if(!isPlaying()) start();
+        if(!running) resume();
         else pause();
     }
 
@@ -453,53 +409,42 @@ public class PlaylistPlayer extends MediaPlayer {
         }
     }
 
-    private void setupShuffle(boolean shuffle) {
+    public void setShuffle(boolean shuffle) {
+        if(this.shuffle == shuffle) return;
         this.shuffle = shuffle;
+
         if(shuffle) createShuffleList();
         else shuffleList = null;
-        playerModel.getShuffle().setValue(shuffle);
-    }
 
-    public void setShuffle(boolean shuffle) {
-        setupShuffle(shuffle);
-
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(SHUFFLE_KEY, shuffle);
-        editor.apply();
-    }
-
-    private void setupRepeat(int repeat) {
-        this.repeat = repeat;
-        setLooping(repeat == REPEAT_SONG);
-        playerModel.getRepeat().setValue(repeat);
+        callback.onShuffleChange(this, shuffle);
     }
 
     public void setRepeat(int repeat) {
-        setupRepeat(repeat);
+        if(this.repeat == repeat) return;
+        this.repeat = repeat;
 
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(REPEAT_KEY, repeat);
-        editor.apply();
+        setLooping(repeat == REPEAT_SONG);
+
+        callback.onRepeatChange(this, repeat);
     }
 
     private void createShuffleList() {
         shuffleList = new ArrayList<>(playlist);
         Collections.shuffle(shuffleList);
+
         if(isValidateCurrentIndex())
             currentShuffleIndex = shuffleList.indexOf(playlist.get(currentIndex));
+        else
+            currentShuffleIndex = -1;
     }
 
     //
-    public boolean isShuffle() {
-        return shuffle;
+    public boolean isReady() {
+        return ready;
     }
 
-    public int getRepeat() {
-        return repeat;
-    }
-
-    public int getCurrentIndex() {
-        return currentIndex;
+    public boolean isRunning() {
+        return running;
     }
 
     public int getCurrentSongId() {
@@ -530,4 +475,15 @@ public class PlaylistPlayer extends MediaPlayer {
         handler.removeCallbacks(updateCurrentPosition);
     }
 
+    //
+    public interface Callback {
+        void onPlayingChange(PlaylistPlayer playlistPlayer, boolean playing);
+        void onReadyChange(PlaylistPlayer playlistPlayer, boolean ready);
+        void onUpdateCurrentPosition(PlaylistPlayer playlistPlayer, int position);
+        void onCurrentIndexChange(PlaylistPlayer playlistPlayer, int index);
+        void onCurrentSongChange(PlaylistPlayer playlistPlayer, SongItem song);
+        void onShuffleChange(PlaylistPlayer playlistPlayer, boolean shuffle);
+        void onRepeatChange(PlaylistPlayer playlistPlayer, int repeat);
+        void onPlaylistChange(PlaylistPlayer playlistPlayer, String playlistId, List<SongItem> playlist);
+    }
 }

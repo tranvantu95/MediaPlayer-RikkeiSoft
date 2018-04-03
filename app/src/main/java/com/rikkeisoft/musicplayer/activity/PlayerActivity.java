@@ -64,6 +64,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             @Override
             public void onChanged(@Nullable SongItem songItem) {
                 if(songItem != null) setTittle(songItem.getName());
+                else setTitle("");
             }
         });
 
