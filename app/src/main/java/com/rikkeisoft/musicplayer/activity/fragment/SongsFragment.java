@@ -1,26 +1,22 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
 import android.arch.lifecycle.Observer;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.activity.PlayerActivity;
-import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
-import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
-import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
-import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+
+import java.util.ArrayList;
 
 public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecyclerAdapter> {
 
@@ -42,15 +38,15 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
 
         model.getPlaylistPlayer().observe(this, new Observer<PlaylistPlayer>() {
             @Override
-            public void onChanged(@Nullable PlaylistPlayer _playlistPlayer) {
-                playlistPlayer = _playlistPlayer;
+            public void onChanged(@Nullable PlaylistPlayer playlistPlayer) {
+                onPlaylistPlayerCreated(playlistPlayer);
             }
         });
     }
 
     @Override
-    protected void playerModelObserve(PlayerModel playerModel) {
-        super.playerModelObserve(playerModel);
+    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
+        super.onPlayerModelCreated(playerModel);
 
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
@@ -61,6 +57,11 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                 }
             }
         });
+    }
+
+    protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
+        Log.d("debug", "onPlaylistPlayerCreated " + getClass().getSimpleName());
+        this.playlistPlayer = playlistPlayer;
     }
 
     @Override
@@ -77,37 +78,15 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                     String newTitle = getActivity().getTitle().toString();
 
                     if (!newTitle.equals(playlistPlayer.getPlaylistId())
-                            || position >= playlistPlayer.getPlaylist().size())
-                        playlistPlayer.setPlaylist(newTitle, model.getItems().getValue(), position, true);
+                            || playlistPlayer.getPlaylist().size() < recyclerAdapter.getItems().size())
+                        playlistPlayer.setPlaylist(newTitle, new ArrayList<>(recyclerAdapter.getItems()), position, true);
                     else
-                        playlistPlayer.play(position, playCallback);
+                        playlistPlayer.play(position, null);
 
                     getActivity().startActivity(PlayerActivity.createIntent(getContext()));
                 }
             }
         });
     }
-
-    private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
-        @Override
-        public void onNotReady(PlaylistPlayer playlistPlayer) {
-
-        }
-
-        @Override
-        public void onPreparing(PlaylistPlayer playlistPlayer) {
-
-        }
-
-        @Override
-        public void onPlaying(PlaylistPlayer playlistPlayer) {
-
-        }
-
-        @Override
-        public void onPaused(PlaylistPlayer playlistPlayer) {
-            playlistPlayer.resume();
-        }
-    };
 
 }

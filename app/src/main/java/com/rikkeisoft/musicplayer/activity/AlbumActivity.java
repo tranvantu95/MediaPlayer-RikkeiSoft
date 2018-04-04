@@ -1,9 +1,10 @@
 package com.rikkeisoft.musicplayer.activity;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
@@ -18,12 +19,8 @@ import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
-
-import java.util.List;
 
 public class AlbumActivity extends MyActivity {
 
@@ -77,34 +74,34 @@ public class AlbumActivity extends MyActivity {
     }
 
     @Override
-    protected void onReceiverMediaChange() {
-        super.onReceiverMediaChange();
-
+    protected void beforeReloadData() {
         album = null;
-        loadData();
     }
 
     @Override
-    protected void loadData() {
+    protected void onDataLoaded() {
         int id = getIntent().getIntExtra(ID, -1);
         if(id == -1) {
             finish();
             return;
         }
 
-        if(album == null) album = Loader.getInstance().findAlbum(id);
         if(album == null) {
-            finish();
-            return;
+            album = Loader.getInstance().findAlbum(id);
+
+            if(album == null) {
+                finish();
+                return;
+            }
+
+            setTitle(album.getName());
+            setCollapsingTitle(album.getName());
+
+            if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
+
+            //
+            getModel(SongsModel.class).getItems().setValue(album.getSongs());
         }
-
-        setTitle(album.getName());
-        setCollapsingTitle(album.getName());
-
-        if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
-
-        //
-        getModel(SongsModel.class).getItems().setValue(album.getSongs());
     }
 
     @Override
@@ -115,11 +112,17 @@ public class AlbumActivity extends MyActivity {
     }
 
     @Override
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel playerModel) {
-        super.onPlayerConnected(playerService, playlistPlayer, playerModel);
+    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
+        super.onPlayerModelCreated(playerModel);
+
+        getModel(SongsModel.class).getPayerModel().setValue(playerModel);
+    }
+
+    @Override
+    protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
+        super.onPlaylistPlayerCreated(playlistPlayer);
 
         getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
-        getModel(SongsModel.class).getPayerModel().setValue(playerModel);
     }
 
     @Override

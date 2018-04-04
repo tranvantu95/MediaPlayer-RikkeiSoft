@@ -127,9 +127,9 @@ public class MyApplication extends Application {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
-                playerService = binder.getService();
-                playlistPlayer = playerService.getPlaylistPlayer();
-                playerModel = playerService.getPlayerModel();
+//                playerService = binder.getService();
+//                playlistPlayer = playerService.getPlaylistPlayer();
+//                playerModel = playerService.getPlayerModel();
             }
 
             @Override

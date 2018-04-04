@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.rikkeisoft.musicplayer.model.item.SongItem;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,16 +59,17 @@ public class MySQLite extends SQLiteOpenHelper {
 
     }
 
-    public List<Song> getPlaylist(String playlistName) {
+    public List<SongItem> getPlaylist(String playlistName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + KEY_SONG_ID + " FROM " + TABLE_SONG
                 + " WHERE " + KEY_PLAYLIST_NAME + " = ?", new String[]{playlistName});
 
-        List<Song> songs = new ArrayList<>();
+        List<SongItem> songs = new ArrayList<>();
 
         if (cursor.moveToFirst()) {
             do {
-                Song song = new Song(cursor.getInt(0));
+                SongItem song = new SongItem();
+                song.setId(cursor.getInt(0));
                 songs.add(song);
             }
             while (cursor.moveToNext());
@@ -78,7 +81,7 @@ public class MySQLite extends SQLiteOpenHelper {
         return songs;
     }
 
-    public void addPlaylist(String playlistName, List<Song> songs) {
+    public void addPlaylist(String playlistName, List<SongItem> songs) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();

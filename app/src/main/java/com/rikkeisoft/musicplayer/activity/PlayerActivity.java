@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -18,15 +19,11 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.PlaylistFragment;
-import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
 import com.rikkeisoft.musicplayer.custom.view.PlayerBehavior;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
-import com.rikkeisoft.musicplayer.model.SongsModel;
-import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.Format;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
@@ -57,8 +54,10 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     }
 
     @Override
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer _playlistPlayer, PlayerModel _playerModel) {
-        super.onPlayerConnected(playerService, _playlistPlayer, _playerModel);
+    protected void onPlayerModelCreated(@NonNull PlayerModel _playerModel) {
+        super.onPlayerModelCreated(_playerModel);
+
+        getModel(PlaylistModel.class).getPayerModel().setValue(playerModel);
 
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
@@ -128,9 +127,6 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             }
         });
 
-        getModel(PlaylistModel.class).getPlaylistPlayer().setValue(playlistPlayer);
-        getModel(PlaylistModel.class).getPayerModel().setValue(playerModel);
-
         playerModel.getItems().observe(this, new Observer<List<SongItem>>() {
             @Override
             public void onChanged(@Nullable List<SongItem> songItems) {
@@ -145,7 +141,8 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
                     Integer index = playerModel.getCurrentIndex().getValue();
                     Boolean playing = playerModel.getPlaying().getValue();
 
-                    playlistPlayer.setPlaylist("Danh sách phát hiện tại",
+                    if(playlistPlayer != null)
+                        playlistPlayer.setPlaylist("Danh sách phát hiện tại",
                             songItems,
                             index != null ? index : -1,
                             playing != null ? playing : false);
@@ -154,6 +151,13 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
                 if(songItems == null || songItems.isEmpty()) finish();
             }
         });
+    }
+
+    @Override
+    protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
+        super.onPlaylistPlayerCreated(playlistPlayer);
+
+        getModel(PlaylistModel.class).getPlaylistPlayer().setValue(playlistPlayer);
     }
 
     private void addFragment() {

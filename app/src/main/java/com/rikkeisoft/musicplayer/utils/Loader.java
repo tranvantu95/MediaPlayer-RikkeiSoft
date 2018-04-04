@@ -42,23 +42,39 @@ public class Loader {
 
     private List<ArtistItem> artists;
 
+    private boolean isLoaded;
+
+    public boolean isLoaded() {
+        return isLoaded;
+    }
+
     //
     public void clearCache() {
         songs = null;
         albums = null;
         artists = null;
+        isLoaded = false;
     }
 
     //
-    public List<SongItem> getSongs() {
+    public synchronized void loadAll() {
+        if(isLoaded) return;
+        isLoaded = true;
+        getSongs();
+        getAlbums();
+        getArtists();
+    }
+
+    //
+    public synchronized List<SongItem> getSongs() {
         return songs != null ? songs : loadSongs();
     }
 
-    public List<AlbumItem> getAlbums() {
+    public synchronized List<AlbumItem> getAlbums() {
         return albums != null ? albums : loadAlbums();
     }
 
-    public List<ArtistItem> getArtists() {
+    public synchronized List<ArtistItem> getArtists() {
         return artists != null ? artists : loadArtists();
     }
 
@@ -179,7 +195,7 @@ public class Loader {
     //
     @NonNull
     private List<SongItem> loadSongs() {
-        Log.d("debug", "loadSongs");
+        Log.d("debug", "---loadSongs");
 
         songs = new ArrayList<>();
 
@@ -236,7 +252,7 @@ public class Loader {
 
     @NonNull
     private List<AlbumItem> loadAlbums() {
-        Log.d("debug", "loadAlbums");
+        Log.d("debug", "---loadAlbums");
 
         albums = new ArrayList<>();
 
@@ -284,7 +300,7 @@ public class Loader {
 
     @NonNull
     private List<ArtistItem> loadArtists() {
-        Log.d("debug", "loadArtists");
+        Log.d("debug", "---loadArtists");
 
         artists = new ArrayList<>();
 

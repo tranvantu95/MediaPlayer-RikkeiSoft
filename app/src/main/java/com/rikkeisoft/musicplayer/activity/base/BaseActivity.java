@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
@@ -15,12 +16,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +32,6 @@ import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.General;
-import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class BaseActivity extends AppCompatActivity {
@@ -53,12 +50,8 @@ public class BaseActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
-                PlayerService service = binder.getService();
-
-                playlistPlayer = service.getPlaylistPlayer();
-                playerModel = service.getPlayerModel();
-
-                onPlayerConnected(service, playlistPlayer, playerModel);
+                PlayerService playerService = binder.getService();
+                onPlayerServiceConnected(playerService);
             }
 
             @Override
@@ -80,9 +73,32 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel playerModel) {
-        Log.d("debug", "onPlayerConnected " + getClass().getSimpleName());
+    protected void onPlayerServiceConnected(PlayerService playerService) {
+        Log.d("debug", "onPlayerServiceConnected " + getClass().getSimpleName());
 
+        playerService.getLiveData().getPlayerModel().observe(this, new Observer<PlayerModel>() {
+            @Override
+            public void onChanged(@Nullable PlayerModel playerModel) {
+                if(playerModel != null) onPlayerModelCreated(playerModel);
+            }
+        });
+
+        playerService.getLiveData().getPlaylistPlayer().observe(this, new Observer<PlaylistPlayer>() {
+            @Override
+            public void onChanged(@Nullable PlaylistPlayer playlistPlayer) {
+                onPlaylistPlayerCreated(playlistPlayer);
+            }
+        });
+    }
+
+    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
+        Log.d("debug", "onPlayerModelCreated " + getClass().getSimpleName());
+        this.playerModel = playerModel;
+    }
+
+    protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
+        Log.d("debug", "onPlaylistPlayerCreated " + getClass().getSimpleName());
+        this.playlistPlayer = playlistPlayer;
     }
 
     // Media change listener

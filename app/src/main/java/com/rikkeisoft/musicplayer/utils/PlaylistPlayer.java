@@ -75,12 +75,10 @@ public class PlaylistPlayer extends MediaPlayer {
 
     private Callback callback;
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
-    }
-
-    public PlaylistPlayer() {
+    public PlaylistPlayer(Callback _callback) {
         super();
+
+        callback = _callback;
 
         //
         handler = new Handler();
@@ -124,7 +122,7 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public void initialize(String playlistId, List<SongItem> playlist, SongItem currentSong,
-                           int currentIndex, boolean shuffle, int repeat) {
+                           int currentIndex, boolean shuffle, int repeat, boolean play) {
 
         this.playlistId = playlistId;
         if(playlist != null) this.playlist = playlist;
@@ -138,7 +136,10 @@ public class PlaylistPlayer extends MediaPlayer {
         this.repeat = repeat;
         if(repeat == REPEAT_SONG) setLooping(true);
 
-        if(isValidateCurrentIndex()) prepare(currentIndex);
+        if(isValidateCurrentIndex()) {
+            if(play) play(currentIndex, null);
+            else prepare(currentIndex);
+        }
     }
 
     private void setPlaying(boolean playing) {
@@ -180,8 +181,9 @@ public class PlaylistPlayer extends MediaPlayer {
 
     @Override
     public void release() {
+        callback.onRelease(this);
+        stopUpdateCurrentPosition();
         super.release();
-        setPlaying(false);
     }
 
     @Override
@@ -254,10 +256,11 @@ public class PlaylistPlayer extends MediaPlayer {
                 return;
             }
             else if(ready) {
-                if(callback != null) {
-                    if (isPlaying()) callback.onPlaying(this);
-                    else callback.onPaused(this);
+                if (isPlaying()) {
+                    if(callback != null) callback.onPlaying(this);
                 }
+                else if(callback != null) callback.onPaused(this);
+                else start();
                 return;
             }
             else if(callback != null) callback.onNotReady(this);
@@ -284,9 +287,7 @@ public class PlaylistPlayer extends MediaPlayer {
         }
 
         @Override
-        public void onPreparing(PlaylistPlayer playlistPlayer) {
-
-        }
+        public void onPreparing(PlaylistPlayer playlistPlayer) {}
 
         @Override
         public void onPlaying(PlaylistPlayer playlistPlayer) {
@@ -490,5 +491,6 @@ public class PlaylistPlayer extends MediaPlayer {
         void onShuffleChange(PlaylistPlayer playlistPlayer, boolean shuffle);
         void onRepeatChange(PlaylistPlayer playlistPlayer, int repeat);
         void onPlaylistChange(PlaylistPlayer playlistPlayer, String playlistId, List<SongItem> playlist);
+        void onRelease(PlaylistPlayer playlistPlayer);
     }
 }

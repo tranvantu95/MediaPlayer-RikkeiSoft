@@ -1,9 +1,10 @@
 package com.rikkeisoft.musicplayer.activity;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,17 +15,11 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.custom.adapter.pager.ArtistPagerAdapter;
 import com.rikkeisoft.musicplayer.model.AlbumsModel;
-import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
-import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
-
-import java.util.List;
 
 public class ArtistActivity extends MyActivity {
 
@@ -75,35 +70,35 @@ public class ArtistActivity extends MyActivity {
     }
 
     @Override
-    protected void onReceiverMediaChange() {
-        super.onReceiverMediaChange();
-
+    protected void beforeReloadData() {
         artist = null;
-        loadData();
     }
 
     @Override
-    protected void loadData() {
+    protected void onDataLoaded() {
         int id = getIntent().getIntExtra(ID, -1);
         if(id == -1) {
             finish();
             return;
         }
 
-        if(artist == null) artist = Loader.getInstance().findArtist(id);
         if(artist == null) {
-            finish();
-            return;
+            artist = Loader.getInstance().findArtist(id);
+
+            if(artist == null) {
+                finish();
+                return;
+            }
+
+            setTitle(artist.getName());
+            setCollapsingTitle(artist.getName());
+
+            if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
+
+            //
+            getModel(SongsModel.class).getItems().setValue(artist.getSongs());
+            getModel(AlbumsModel.class).getItems().setValue(artist.getAlbums());
         }
-
-        setTitle(artist.getName());
-        setCollapsingTitle(artist.getName());
-
-        if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
-
-        //
-        getModel(SongsModel.class).getItems().setValue(artist.getSongs());
-        getModel(AlbumsModel.class).getItems().setValue(artist.getAlbums());
     }
 
     @Override
@@ -115,12 +110,18 @@ public class ArtistActivity extends MyActivity {
     }
 
     @Override
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel playerModel) {
-        super.onPlayerConnected(playerService, playlistPlayer, playerModel);
+    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
+        super.onPlayerModelCreated(playerModel);
 
-        getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
         getModel(SongsModel.class).getPayerModel().setValue(playerModel);
         getModel(AlbumsModel.class).getPayerModel().setValue(playerModel);
+    }
+
+    @Override
+    protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
+        super.onPlaylistPlayerCreated(playlistPlayer);
+
+        getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.rikkeisoft.musicplayer.activity.base;
 
 import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.view.Menu;
@@ -14,10 +15,7 @@ import com.rikkeisoft.musicplayer.activity.PlayerActivity;
 import com.rikkeisoft.musicplayer.custom.view.BottomPlayerController;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.PlayerService;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
-
-import java.util.List;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 public abstract class MyActivity extends SwitchListActivity {
 
@@ -59,8 +57,8 @@ public abstract class MyActivity extends SwitchListActivity {
     protected abstract int calculateForBottomPlayerController(CoordinatorLayout parent, View child, View dependency);
 
     @Override
-    protected void onPlayerConnected(PlayerService playerService, PlaylistPlayer playlistPlayer, PlayerModel _playerModel) {
-        super.onPlayerConnected(playerService, playlistPlayer, _playerModel);
+    protected void onPlayerModelCreated(@NonNull PlayerModel _playerModel) {
+        super.onPlayerModelCreated(_playerModel);
 
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
@@ -106,17 +104,49 @@ public abstract class MyActivity extends SwitchListActivity {
                         .getDrawable(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play));
             }
         });
-
     }
 
     @Override
     protected void onPermissionGranted() {
         super.onPermissionGranted();
-
         loadData();
     }
 
-    protected abstract void loadData();
+    @Override
+    protected void onReceiverMediaChange() {
+        super.onReceiverMediaChange();
+        beforeReloadData();
+        loadData();
+    }
+
+    private void loadData() {
+        if(isDataLoaded()) onDataLoaded();
+        else new Thread(new Runnable() {
+            @Override
+            public void run() {
+                onLoadData();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onDataLoaded();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    protected abstract void beforeReloadData();
+
+    protected boolean isDataLoaded() {
+        return Loader.getInstance().isLoaded();
+    }
+
+    protected void onLoadData() {
+        Loader.getInstance().loadAll();
+    }
+
+    protected abstract void onDataLoaded();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
