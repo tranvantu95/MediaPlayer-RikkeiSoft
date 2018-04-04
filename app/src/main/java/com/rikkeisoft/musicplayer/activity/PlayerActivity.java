@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +25,9 @@ import com.rikkeisoft.musicplayer.custom.view.PlayerBehavior;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.utils.DBHandler;
 import com.rikkeisoft.musicplayer.utils.Format;
+import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
@@ -37,6 +40,8 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     private ImageView btnShuffle, btnRepeat;
     private CircularSeekBar seekBar;
     private boolean userIsSeeking;
+
+    private View fragmentContainer;
 
     public static Intent createIntent(Context context) {
         Intent intent = new Intent(context, PlayerActivity.class);
@@ -215,6 +220,17 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             }
         });
 
+        CoordinatorLayout.Behavior behavior =
+                ((CoordinatorLayout.LayoutParams) fragmentContainer.getLayoutParams()).getBehavior();
+
+        if(behavior != null)
+            ((PlayerBehavior) behavior).setCallback(new PlayerBehavior.Callback() {
+                @Override
+                public void onTopChange(int top) {
+//                    Log.d("debug", "onTopChange " + top);
+                    fragmentContainer.setPadding(0, 0, 0, top);
+                }
+            });
     }
 
     @Override
@@ -228,21 +244,10 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         btnShuffle = findViewById(R.id.btn_shuffle);
         btnRepeat = findViewById(R.id.btn_repeat);
 
+        fragmentContainer = findViewById(R.id.fragment_container);
+
         findViewById(R.id.btn_next).setOnClickListener(this);
         findViewById(R.id.btn_previous).setOnClickListener(this);
-
-        CoordinatorLayout.Behavior behavior =
-                ((CoordinatorLayout.LayoutParams)
-                        findViewById(R.id.fragment_container).getLayoutParams()).getBehavior();
-
-        if(behavior != null)
-            ((PlayerBehavior) behavior).setCallback(new PlayerBehavior.Callback() {
-                @Override
-                public void onTopChange(int top) {
-                    findViewById(R.id.fragment_container).setPadding(0, 0, 0, top);
-//                    getModel(PlaylistModel.class).getTop().setValue(top);
-                }
-            });
     }
 
     @Override

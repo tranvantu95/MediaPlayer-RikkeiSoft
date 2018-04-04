@@ -19,15 +19,18 @@ public class DBHandler {
 
         private Callback callback;
 
-        public PlaylistLoader(Context context, Callback callback) {
+        private List<SongItem> songs;
+
+        public PlaylistLoader(Context context, List<SongItem> songs, Callback callback) {
             mySQLite = MySQLite.getInstance(context);
             this.callback = callback;
+            if(songs != null) this.songs = new ArrayList<>(songs);
         }
 
         @Override
         protected List<SongItem> doInBackground(String... args) {
             List<SongItem> playlist = new ArrayList<>();
-            List<SongItem> songs = mySQLite.getPlaylist(args[0]);
+            if(songs == null) songs = mySQLite.getPlaylist(args[0]);
             List<SongItem> songItems = Loader.getInstance().getSongs();
 //            Collections.sort(songItems, new Comparator<SongItem>() {
 //                @Override
@@ -70,7 +73,7 @@ public class DBHandler {
 
         public PlaylistSaver(Context context, List<SongItem> songs) {
             mySQLite = MySQLite.getInstance(context);
-            this.songs = songs;
+            this.songs = new ArrayList<>(songs);
         }
 
         @Override

@@ -18,9 +18,12 @@ import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.service.PlayerService;
+import com.rikkeisoft.musicplayer.utils.DBHandler;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+
+import java.util.List;
 
 public class MyApplication extends Application {
 
@@ -70,6 +73,17 @@ public class MyApplication extends Application {
         Log.d("debug", "onMediaChange " + getClass().getSimpleName());
         Loader.getInstance().clearCache();
         sendBroadcastMediaChange();
+
+        //
+        new DBHandler.PlaylistLoader(this, playerModel != null ? playerModel.getItems().getValue() : null,
+                new DBHandler.PlaylistLoader.Callback() {
+            @Override
+            public void onResult(List<SongItem> playlist) {
+                if(playlistPlayer == null) return;
+                int index = Loader.findIndex(playlist, playlistPlayer.getCurrentSongId());
+                playlistPlayer.setPlaylist(playlistPlayer.getPlaylistId(), playlist, index, false);
+            }
+        }).execute(PlayerService.CURRENT_PLAYLIST_NAME);
     }
 
     private void sendBroadcastMediaChange() {
@@ -78,18 +92,6 @@ public class MyApplication extends Application {
     }
 
     //
-    private static PlayerService playerService;
-
-    public static PlayerService getPlayerService() {
-        return playerService;
-    }
-
-    private static PlaylistPlayer playlistPlayer;
-
-    public static PlaylistPlayer getPlaylistPlayer() {
-        return playlistPlayer;
-    }
-
     private static PlayerModel playerModel;
 
     public static PlayerModel getPlayerModel() {
@@ -98,6 +100,12 @@ public class MyApplication extends Application {
 
     public static void setPlayerModel(PlayerModel playerModel) {
         MyApplication.playerModel = playerModel;
+    }
+
+    private static PlaylistPlayer playlistPlayer;
+
+    public static void setPlaylistPlayer(PlaylistPlayer playlistPlayer) {
+        MyApplication.playlistPlayer = playlistPlayer;
     }
 
     @Override
@@ -120,28 +128,6 @@ public class MyApplication extends Application {
                 "shouldShowRequestPermissionRationale", false);
         General.typeView = sharedPreferences.getInt("typeView", SwitchListModel.LIST);
 
-        //
-        Intent intent = new Intent(this, PlayerService.class);
-
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
-//                playerService = binder.getService();
-//                playlistPlayer = playerService.getPlaylistPlayer();
-//                playerModel = playerService.getPlayerModel();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-
-            }
-        };
-
-//        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-
-//        startService(intent);
-//        stopService(intent);
     }
 
 }

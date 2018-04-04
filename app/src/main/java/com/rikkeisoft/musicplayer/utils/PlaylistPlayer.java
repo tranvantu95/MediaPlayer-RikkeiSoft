@@ -2,6 +2,7 @@ package com.rikkeisoft.musicplayer.utils;
 
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.item.SongItem;
@@ -109,6 +110,7 @@ public class PlaylistPlayer extends MediaPlayer {
         setOnPreparedListener(new OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
+                if(running) start();
                 setReady(true);
             }
         });
@@ -116,7 +118,8 @@ public class PlaylistPlayer extends MediaPlayer {
         setOnCompletionListener(new OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                next(false);
+                if(repeat == REPEAT_SONG) start();
+                else next(false);
             }
         });
     }
@@ -134,7 +137,6 @@ public class PlaylistPlayer extends MediaPlayer {
         if(shuffle) createShuffleList();
 
         this.repeat = repeat;
-        if(repeat == REPEAT_SONG) setLooping(true);
 
         if(isValidateCurrentIndex()) {
             if(play) play(currentIndex, null);
@@ -157,8 +159,6 @@ public class PlaylistPlayer extends MediaPlayer {
         this.ready = ready;
 
         preparing = false;
-
-        if(ready && running) start();
 
         callback.onReadyChange(this, ready);
     }
@@ -241,6 +241,7 @@ public class PlaylistPlayer extends MediaPlayer {
         }
         catch (IOException ex) {
             ex.printStackTrace();
+            setPlaying(false);
         }
     }
 
@@ -381,6 +382,7 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public void resume() {
+        if(!isValidateCurrentIndex()) currentIndex = 0;
         if(!ready) play(currentIndex, null);
         else if(!isPlaying()) start();
     }
@@ -428,8 +430,6 @@ public class PlaylistPlayer extends MediaPlayer {
     public void setRepeat(int repeat) {
         if(this.repeat == repeat) return;
         this.repeat = repeat;
-
-        setLooping(repeat == REPEAT_SONG);
 
         callback.onRepeatChange(this, repeat);
     }
@@ -487,7 +487,7 @@ public class PlaylistPlayer extends MediaPlayer {
         void onReadyChange(PlaylistPlayer playlistPlayer, boolean ready);
         void onUpdateCurrentPosition(PlaylistPlayer playlistPlayer, int position);
         void onCurrentIndexChange(PlaylistPlayer playlistPlayer, int index);
-        void onCurrentSongChange(PlaylistPlayer playlistPlayer, SongItem song);
+        void onCurrentSongChange(PlaylistPlayer playlistPlayer, @Nullable SongItem song);
         void onShuffleChange(PlaylistPlayer playlistPlayer, boolean shuffle);
         void onRepeatChange(PlaylistPlayer playlistPlayer, int repeat);
         void onPlaylistChange(PlaylistPlayer playlistPlayer, String playlistId, List<SongItem> playlist);

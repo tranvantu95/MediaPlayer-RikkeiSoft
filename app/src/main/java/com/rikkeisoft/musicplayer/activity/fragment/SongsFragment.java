@@ -51,10 +51,9 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
             public void onChanged(@Nullable SongItem songItem) {
-                if(songItem != null) {
-                    recyclerAdapter.setCurrentId(songItem.getId());
-                    recyclerAdapter.notifyDataSetChanged();
-                }
+                if(songItem != null) recyclerAdapter.setCurrentId(songItem.getId());
+                else recyclerAdapter.setCurrentId(-1);
+                recyclerAdapter.notifyDataSetChanged();
             }
         });
     }

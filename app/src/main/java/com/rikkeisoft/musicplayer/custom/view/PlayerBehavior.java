@@ -27,7 +27,8 @@ public class PlayerBehavior extends AppBarLayout.ScrollingViewBehavior {
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
 //        android.util.Log.d("debug", "child " + child.getTop());
 //        android.util.Log.d("debug", "dependency " + dependency.getTop());
-        if(callback != null) callback.onTopChange(child.getTop() - dependency.findViewById(R.id.toolbar).getHeight());
+        if(callback != null) callback.onTopChange(dependency.getHeight()
+                - dependency.findViewById(R.id.toolbar).getHeight() + dependency.getTop());
         return super.onDependentViewChanged(parent, child, dependency);
     }
 

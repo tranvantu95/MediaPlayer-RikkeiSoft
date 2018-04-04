@@ -35,9 +35,13 @@
             android:label="@string/title_activity_player"
             android:theme="@style/AppTheme.NoActionBar"  />
 
-        <service android:name=".service.PlayerService"
-            android:enabled="true"
-            android:exported="true"/>
+        <service android:name=".service.PlayerService" />
+
+        <receiver android:name=".app.KeepPlayerService" >
+            <intent-filter>
+                <action android:name="com.rikkeisoft.musicplayer.action.KEEP_PLAYER_SERVICE" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

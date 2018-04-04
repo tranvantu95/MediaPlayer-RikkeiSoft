@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.util.Log;
 
@@ -21,6 +23,8 @@ import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
 
+import me.henrytao.smoothappbarlayout.SmoothAppBarLayout;
+
 public class PlaylistFragment extends SongsFragment {
 
     public static PlaylistFragment newInstance(int modelOwner) {
@@ -33,7 +37,6 @@ public class PlaylistFragment extends SongsFragment {
         return fragment;
     }
 
-    private MyLinearLayoutManager layoutManager;
     private PlaylistModel playlistModel;
 
     private int currentIndex = -1;
@@ -44,12 +47,6 @@ public class PlaylistFragment extends SongsFragment {
 
         setTypeView(SwitchRecyclerAdapter.LIST_VIEW);
 
-        playlistModel.getTop().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null) layoutManager.offsetBot = integer;
-            }
-        });
     }
 
     @Override
@@ -64,7 +61,7 @@ public class PlaylistFragment extends SongsFragment {
         });
     }
 
-    private void gotoPos(Integer position) {
+    private void gotoPos(final Integer position) {
         currentIndex = position;
         if(position >= 0 && position < recyclerAdapter.getItemCount() && recyclerView != null) {
             new Handler().postDelayed(new Runnable() {
@@ -125,9 +122,4 @@ public class PlaylistFragment extends SongsFragment {
         return playlistModel;
     }
 
-    @Override
-    protected LinearLayoutManager onCreateLinearLayoutManager() {
-        layoutManager = new MyLinearLayoutManager(getContext());
-        return layoutManager;
-    }
 }

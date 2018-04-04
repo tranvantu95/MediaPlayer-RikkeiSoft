@@ -1,5 +1,7 @@
 package com.rikkeisoft.musicplayer.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -9,8 +11,11 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.MainActivity;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
@@ -22,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerService extends Service {
+
+    public static final String ACTION_KEEP_PLAYER_SERVICE = "com.rikkeisoft.musicplayer.action.KEEP_PLAYER_SERVICE";
 
     public static final String DATA = "player_data";
     public static final String SHUFFLE_KEY = "shuffle";
@@ -86,10 +93,13 @@ public class PlayerService extends Service {
 
     private PlayerModel playerModel;
 
+    private Notification notification;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("debug", "onCreate " + getClass().getSimpleName());
+        startService(new Intent(this, getClass()));
 
 //        playerThread = new HandlerThread("playerThread");
 //        playerThread.start();
@@ -102,11 +112,14 @@ public class PlayerService extends Service {
         liveData = new LiveData();
 
         init();
+
+        notification = createNotification();
+        startForeground(1001, notification);
     }
 
     private void init() {
         if(MyApplication.getPlayerModel() == null) {
-            new DBHandler.PlaylistLoader(getApplicationContext(), new DBHandler.PlaylistLoader.Callback() {
+            new DBHandler.PlaylistLoader(getApplicationContext(), null, new DBHandler.PlaylistLoader.Callback() {
                 @Override
                 public void onResult(List<SongItem> playlist) {
                     createPlayerModel(playlist);
@@ -221,15 +234,15 @@ public class PlayerService extends Service {
             }
 
             @Override
-            public void onCurrentSongChange(PlaylistPlayer playlistPlayer, SongItem song) {
-                Log.d("debug", "---onCurrentSongChange " + song.getName());
+            public void onCurrentSongChange(PlaylistPlayer playlistPlayer, @Nullable SongItem song) {
+                Log.d("debug", "---onCurrentSongChange " + (song != null ? song.getName() : "null"));
                 playerModel.getCurrentSong().setValue(song);
 
                 playerModel.getCurrentPosition().setValue(0);
-                playerModel.getDuration().setValue(song.getDuration());
+                if(song != null) playerModel.getDuration().setValue(song.getDuration());
 
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt(CURRENT_SONG_ID_KEY, song.getId());
+                editor.putInt(CURRENT_SONG_ID_KEY, song != null ? song.getId() : -1);
                 editor.apply();
             }
 
@@ -264,7 +277,7 @@ public class PlayerService extends Service {
                 editor.apply();
 
                 //
-                new DBHandler.PlaylistSaver(getApplicationContext(), new ArrayList<>(playlist))
+                new DBHandler.PlaylistSaver(getApplicationContext(), playlist)
                         .execute(CURRENT_PLAYLIST_NAME);
             }
 
@@ -284,6 +297,7 @@ public class PlayerService extends Service {
                 Log.d("debug", "---onError");
                 mediaPlayer.release();
                 liveData.getPlaylistPlayer().setValue(null);
+                MyApplication.setPlaylistPlayer(null);
                 init();
                 return true;
             }
@@ -292,6 +306,29 @@ public class PlayerService extends Service {
         playlistPlayer.initialize(playlistId, playlist, currentSong, currentIndex, shuffle, repeat, play);
 
         liveData.getPlaylistPlayer().setValue(playlistPlayer);
+        MyApplication.setPlaylistPlayer(playlistPlayer);
+    }
+
+    private Notification createNotification() {
+        // In this sample, we'll use the same text for the ticker and the expanded notification
+        CharSequence text = "qwerty";
+
+        // The PendingIntent to launch our activity if the user selects this notification
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), 0);
+
+        // Set the info for the views that show in the notification panel.
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher_round)  // the status icon
+                .setTicker("ticker")  // the status text
+                .setWhen(System.currentTimeMillis())  // the time stamp
+                .setContentTitle("Title")  // the label of the entry
+                .setContentText("Content")  // the contents of the entry
+                .setContentIntent(contentIntent)  // The intent to send when the entry is clicked
+                .build();
+
+        // Send the notification.
+        return notification;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -330,6 +367,15 @@ public class PlayerService extends Service {
         super.onTaskRemoved(rootIntent);
         Log.d("debug", "onTaskRemoved " + getClass().getSimpleName());
 
+//        sendBroadcast(new Intent(ACTION_KEEP_PLAYER_SERVICE));
+
+//        if(playerModel != null && playerModel.getCurrentPosition().getValue() != null) {
+//            Log.d("debug", "save position " + getClass().getSimpleName());
+//
+//            SharedPreferences.Editor editor = preferences.edit();
+//            editor.putInt(CURRENT_POSITION_KEY, playerModel.getCurrentPosition().getValue());
+//            editor.apply();
+//        }
     }
 
     @Override
@@ -340,6 +386,7 @@ public class PlayerService extends Service {
         if(playlistPlayer != null) {
             playlistPlayer.release();
             liveData.getPlaylistPlayer().setValue(null);
+            MyApplication.setPlaylistPlayer(null);
         }
     }
 
