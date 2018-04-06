@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -143,6 +144,7 @@ public abstract class MyActivity extends SwitchListActivity {
     }
 
     protected void onLoadData() {
+        Log.d("debug", "onLoadData " + getClass().getSimpleName());
         Loader.getInstance().loadAll();
     }
 

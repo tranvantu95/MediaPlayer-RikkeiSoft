@@ -56,7 +56,7 @@ public class AppbarActivity extends BaseActivity {
         else toolbar.setTitle(string);
     }
 
-//    public void getTitle() {
+//    public void getPlaylistName() {
 //
 //    }
 

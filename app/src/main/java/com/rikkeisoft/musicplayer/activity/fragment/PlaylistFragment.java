@@ -61,7 +61,7 @@ public class PlaylistFragment extends SongsFragment {
         });
     }
 
-    private void gotoPos(final Integer position) {
+    private void gotoPos(Integer position) {
         currentIndex = position;
         if(position >= 0 && position < recyclerAdapter.getItemCount() && recyclerView != null) {
             new Handler().postDelayed(new Runnable() {

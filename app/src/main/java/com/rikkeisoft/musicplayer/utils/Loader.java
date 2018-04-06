@@ -49,7 +49,14 @@ public class Loader {
     }
 
     //
+    private long latestTimeClearCache; // for playerService
+
+    //
     public void clearCache() {
+        if(System.currentTimeMillis() - latestTimeClearCache < 1000) return;
+        Log.d("debug", "clearCache " + getClass().getSimpleName());
+        latestTimeClearCache = System.currentTimeMillis();
+
         songs = null;
         albums = null;
         artists = null;
@@ -59,10 +66,11 @@ public class Loader {
     //
     public synchronized void loadAll() {
         if(isLoaded) return;
-        isLoaded = true;
+        Log.d("debug", "loadAll " + getClass().getSimpleName());
         getSongs();
         getAlbums();
         getArtists();
+        isLoaded = true;
     }
 
     //
@@ -203,14 +211,14 @@ public class Loader {
 
         String[] projection = {
                 Media._ID,     // song id
-                Media.TITLE,   // song name
+//                Media.TITLE,   // song name
+                Media.DISPLAY_NAME,
                 Media.ALBUM_ID,
                 Media.ALBUM,
                 Media.ARTIST_ID,
                 Media.ARTIST,
                 Media.DURATION,
                 Media.DATA,
-//                Media.DISPLAY_NAME,
         };
 
         String selection = Media.IS_MUSIC + " != 0";

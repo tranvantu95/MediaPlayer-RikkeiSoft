@@ -45,17 +45,8 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
     }
 
     @Override
-    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
-        super.onPlayerModelCreated(playerModel);
-
-        playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
-            @Override
-            public void onChanged(@Nullable SongItem songItem) {
-                if(songItem != null) recyclerAdapter.setCurrentId(songItem.getId());
-                else recyclerAdapter.setCurrentId(-1);
-                recyclerAdapter.notifyDataSetChanged();
-            }
-        });
+    protected void onCurrentSongChange(@NonNull SongItem songItem) {
+        recyclerAdapter.setCurrentId(songItem.getId());
     }
 
     protected void onPlaylistPlayerCreated(@Nullable PlaylistPlayer playlistPlayer) {
@@ -76,7 +67,7 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                 if(playlistPlayer != null) {
                     String newTitle = getActivity().getTitle().toString();
 
-                    if (!newTitle.equals(playlistPlayer.getPlaylistId())
+                    if (!newTitle.equals(playlistPlayer.getPlaylistName())
                             || playlistPlayer.getPlaylist().size() < recyclerAdapter.getItems().size())
                         playlistPlayer.setPlaylist(newTitle, new ArrayList<>(recyclerAdapter.getItems()), position, true);
                     else

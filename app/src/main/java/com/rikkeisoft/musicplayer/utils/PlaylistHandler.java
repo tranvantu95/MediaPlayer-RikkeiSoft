@@ -2,6 +2,7 @@ package com.rikkeisoft.musicplayer.utils;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.db.AppDatabase;
 import com.rikkeisoft.musicplayer.db.MySQLite;
@@ -11,7 +12,7 @@ import com.rikkeisoft.musicplayer.model.item.SongItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DBHandler {
+public class PlaylistHandler {
 
     public static class PlaylistLoader extends AsyncTask<String, Void, List<SongItem>> {
 
@@ -29,15 +30,20 @@ public class DBHandler {
 
         @Override
         protected List<SongItem> doInBackground(String... args) {
-            List<SongItem> playlist = new ArrayList<>();
-            if(songs == null) songs = mySQLite.getPlaylist(args[0]);
+            Loader.getInstance().loadAll();
             List<SongItem> songItems = Loader.getInstance().getSongs();
+            if(songs == null) {
+                Log.d("debug", "loadPlaylistDatabase " + getClass().getSimpleName());
+                songs = mySQLite.getPlaylist(args[0]);
+            }
 //            Collections.sort(songItems, new Comparator<SongItem>() {
 //                @Override
 //                public int compare(SongItem songItem, SongItem t1) {
 //                    return songItem.getId() - t1.getId();
 //                }
 //            });
+            List<SongItem> playlist = new ArrayList<>();
+
             int size = songItems.size();
             for(int i = 0; i < size; i++) {
                 SongItem songItem = songItems.get(i);
@@ -78,6 +84,7 @@ public class DBHandler {
 
         @Override
         protected Void doInBackground(String... args) {
+            Log.d("debug", "savePlaylistDatabase " + getClass().getSimpleName());
             mySQLite.deletePlaylist(args[0]);
             mySQLite.addPlaylist(args[0], songs);
 

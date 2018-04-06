@@ -14,6 +14,7 @@ import com.rikkeisoft.musicplayer.custom.adapter.base.MyRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.model.base.MyModel;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 public abstract class MyFragment<Item extends BaseItem,
         Model extends MyModel<Item>,
@@ -47,7 +48,18 @@ public abstract class MyFragment<Item extends BaseItem,
                 }
             }
         });
+
+        playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
+            @Override
+            public void onChanged(@Nullable SongItem songItem) {
+                if(songItem == null) recyclerAdapter.setCurrentId(-1);
+                else onCurrentSongChange(songItem);
+                recyclerAdapter.notifyDataSetChanged();
+            }
+        });
     }
+
+    protected abstract void onCurrentSongChange(@NonNull SongItem songItem);
 
     @Override
     protected LinearLayoutManager onCreateLinearLayoutManager() {

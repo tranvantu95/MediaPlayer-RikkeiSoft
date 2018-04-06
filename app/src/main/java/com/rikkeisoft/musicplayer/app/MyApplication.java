@@ -1,29 +1,20 @@
 package com.rikkeisoft.musicplayer.app;
 
 import android.app.Application;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
-import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.service.PlayerService;
-import com.rikkeisoft.musicplayer.utils.DBHandler;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
-
-import java.util.List;
 
 public class MyApplication extends Application {
 
@@ -36,6 +27,7 @@ public class MyApplication extends Application {
 
     private void registerOnMediaChange() {
         if(onMediaChange != null) return;
+        Log.d("debug", "registerOnMediaChange " + getClass().getSimpleName());
 
         onMediaChange = new ContentObserver(new Handler()) {
             private long latestTime = System.currentTimeMillis();
@@ -64,6 +56,7 @@ public class MyApplication extends Application {
 
     private void unregisterOnMediaChange() {
         if(onMediaChange != null) {
+            Log.d("debug", "unregisterOnMediaChange " + getClass().getSimpleName());
             getContentResolver().unregisterContentObserver(onMediaChange);
             onMediaChange = null;
         }
@@ -73,25 +66,16 @@ public class MyApplication extends Application {
         Log.d("debug", "onMediaChange " + getClass().getSimpleName());
         Loader.getInstance().clearCache();
         sendBroadcastMediaChange();
-
-        //
-        new DBHandler.PlaylistLoader(this, playerModel != null ? playerModel.getItems().getValue() : null,
-                new DBHandler.PlaylistLoader.Callback() {
-            @Override
-            public void onResult(List<SongItem> playlist) {
-                if(playlistPlayer == null) return;
-                int index = Loader.findIndex(playlist, playlistPlayer.getCurrentSongId());
-                playlistPlayer.setPlaylist(playlistPlayer.getPlaylistId(), playlist, index, false);
-            }
-        }).execute(PlayerService.CURRENT_PLAYLIST_NAME);
     }
 
+    // broadcast for activity
     private void sendBroadcastMediaChange() {
+        Log.d("debug", "sendBroadcastMediaChange " + getClass().getSimpleName());
         Intent intent = new Intent(ACTION_MEDIA_CHANGE);
         sendBroadcast(intent);
     }
 
-    //
+    // cache for playerService
     private static PlayerModel playerModel;
 
     public static PlayerModel getPlayerModel() {
@@ -103,6 +87,10 @@ public class MyApplication extends Application {
     }
 
     private static PlaylistPlayer playlistPlayer;
+
+    public static PlaylistPlayer getPlaylistPlayer() {
+        return playlistPlayer;
+    }
 
     public static void setPlaylistPlayer(PlaylistPlayer playlistPlayer) {
         MyApplication.playlistPlayer = playlistPlayer;

@@ -7,6 +7,14 @@ import com.rikkeisoft.musicplayer.model.item.SongItem;
 
 public class PlayerModel extends BaseListModel<SongItem> {
 
+    private MutableLiveData<String> playlistName;
+
+    public MutableLiveData<String> getPlaylistName() {
+        if(playlistName == null) playlistName = new MutableLiveData<>();
+
+        return playlistName;
+    }
+
     private MutableLiveData<Integer> currentIndex;
 
     public MutableLiveData<Integer> getCurrentIndex() {
@@ -61,22 +69,6 @@ public class PlayerModel extends BaseListModel<SongItem> {
         if(repeat == null) repeat = new MutableLiveData<>();
 
         return repeat;
-    }
-
-    private MutableLiveData<String> title;
-
-    public MutableLiveData<String> getTitle() {
-        if(title == null) title = new MutableLiveData<>();
-
-        return title;
-    }
-
-    private MutableLiveData<Boolean> updatePlaylist;
-
-    public MutableLiveData<Boolean> getUpdatePlaylist() {
-        if(updatePlaylist == null) updatePlaylist = new MutableLiveData<>();
-
-        return updatePlaylist;
     }
 
 }

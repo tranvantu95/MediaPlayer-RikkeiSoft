@@ -34,10 +34,10 @@ public class PlaylistPlayer extends MediaPlayer {
     private int currentIndex = -1;
     private SongItem currentSong;
 
-    private String playlistId;
+    private String playlistName;
 
-    public String getPlaylistId() {
-        return playlistId;
+    public String getPlaylistName() {
+        return playlistName;
     }
 
     private List<SongItem> playlist = new ArrayList<>();
@@ -46,22 +46,22 @@ public class PlaylistPlayer extends MediaPlayer {
         return playlist;
     }
 
-    public void setPlaylist(String playlistId, List<SongItem> playlist, int index, boolean play) {
+    public void setPlaylist(String playlistName, List<SongItem> playlist, int index, boolean mustPlay) {
         if(playlist != null) {
 
-            this.playlistId = playlistId;
+            this.playlistName = playlistName;
 
             int oldSongId = getCurrentSongId();
 
             this.playlist = playlist;
 
-            callback.onPlaylistChange(this, playlistId, playlist);
+            callback.onPlaylistChange(this, playlistName, playlist);
 
             setCurrentIndex(index);
 
             if(shuffle) createShuffleList();
 
-            if(play) {
+            if(mustPlay) {
                 if (getCurrentSongId() == oldSongId && oldSongId != -1) {
                     resume();
                 }
@@ -118,6 +118,7 @@ public class PlaylistPlayer extends MediaPlayer {
         setOnCompletionListener(new OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
+                callback.onCompletion(PlaylistPlayer.this, currentSong, currentIndex);
                 if(repeat == REPEAT_SONG) start();
                 else next(false);
             }
@@ -127,7 +128,7 @@ public class PlaylistPlayer extends MediaPlayer {
     public void initialize(String playlistId, List<SongItem> playlist, SongItem currentSong,
                            int currentIndex, boolean shuffle, int repeat, boolean play) {
 
-        this.playlistId = playlistId;
+        this.playlistName = playlistId;
         if(playlist != null) this.playlist = playlist;
 
         this.currentSong = currentSong;
@@ -169,7 +170,7 @@ public class PlaylistPlayer extends MediaPlayer {
             callback.onCurrentIndexChange(this, index);
         }
 
-        SongItem song = getCurrentSong();
+        SongItem song = findCurrentSong();
 
         if(currentSong == null && song != null || currentSong != null && !currentSong.equals(song)) {
             currentSong = song;
@@ -241,8 +242,13 @@ public class PlaylistPlayer extends MediaPlayer {
         }
         catch (IOException ex) {
             ex.printStackTrace();
-            setPlaying(false);
+            callback.onNotFoundData(this, playlist.get(index), index);
         }
+    }
+
+    public void simpleHandleNotFoundData(int index) {
+        playlist.remove(index);
+        setPlaylist(playlistName, playlist, index, true);
     }
 
     public void play(int index, PlayCallback callback) {
@@ -453,14 +459,23 @@ public class PlaylistPlayer extends MediaPlayer {
         return running;
     }
 
-    public int getCurrentSongId() {
-        if(!isValidateCurrentIndex()) return -1;
-        return playlist.get(currentIndex).getId();
+    public SongItem getCurrentSong() {
+        return currentSong;
     }
 
-    public SongItem getCurrentSong() {
+    public int getCurrentSongId() {
+        return currentSong != null ? currentSong.getId() : -1;
+    }
+
+    //
+    public SongItem findCurrentSong() {
         if(!isValidateCurrentIndex()) return null;
         return playlist.get(currentIndex);
+    }
+
+    public int findCurrentSongId() {
+        if(!isValidateCurrentIndex()) return -1;
+        return playlist.get(currentIndex).getId();
     }
 
     private boolean isValidateCurrentIndex() {
@@ -491,6 +506,8 @@ public class PlaylistPlayer extends MediaPlayer {
         void onShuffleChange(PlaylistPlayer playlistPlayer, boolean shuffle);
         void onRepeatChange(PlaylistPlayer playlistPlayer, int repeat);
         void onPlaylistChange(PlaylistPlayer playlistPlayer, String playlistId, List<SongItem> playlist);
+        void onNotFoundData(PlaylistPlayer playlistPlayer, SongItem song, int index);
+        void onCompletion(PlaylistPlayer playlistPlayer, SongItem song, int index);
         void onRelease(PlaylistPlayer playlistPlayer);
     }
 }

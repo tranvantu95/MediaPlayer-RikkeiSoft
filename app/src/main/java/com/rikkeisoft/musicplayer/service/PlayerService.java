@@ -7,40 +7,93 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.MainActivity;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.utils.DBHandler;
+import com.rikkeisoft.musicplayer.utils.PlaylistHandler;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerService extends Service {
 
+    // Media change listener
+    private ContentObserver onMediaChange;
+
+    private void registerOnMediaChange() {
+        if(onMediaChange != null) return;
+        Log.d("debug", "registerOnMediaChange " + getClass().getSimpleName());
+
+        onMediaChange = new ContentObserver(new Handler()) {
+            private long latestTime = System.currentTimeMillis();
+
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                super.onChange(selfChange, uri);
+
+                if(System.currentTimeMillis() - latestTime > 1000) {
+                    latestTime = System.currentTimeMillis();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            onMediaChange();
+                        }
+                    }, 1000);
+                }
+
+            }
+        };
+
+        getContentResolver().registerContentObserver(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true, onMediaChange);
+    }
+
+    private void unregisterOnMediaChange() {
+        if(onMediaChange != null) {
+            Log.d("debug", "unregisterOnMediaChange " + getClass().getSimpleName());
+            getContentResolver().unregisterContentObserver(onMediaChange);
+            onMediaChange = null;
+        }
+    }
+
+    private void onMediaChange() {
+        Log.d("debug", "onMediaChange " + getClass().getSimpleName());
+        Loader.getInstance().clearCache();
+        reloadPlaylist();
+    }
+
+    // handle on task remove
     public static final String ACTION_KEEP_PLAYER_SERVICE = "com.rikkeisoft.musicplayer.action.KEEP_PLAYER_SERVICE";
 
+    // data and database
     public static final String DATA = "player_data";
     public static final String SHUFFLE_KEY = "shuffle";
     public static final String REPEAT_KEY = "repeat";
     public static final String CURRENT_SONG_ID_KEY = "currentSongId";
-    public static final String CURRENT_PLAYLIST_ID_KEY = "currentPlaylistId";
+    public static final String CURRENT_PLAYLIST_NAME_KEY = "currentPlaylistName";
     public static final String CURRENT_POSITION_KEY = "currentPosition";
 
-    public static final String CURRENT_PLAYLIST_NAME = "Danh sách phát hiện tại";
+    public static final String CURRENT_LISTING = "Danh sách phát hiện tại";
 
     private SharedPreferences preferences;
 
+    // binder
     private final IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
@@ -64,6 +117,7 @@ public class PlayerService extends Service {
 //    private Handler playerHandler;
 //    private Handler uiHandler;
 
+    // update for activity
     public class LiveData {
 
         private MutableLiveData<PlayerModel> playerModel;
@@ -89,17 +143,22 @@ public class PlayerService extends Service {
         return liveData;
     }
 
+    //
     private PlaylistPlayer playlistPlayer;
 
     private PlayerModel playerModel;
 
+    //
     private Notification notification;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("debug", "onCreate " + getClass().getSimpleName());
+
         startService(new Intent(this, getClass()));
+
+        registerOnMediaChange();
 
 //        playerThread = new HandlerThread("playerThread");
 //        playerThread.start();
@@ -119,86 +178,57 @@ public class PlayerService extends Service {
 
     private void init() {
         if(MyApplication.getPlayerModel() == null) {
-            new DBHandler.PlaylistLoader(getApplicationContext(), null, new DBHandler.PlaylistLoader.Callback() {
+            new PlaylistHandler.PlaylistLoader(getApplicationContext(), null, new PlaylistHandler.PlaylistLoader.Callback() {
                 @Override
                 public void onResult(List<SongItem> playlist) {
-                    createPlayerModel(playlist);
+                    create(playlist);
                 }
-            }).execute(CURRENT_PLAYLIST_NAME);
-        }
-        else createPlayerModel(null);
-    }
-
-    private void createPlayerModel(List<SongItem> _playlist) {
-        String playlistId;
-        List<SongItem> playlist;
-        SongItem currentSong = null;
-        int currentIndex = -1;
-        boolean shuffle = false;
-        int repeat = PlaylistPlayer.UN_REPEAT;
-        boolean play = false;
-
-        if(MyApplication.getPlayerModel() == null) {
-            Log.d("debug", "CreatePlayerModel " + getClass().getSimpleName());
-            playerModel = new PlayerModel();
-            MyApplication.setPlayerModel(playerModel);
-
-            // a little bug (if database incorrect) on song fragment item click
-            playlistId = preferences.getString(CURRENT_PLAYLIST_ID_KEY, null);
-
-//            playlist = Loader.getInstance().getSongs(); // test
-            playlist = _playlist;
-
-            int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
-            if(currentSongId != -1) currentIndex = Loader.findIndex(playlist, currentSongId);
-            if(currentIndex != -1) currentSong = playlist.get(currentIndex);
-
-            shuffle = preferences.getBoolean(SHUFFLE_KEY, false);
-            repeat = preferences.getInt(REPEAT_KEY, PlaylistPlayer.UN_REPEAT);
-
-            playerModel.getTitle().setValue(playlistId);
-            playerModel.getItems().setValue(playlist);
-            playerModel.getCurrentSong().setValue(currentSong);
-            playerModel.getCurrentIndex().setValue(currentIndex);
-            playerModel.getShuffle().setValue(shuffle);
-            playerModel.getRepeat().setValue(repeat);
-            playerModel.getPlaying().setValue(false);
-
-            if(currentSong != null) playerModel.getDuration().setValue(currentSong.getDuration());
-            playerModel.getCurrentPosition().setValue(currentSong != null
-                    ? preferences.getInt(CURRENT_POSITION_KEY, 0) : 0);
+            }).execute(CURRENT_LISTING);
         }
         else {
-            Log.d("debug", "RestorePlayerModel " + getClass().getSimpleName());
-            playerModel = MyApplication.getPlayerModel();
-
-            playlistId = playerModel.getTitle().getValue();
-            playlist = playerModel.getItems().getValue();
-            currentSong = playerModel.getCurrentSong().getValue();
-
-            if(playerModel.getCurrentIndex().getValue() != null)
-                currentIndex = playerModel.getCurrentIndex().getValue();
-
-            if(playerModel.getShuffle().getValue() != null)
-                shuffle = playerModel.getShuffle().getValue();
-
-            if(playerModel.getRepeat().getValue() != null)
-                repeat = playerModel.getRepeat().getValue();
-
-            if(playerModel.getPlaying().getValue() != null)
-                play = playerModel.getPlaying().getValue();
+            setLivePlayerModel(MyApplication.getPlayerModel());
+            setLivePlaylistPlayer(MyApplication.getPlaylistPlayer());
         }
-
-        if(liveData.getPlayerModel().getValue() == null
-                || !liveData.getPlayerModel().getValue().equals(playerModel)) {
-            Log.d("debug", "SetLivePlayerModel " + getClass().getSimpleName());
-            liveData.getPlayerModel().setValue(playerModel);
-        }
-
-        createPlaylistPlayer(playlistId, playlist, currentSong, currentIndex, shuffle, repeat, play);
     }
 
-    private void createPlaylistPlayer(String playlistId, List<SongItem> playlist, SongItem currentSong,
+    private void create(List<SongItem> playlist) {
+        // a little bug (if database incorrect) on song fragment item click
+        String playlistName = preferences.getString(CURRENT_PLAYLIST_NAME_KEY, null);
+
+        int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
+        int currentIndex = currentSongId != -1 ? Loader.findIndex(playlist, currentSongId) : -1;
+        SongItem currentSong = currentIndex != -1 ? playlist.get(currentIndex) : null;
+
+        boolean shuffle = preferences.getBoolean(SHUFFLE_KEY, false);
+        int repeat = preferences.getInt(REPEAT_KEY, PlaylistPlayer.UN_REPEAT);
+
+        boolean play = false;
+
+        createPlayerModel(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
+        createPlaylistPlayer(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
+    }
+
+    private void createPlayerModel(String playlistName, List<SongItem> playlist, SongItem currentSong,
+                                   int currentIndex, boolean shuffle, int repeat, boolean play) {
+        Log.d("debug", "CreatePlayerModel " + getClass().getSimpleName());
+        playerModel = new PlayerModel();
+
+        playerModel.getPlaylistName().setValue(playlistName);
+        playerModel.getItems().setValue(playlist);
+        playerModel.getCurrentSong().setValue(currentSong);
+        playerModel.getCurrentIndex().setValue(currentIndex);
+        playerModel.getShuffle().setValue(shuffle);
+        playerModel.getRepeat().setValue(repeat);
+        playerModel.getPlaying().setValue(play);
+
+        if(currentSong != null) playerModel.getDuration().setValue(currentSong.getDuration());
+        playerModel.getCurrentPosition().setValue(currentSong != null
+                ? preferences.getInt(CURRENT_POSITION_KEY, 0) : 0);
+
+        setLivePlayerModel(playerModel);
+    }
+
+    private void createPlaylistPlayer(String playlistName, List<SongItem> playlist, SongItem currentSong,
                                       int currentIndex, boolean shuffle, int repeat, boolean play) {
         Log.d("debug", "CreatePlaylistPlayer " + getClass().getSimpleName());
         playlistPlayer = new PlaylistPlayer(new PlaylistPlayer.Callback() {
@@ -267,26 +297,39 @@ public class PlayerService extends Service {
             }
 
             @Override
-            public void onPlaylistChange(PlaylistPlayer _playlistPlayer, String playlistId, List<SongItem> playlist) {
-                Log.d("debug", "---onPlaylistChange " + playlistId);
-                playerModel.getTitle().setValue(playlistId);
+            public void onPlaylistChange(PlaylistPlayer _playlistPlayer, String playlistName, List<SongItem> playlist) {
+                Log.d("debug", "---onPlaylistChange " + playlistName);
+                playerModel.getPlaylistName().setValue(playlistName);
                 playerModel.getItems().setValue(playlist);
 
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(CURRENT_PLAYLIST_ID_KEY, playlistId);
+                editor.putString(CURRENT_PLAYLIST_NAME_KEY, playlistName);
                 editor.apply();
 
                 //
-                new DBHandler.PlaylistSaver(getApplicationContext(), playlist)
-                        .execute(CURRENT_PLAYLIST_NAME);
+                new PlaylistHandler.PlaylistSaver(getApplicationContext(), playlist)
+                        .execute(CURRENT_LISTING);
             }
 
             @Override
-            public void onRelease(PlaylistPlayer playlistPlayer) {
+            public void onNotFoundData(PlaylistPlayer playlistPlayer, SongItem song, int index) {
+                Log.d("debug", "---onNotFoundData " + song.getName());
+                playlistPlayer.simpleHandleNotFoundData(index);
+                Toast.makeText(getApplicationContext(), "Not Found Data " + song.getName(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCompletion(PlaylistPlayer playlistPlayer, SongItem song, int index) {
+                Log.d("debug", "---onCompletion " + song.getName());
+
+            }
+
+            @Override
+            public void onRelease(PlaylistPlayer _playlistPlayer) {
                 Log.d("debug", "---onRelease");
 
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt(CURRENT_POSITION_KEY, playlistPlayer.getCurrentPosition());
+                editor.putInt(CURRENT_POSITION_KEY, _playlistPlayer.getCurrentPosition());
                 editor.apply();
             }
 
@@ -296,19 +339,76 @@ public class PlayerService extends Service {
             public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
                 Log.d("debug", "---onError");
                 mediaPlayer.release();
-                liveData.getPlaylistPlayer().setValue(null);
-                MyApplication.setPlaylistPlayer(null);
-                init();
+                setLivePlaylistPlayer(null);
+                reCreatePlaylistPlayer();
                 return true;
             }
         });
         playlistPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        playlistPlayer.initialize(playlistId, playlist, currentSong, currentIndex, shuffle, repeat, play);
+        playlistPlayer.initialize(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
 
-        liveData.getPlaylistPlayer().setValue(playlistPlayer);
-        MyApplication.setPlaylistPlayer(playlistPlayer);
+        setLivePlaylistPlayer(playlistPlayer);
     }
 
+    private void setLivePlayerModel(PlayerModel playerModel) {
+        Log.d("debug", "setLivePlayerModel " + getClass().getSimpleName());
+        liveData.getPlayerModel().setValue(playerModel);
+        MyApplication.setPlayerModel(playerModel);
+        this.playerModel = playerModel;
+    }
+
+    private void setLivePlaylistPlayer(PlaylistPlayer playlistPlayer) {
+        Log.d("debug", "setLivePlaylistPlayer " + getClass().getSimpleName());
+        liveData.getPlaylistPlayer().setValue(playlistPlayer);
+        MyApplication.setPlaylistPlayer(playlistPlayer);
+        this.playlistPlayer = playlistPlayer;
+    }
+
+    private void reCreatePlaylistPlayer() {
+        Log.d("debug", "reCreatePlaylistPlayer " + getClass().getSimpleName());
+
+        String playlistName;
+        List<SongItem> playlist;
+        SongItem currentSong;
+        int currentIndex = -1;
+        boolean shuffle = false;
+        int repeat = PlaylistPlayer.UN_REPEAT;
+        boolean play = false;
+
+        playlistName = playerModel.getPlaylistName().getValue();
+        playlist = playerModel.getItems().getValue();
+        currentSong = playerModel.getCurrentSong().getValue();
+
+        if(playerModel.getCurrentIndex().getValue() != null)
+            currentIndex = playerModel.getCurrentIndex().getValue();
+
+        if(playerModel.getShuffle().getValue() != null)
+            shuffle = playerModel.getShuffle().getValue();
+
+        if(playerModel.getRepeat().getValue() != null)
+            repeat = playerModel.getRepeat().getValue();
+
+        if(playerModel.getPlaying().getValue() != null)
+            play = playerModel.getPlaying().getValue();
+
+        createPlaylistPlayer(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
+    }
+
+    private void reloadPlaylist() {
+        Log.d("debug", "reloadPlaylist " + getClass().getSimpleName());
+        new PlaylistHandler.PlaylistLoader(this, playlistPlayer != null ? playlistPlayer.getPlaylist() : null,
+                new PlaylistHandler.PlaylistLoader.Callback() {
+                    @Override
+                    public void onResult(List<SongItem> playlist) {
+                        if(playlistPlayer == null) return;
+                        int index = playlistPlayer.getCurrentSongId() < 0 ? -1
+                                : Loader.findIndex(playlist, playlistPlayer.getCurrentSongId());
+                        playlistPlayer.setPlaylist(playlistPlayer.getPlaylistName(), playlist, index, false);
+                    }
+                }).execute(PlayerService.CURRENT_LISTING);
+    }
+
+    //
     private Notification createNotification() {
         // In this sample, we'll use the same text for the ticker and the expanded notification
         CharSequence text = "qwerty";
@@ -340,7 +440,6 @@ public class PlayerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
         Log.d("debug", "onBind " + getClass().getSimpleName());
         return mBinder;
     }
@@ -360,6 +459,12 @@ public class PlayerService extends Service {
     public void onRebind(Intent intent) {
         super.onRebind(intent);
         Log.d("debug", "onRebind " + getClass().getSimpleName());
+
+        if(MyApplication.getPlayerModel() == null && playerModel != null) {
+            MyApplication.setPlayerModel(playerModel);
+            MyApplication.setPlaylistPlayer(playlistPlayer);
+            reloadPlaylist();
+        }
     }
 
     @Override
@@ -383,11 +488,7 @@ public class PlayerService extends Service {
         super.onDestroy();
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
 
-        if(playlistPlayer != null) {
-            playlistPlayer.release();
-            liveData.getPlaylistPlayer().setValue(null);
-            MyApplication.setPlaylistPlayer(null);
-        }
+        unregisterOnMediaChange();
     }
 
 }

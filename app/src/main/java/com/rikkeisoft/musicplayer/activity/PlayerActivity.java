@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,9 +24,7 @@ import com.rikkeisoft.musicplayer.custom.view.PlayerBehavior;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.utils.DBHandler;
 import com.rikkeisoft.musicplayer.utils.Format;
-import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
@@ -72,7 +69,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             }
         });
 
-        playerModel.getTitle().observe(this, new Observer<String>() {
+        playerModel.getPlaylistName().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String string) {
                 if(string != null) tvTitle.setText(string);
@@ -135,24 +132,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         playerModel.getItems().observe(this, new Observer<List<SongItem>>() {
             @Override
             public void onChanged(@Nullable List<SongItem> songItems) {
-
                 getModel(PlaylistModel.class).getItems().setValue(songItems);
-
-                if(playerModel.getUpdatePlaylist().getValue() != null
-                        && playerModel.getUpdatePlaylist().getValue()) {
-
-                    playerModel.getUpdatePlaylist().setValue(false);
-
-                    Integer index = playerModel.getCurrentIndex().getValue();
-                    Boolean playing = playerModel.getPlaying().getValue();
-
-                    if(playlistPlayer != null)
-                        playlistPlayer.setPlaylist("Danh sách phát hiện tại",
-                            songItems,
-                            index != null ? index : -1,
-                            playing != null ? playing : false);
-                }
-
                 if(songItems == null || songItems.isEmpty()) finish();
             }
         });
