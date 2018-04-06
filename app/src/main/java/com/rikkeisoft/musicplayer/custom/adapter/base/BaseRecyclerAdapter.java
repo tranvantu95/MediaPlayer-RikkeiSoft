@@ -110,6 +110,7 @@ public abstract class BaseRecyclerAdapter<Item,
             this.item = item;
             this.position = position;
         }
+
     }
 
     public interface OnItemClickListener {

@@ -12,11 +12,14 @@ import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
+import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
+import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecyclerAdapter> {
 
@@ -65,11 +68,13 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
             @Override
             public void onItemClick(View itemView, int position) {
                 if(playlistPlayer != null) {
-                    String newTitle = getActivity().getTitle().toString();
+                    String oldPlaylistName = playlistPlayer.getPlaylistName();
+                    String newPlaylistName = getActivity().getTitle().toString();
+                    List<SongItem> oldPlaylist = playlistPlayer.getPlaylist();
+                    List<SongItem> newPlaylist = recyclerAdapter.getItems();
 
-                    if (!newTitle.equals(playlistPlayer.getPlaylistName())
-                            || playlistPlayer.getPlaylist().size() < recyclerAdapter.getItems().size())
-                        playlistPlayer.setPlaylist(newTitle, new ArrayList<>(recyclerAdapter.getItems()), position, true);
+                    if (!newPlaylistName.equals(oldPlaylistName) || !ArrayUtils.equalsList(oldPlaylist, newPlaylist))
+                        playlistPlayer.setPlaylist(newPlaylistName, new ArrayList<>(newPlaylist), position, true);
                     else
                         playlistPlayer.play(position, null);
 

@@ -56,10 +56,6 @@ public class AppbarActivity extends BaseActivity {
         else toolbar.setTitle(string);
     }
 
-//    public void getPlaylistName() {
-//
-//    }
-
     // Collapsing
     public void setCollapsingTitle(int resStringId) {
         setCollapsingTitle(getString(resStringId));

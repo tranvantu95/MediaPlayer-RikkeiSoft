@@ -13,5 +13,4 @@
         android:id="@id/action_sort_playlist"
         android:title="Sort List" />
 
-
 </menu>

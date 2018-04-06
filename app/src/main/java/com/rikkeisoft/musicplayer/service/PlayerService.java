@@ -24,6 +24,7 @@ import com.rikkeisoft.musicplayer.activity.MainActivity;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.utils.PlaylistHandler;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
@@ -85,8 +86,8 @@ public class PlayerService extends Service {
     public static final String DATA = "player_data";
     public static final String SHUFFLE_KEY = "shuffle";
     public static final String REPEAT_KEY = "repeat";
-    public static final String CURRENT_SONG_ID_KEY = "currentSongId";
     public static final String CURRENT_PLAYLIST_NAME_KEY = "currentPlaylistName";
+    public static final String CURRENT_SONG_ID_KEY = "currentSongId";
     public static final String CURRENT_POSITION_KEY = "currentPosition";
 
     public static final String CURRENT_LISTING = "Danh sách phát hiện tại";
@@ -187,16 +188,17 @@ public class PlayerService extends Service {
         }
         else {
             setLivePlayerModel(MyApplication.getPlayerModel());
-            setLivePlaylistPlayer(MyApplication.getPlaylistPlayer());
+
+            if(MyApplication.getPlaylistPlayer() == null) restorePlaylistPlayer();
+            else setLivePlaylistPlayer(MyApplication.getPlaylistPlayer());
         }
     }
 
     private void create(List<SongItem> playlist) {
-        // a little bug (if database incorrect) on song fragment item click
         String playlistName = preferences.getString(CURRENT_PLAYLIST_NAME_KEY, null);
 
         int currentSongId = preferences.getInt(CURRENT_SONG_ID_KEY, -1);
-        int currentIndex = currentSongId != -1 ? Loader.findIndex(playlist, currentSongId) : -1;
+        int currentIndex = currentSongId != -1 ? ArrayUtils.findIndex(playlist, currentSongId) : -1;
         SongItem currentSong = currentIndex != -1 ? playlist.get(currentIndex) : null;
 
         boolean shuffle = preferences.getBoolean(SHUFFLE_KEY, false);
@@ -208,6 +210,7 @@ public class PlayerService extends Service {
         createPlaylistPlayer(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
     }
 
+    //
     private void createPlayerModel(String playlistName, List<SongItem> playlist, SongItem currentSong,
                                    int currentIndex, boolean shuffle, int repeat, boolean play) {
         Log.d("debug", "CreatePlayerModel " + getClass().getSimpleName());
@@ -325,11 +328,12 @@ public class PlayerService extends Service {
             }
 
             @Override
-            public void onRelease(PlaylistPlayer _playlistPlayer) {
+            public void onRelease(PlaylistPlayer playlistPlayer) {
                 Log.d("debug", "---onRelease");
+                setLivePlaylistPlayer(null);
 
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt(CURRENT_POSITION_KEY, _playlistPlayer.getCurrentPosition());
+                editor.putInt(CURRENT_POSITION_KEY, playlistPlayer.getCurrentPosition());
                 editor.apply();
             }
 
@@ -339,8 +343,7 @@ public class PlayerService extends Service {
             public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
                 Log.d("debug", "---onError");
                 mediaPlayer.release();
-                setLivePlaylistPlayer(null);
-                reCreatePlaylistPlayer();
+                restorePlaylistPlayer();
                 return true;
             }
         });
@@ -350,6 +353,7 @@ public class PlayerService extends Service {
         setLivePlaylistPlayer(playlistPlayer);
     }
 
+    //
     private void setLivePlayerModel(PlayerModel playerModel) {
         Log.d("debug", "setLivePlayerModel " + getClass().getSimpleName());
         liveData.getPlayerModel().setValue(playerModel);
@@ -364,8 +368,9 @@ public class PlayerService extends Service {
         this.playlistPlayer = playlistPlayer;
     }
 
-    private void reCreatePlaylistPlayer() {
-        Log.d("debug", "reCreatePlaylistPlayer " + getClass().getSimpleName());
+    //
+    private void restorePlaylistPlayer() {
+        Log.d("debug", "restorePlaylistPlayer " + getClass().getSimpleName());
 
         String playlistName;
         List<SongItem> playlist;
@@ -402,7 +407,7 @@ public class PlayerService extends Service {
                     public void onResult(List<SongItem> playlist) {
                         if(playlistPlayer == null) return;
                         int index = playlistPlayer.getCurrentSongId() < 0 ? -1
-                                : Loader.findIndex(playlist, playlistPlayer.getCurrentSongId());
+                                : ArrayUtils.findIndex(playlist, playlistPlayer.getCurrentSongId());
                         playlistPlayer.setPlaylist(playlistPlayer.getPlaylistName(), playlist, index, false);
                     }
                 }).execute(PlayerService.CURRENT_LISTING);
@@ -489,6 +494,8 @@ public class PlayerService extends Service {
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
 
         unregisterOnMediaChange();
+
+        playlistPlayer.release();
     }
 
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 
@@ -59,6 +60,7 @@ public class MySQLite extends SQLiteOpenHelper {
 
     }
 
+    @NonNull
     public List<SongItem> getPlaylist(String playlistName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + KEY_SONG_ID + " FROM " + TABLE_SONG

@@ -48,8 +48,10 @@ public class Loader {
         return isLoaded;
     }
 
-    //
-    private long latestTimeClearCache; // for playerService
+    /* Because playerService lifecycle different application lifecycle
+    * --> registerOnMediaChange for playerService and application
+    * --> clearCache at playerService and application */
+    private long latestTimeClearCache;
 
     //
     public void clearCache() {
@@ -88,21 +90,21 @@ public class Loader {
 
     //
     public SongItem findSong(int songId) {
-        return findItem(getSongs(), songId);
+        return ArrayUtils.findItem(getSongs(), songId);
     }
 
     public AlbumItem findAlbum(int albumId) {
-        return findItem(getAlbums(), albumId);
+        return ArrayUtils.findItem(getAlbums(), albumId);
     }
 
     public ArtistItem findArtist(int artistId) {
-        return findItem(getArtists(), artistId);
+        return ArrayUtils.findItem(getArtists(), artistId);
     }
 
     //
     @NonNull
     public List<SongItem> findSongsOfAlbum(AlbumItem albumItem) {
-        return findItems(getSongs(), albumItem, new FindItems<SongItem, AlbumItem>() {
+        return ArrayUtils.findItems(getSongs(), albumItem, new ArrayUtils.FindItems<SongItem, AlbumItem>() {
             @Override
             public int getId(SongItem song) {
                 return song.getAlbumId();
@@ -117,7 +119,7 @@ public class Loader {
 
     @NonNull
     public List<SongItem> findSongsOfArtist(ArtistItem artistItem) {
-        return findItems(getSongs(), artistItem, new FindItems<SongItem, ArtistItem>() {
+        return ArrayUtils.findItems(getSongs(), artistItem, new ArrayUtils.FindItems<SongItem, ArtistItem>() {
             @Override
             public int getId(SongItem song) {
                 return song.getArtistId();
@@ -159,45 +161,6 @@ public class Loader {
         }
 
         return result;
-    }
-
-    //
-    public static <Item extends BaseItem> int findIndex(List<Item> items, int id) {
-        for(int i = items.size() - 1; i >= 0; i--) {
-            if(id == items.get(i).getId()) return i;
-        }
-
-        return -1;
-    }
-
-    private static <Item extends BaseItem> Item findItem(List<Item> items, int id) {
-        for(int i = items.size() - 1; i >= 0; i--) {
-            Item item = items.get(i);
-            if(id == item.getId()) return item;
-        }
-
-        return null;
-    }
-
-    @NonNull
-    private static <Item extends BaseItem, Item2 extends BaseItem> List<Item> findItems(
-            List<Item> items, Item2 item2, FindItems<Item, Item2> findItems) {
-        List<Item> _items = new ArrayList<>();
-
-        for(int i = items.size() - 1; i >= 0; i--) {
-            Item item = items.get(i);
-            if(item2.getId() == findItems.getId(item)) {
-                findItems.linked(item, item2);
-                _items.add(0, item);
-            }
-        }
-
-        return _items;
-    }
-
-    private interface FindItems<Item, Item2> {
-        int getId(Item item);
-        void linked(Item item, Item2 item2);
     }
 
     //

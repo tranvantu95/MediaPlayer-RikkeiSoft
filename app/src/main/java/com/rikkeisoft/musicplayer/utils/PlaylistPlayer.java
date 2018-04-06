@@ -240,7 +240,7 @@ public class PlaylistPlayer extends MediaPlayer {
             setDataSource(getPath(index));
             prepare();
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
             ex.printStackTrace();
             callback.onNotFoundData(this, playlist.get(index), index);
         }

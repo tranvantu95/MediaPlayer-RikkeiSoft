@@ -1,29 +1,21 @@
 package com.rikkeisoft.musicplayer.activity.fragment;
 
-import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
-import com.rikkeisoft.musicplayer.custom.view.MyLinearLayoutManager;
-import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 import java.util.List;
-
-import me.henrytao.smoothappbarlayout.SmoothAppBarLayout;
 
 public class PlaylistFragment extends SongsFragment {
 
@@ -39,7 +31,9 @@ public class PlaylistFragment extends SongsFragment {
 
     private PlaylistModel playlistModel;
 
-    private int currentIndex = -1;
+    private SongItem currentSong;
+
+    private boolean first;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,30 +41,37 @@ public class PlaylistFragment extends SongsFragment {
 
         setTypeView(SwitchRecyclerAdapter.LIST_VIEW);
 
+        first = true;
     }
 
     @Override
-    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
-        super.onPlayerModelCreated(playerModel);
-
-        playerModel.getCurrentIndex().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(@Nullable Integer integer) {
-                if(integer != null) gotoPos(integer);
-            }
-        });
+    protected void onCurrentSongChange(@NonNull SongItem songItem) {
+        super.onCurrentSongChange(songItem);
+        currentSong = songItem;
+        gotoCurrentSong(0);
     }
 
-    private void gotoPos(Integer position) {
-        currentIndex = position;
-        if(position >= 0 && position < recyclerAdapter.getItemCount() && recyclerView != null) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("debug", "gotoPos " + currentIndex + " PlaylistFragment");
-                    recyclerView.smoothScrollToPosition(currentIndex);
-                }
-            }, 300);
+    private Handler handler = new Handler();
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            if(recyclerView != null) {
+                int index = recyclerAdapter.getItems().indexOf(currentSong);
+                Log.d("debug", "gotoCurrentSong " + index + " PlaylistFragment");
+                recyclerView.smoothScrollToPosition(index);
+                first = false;
+            }
+        }
+    };
+
+    protected void gotoCurrentSong(int delay) {
+        if(currentSong != null && recyclerAdapter.getItems().contains(currentSong) && recyclerView != null) {
+            if(delay == 0) runnable.run();
+            else {
+                handler.removeCallbacks(runnable);
+                handler.postDelayed(runnable, delay);
+            }
         }
     }
 
@@ -78,14 +79,14 @@ public class PlaylistFragment extends SongsFragment {
     protected void updateRecyclerAdapter(List<SongItem> songItems) {
         super.updateRecyclerAdapter(songItems);
 
-        gotoPos(currentIndex);
+        if(first) gotoCurrentSong(300);
     }
 
     @Override
     protected void updateRecyclerView() {
         super.updateRecyclerView();
 
-        gotoPos(currentIndex);
+        if(first) gotoCurrentSong(500);
     }
 
     @Override
@@ -93,6 +94,7 @@ public class PlaylistFragment extends SongsFragment {
         return new SongsRecyclerAdapter(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
+                Log.d("debug", "---play " + position + " PlaylistFragment");
                 if(playlistPlayer != null) playlistPlayer.play(position, playCallback);
             }
         });

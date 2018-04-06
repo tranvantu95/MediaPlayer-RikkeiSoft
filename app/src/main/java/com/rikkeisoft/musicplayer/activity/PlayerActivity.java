@@ -19,6 +19,7 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.fragment.PlaylistFragment;
+import com.rikkeisoft.musicplayer.activity.fragment.SortPlaylistFragment;
 import com.rikkeisoft.musicplayer.custom.view.CircularSeekBar;
 import com.rikkeisoft.musicplayer.custom.view.PlayerBehavior;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
@@ -272,6 +273,19 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
+            case R.id.action_sort_playlist:
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                SortPlaylistFragment fragment = (SortPlaylistFragment) fragmentManager.findFragmentByTag("SortPlaylistFragment");
+                if(fragment == null) fragment = SortPlaylistFragment.newInstance(BaseFragment.ACTIVITY_MODEL);
+
+                if(!fragment.isAdded()) {
+                    fragmentManager.beginTransaction()
+                            .add(android.R.id.content, fragment, "SortPlaylistFragment")
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
