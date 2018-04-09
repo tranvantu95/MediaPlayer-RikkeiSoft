@@ -1,4 +1,4 @@
-package com.rikkeisoft.musicplayer.utils;
+package com.rikkeisoft.musicplayer.player;
 
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class PlaylistPlayer extends MediaPlayer {
 
             callback.onPlaylistChange(this, playlistName, playlist);
 
-            setCurrentIndex(index);
+            setCurrentIndex(index, true);
 
             if(shuffle) createShuffleList();
 
@@ -68,6 +69,34 @@ public class PlaylistPlayer extends MediaPlayer {
                 else {
                     setReady(false);
                     play(index, null);
+                }
+            }
+
+        }
+    }
+
+    public void setPlaylist(String playlistName, List<SongItem> playlist, SongItem song, boolean mustPlay) {
+        if(playlist != null) {
+
+            this.playlistName = playlistName;
+
+            int oldSongId = getCurrentSongId();
+
+            this.playlist = playlist;
+
+            callback.onPlaylistChange(this, playlistName, playlist);
+
+            setCurrentSong(song, true);
+
+            if(shuffle) createShuffleList();
+
+            if(mustPlay) {
+                if (getCurrentSongId() == oldSongId && oldSongId != -1) {
+                    resume();
+                }
+                else {
+                    setReady(false);
+                    play(song, null);
                 }
             }
 
@@ -164,20 +193,24 @@ public class PlaylistPlayer extends MediaPlayer {
         callback.onReadyChange(this, ready);
     }
 
-    private void setCurrentIndex(int index) {
+    private void setCurrentIndex(int index, boolean b) {
         if(currentIndex != index) {
             currentIndex = index;
             callback.onCurrentIndexChange(this, index);
         }
 
-        SongItem song = findCurrentSong();
+        if(b) setCurrentSong(findCurrentSong(), false);
+    }
 
+    private void setCurrentSong(SongItem song, boolean b) {
         if(currentSong == null && song != null || currentSong != null && !currentSong.equals(song)) {
             currentSong = song;
             callback.onCurrentSongChange(this, song);
+
+            if(song == null) stop();
         }
 
-        if(song == null) stop();
+        if(b) setCurrentIndex(findCurrentIndex(), false);
     }
 
     @Override
@@ -246,13 +279,25 @@ public class PlaylistPlayer extends MediaPlayer {
         }
     }
 
+    private void prepare(SongItem song) {
+        reset();
+        try {
+            setDataSource(song.getPath());
+            prepare();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            callback.onNotFoundData(this, song, playlist.indexOf(song));
+        }
+    }
+
     public void simpleHandleNotFoundData(int index) {
         playlist.remove(index);
         setPlaylist(playlistName, playlist, index, true);
     }
 
     public void play(int index, PlayCallback callback) {
-        if(!isValidateIndex(playlist, index)) {
+        if(!ArrayUtils.isValidateIndex(playlist, index)) {
             Log.d("debug", "index out of bound " + getClass().getSimpleName());
             return;
         }
@@ -273,11 +318,40 @@ public class PlaylistPlayer extends MediaPlayer {
             else if(callback != null) callback.onNotReady(this);
         }
 
-        setCurrentIndex(index);
+        setCurrentIndex(index, true);
 
         setPlaying(true);
 
         prepare(index);
+    }
+
+    public void play(SongItem song, PlayCallback callback) {
+        if(song == null) {
+            Log.d("debug", "song is null " + getClass().getSimpleName());
+            return;
+        }
+
+        if(song.equals(currentSong)) {
+            if(preparing) {
+                if(callback != null) callback.onPreparing(this);
+                return;
+            }
+            else if(ready) {
+                if (isPlaying()) {
+                    if(callback != null) callback.onPlaying(this);
+                }
+                else if(callback != null) callback.onPaused(this);
+                else start();
+                return;
+            }
+            else if(callback != null) callback.onNotReady(this);
+        }
+
+        setCurrentSong(song, true);
+
+        setPlaying(true);
+
+        prepare(song);
     }
 
     public interface PlayCallback {
@@ -313,7 +387,7 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     private void playShuffle(int index, PlayCallback playCallback) {
-        if(!isValidateIndex(shuffleList, index)) {
+        if(!ArrayUtils.isValidateIndex(shuffleList, index)) {
             Log.d("debug", "index out of bound " + getClass().getSimpleName());
             return;
         }
@@ -468,6 +542,10 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     //
+    public int findCurrentIndex() {
+        return playlist.indexOf(currentSong);
+    }
+
     public SongItem findCurrentSong() {
         if(!isValidateCurrentIndex()) return null;
         return playlist.get(currentIndex);
@@ -479,11 +557,7 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     private boolean isValidateCurrentIndex() {
-        return isValidateIndex(playlist, currentIndex);
-    }
-
-    public static boolean isValidateIndex(List list, int index) {
-        return index >= 0 && index < list.size();
+        return ArrayUtils.isValidateIndex(playlist, currentIndex);
     }
 
     //

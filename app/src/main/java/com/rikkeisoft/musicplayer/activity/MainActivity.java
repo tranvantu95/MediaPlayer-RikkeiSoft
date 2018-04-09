@@ -17,7 +17,7 @@ import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.Loader;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class MainActivity extends MyActivity {
 

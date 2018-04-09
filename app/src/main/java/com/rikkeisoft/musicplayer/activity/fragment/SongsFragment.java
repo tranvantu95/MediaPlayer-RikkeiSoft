@@ -11,12 +11,10 @@ import com.rikkeisoft.musicplayer.activity.PlayerActivity;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
-import com.rikkeisoft.musicplayer.model.PlayerModel;
-import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

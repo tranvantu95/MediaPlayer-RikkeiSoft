@@ -54,9 +54,9 @@ public class ArrayUtils {
     public static <T extends BaseItem> boolean equalsList(List<T> oldList, List<T> newList) {
         if(oldList.size() != newList.size()) return false;
 
-        int size = oldList.size();
-        for(int i = 0; i < size; i++)
-            if(oldList.get(i).getId() != newList.get(i).getId()) return false;
+//        int size = oldList.size();
+//        for(int i = 0; i < size; i++)
+//            if(oldList.get(i).getId() != newList.get(i).getId()) return false;
 
         return true;
     }
@@ -66,35 +66,25 @@ public class ArrayUtils {
     public static  <T extends BaseItem> List<T> searchList(List<T> rootList, List<T> oldList) {
         List<T> newList = new ArrayList<>();
 
-        //
-//        int rootSize = rootList.size();
-//        for(int i = 0; i < rootSize; i++) {
-//            T item = rootList.get(i);
-//            int oldSize = oldList.size();
-//            if(oldSize == 0) break;
-//            for(int j = 0; j < oldSize; j++) {
-//                if (oldList.get(j).getId() == item.getId()) {
-//                    newList.add(item);
-//                    oldList.remove(j);
-//                    break;
-//                }
-//            }
-//        }
-
-        //
         int oldSize = oldList.size();
         for(int i = 0; i < oldSize; i++) {
-            T item = oldList.get(i);
+            T oldItem = oldList.get(i);
             int rootSize = rootList.size();
             for(int j = 0; j < rootSize; j++) {
-                if (rootList.get(j).getId() == item.getId()) {
-                    newList.add(rootList.get(j));
+                T newItem = rootList.get(j);
+                if (newItem.getId() == oldItem.getId()) {
+                    newList.add(newItem);
                     break;
                 }
             }
         }
 
         return newList;
+    }
+
+    //
+    public static boolean isValidateIndex(List list, int index) {
+        return index >= 0 && index < list.size();
     }
 
 }

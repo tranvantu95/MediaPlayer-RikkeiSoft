@@ -9,7 +9,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
 
 public class BottomPlayerController implements View.OnClickListener {
 

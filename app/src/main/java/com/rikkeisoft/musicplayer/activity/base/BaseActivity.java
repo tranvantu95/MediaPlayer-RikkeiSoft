@@ -32,7 +32,7 @@ import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.General;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -56,8 +56,7 @@ public class BaseActivity extends AppCompatActivity {
 
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
-                playlistPlayer = null;
-                playerModel = null;
+                onPlaylistPlayerCreated(null);
             }
         };
 

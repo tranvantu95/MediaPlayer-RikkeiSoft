@@ -14,7 +14,7 @@ import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class MyApplication extends Application {
 

@@ -14,13 +14,11 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.base.BaseFragment;
 import com.rikkeisoft.musicplayer.activity.base.MyActivity;
 import com.rikkeisoft.musicplayer.activity.fragment.SongsFragment;
-import com.rikkeisoft.musicplayer.model.AlbumsModel;
-import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.AlbumItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class AlbumActivity extends MyActivity {
 

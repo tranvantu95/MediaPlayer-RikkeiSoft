@@ -7,15 +7,18 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 
+import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.service.PlayerService;
 
 import java.util.Collections;
 
-public class SortPlaylistFragment extends PlaylistFragment {
+public class SortPlaylistFragment extends PlaylistFragment implements View.OnClickListener {
 
     public static SortPlaylistFragment newInstance(int modelOwner) {
         SortPlaylistFragment fragment = new SortPlaylistFragment();
@@ -26,6 +29,8 @@ public class SortPlaylistFragment extends PlaylistFragment {
 
         return fragment;
     }
+
+    private Toolbar toolbar;
 
     private ItemTouchHelper touchHelper;
 
@@ -140,8 +145,7 @@ public class SortPlaylistFragment extends PlaylistFragment {
         @Override
         public void run() {
             if(playlistPlayer != null) playlistPlayer.setPlaylist(PlayerService.CURRENT_LISTING,
-                    playlistPlayer.getPlaylist(), playlistPlayer.getPlaylist().indexOf(
-                            playlistPlayer.getCurrentSong()), false);
+                    playlistPlayer.getPlaylist(), playlistPlayer.findCurrentIndex(), false);
         }
     };
 
@@ -151,14 +155,44 @@ public class SortPlaylistFragment extends PlaylistFragment {
     }
 
     @Override
+    protected void onPlayerModelCreated(@NonNull PlayerModel playerModel) {
+        super.onPlayerModelCreated(playerModel);
+
+        playerModel.getPlaylistName().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                if(toolbar != null) toolbar.setTitle(s);
+            }
+        });
+    }
+
+    @Override
     protected void gotoCurrentSong(int delay) {}
+
+    @Override
+    protected int getFragmentLayoutId() {
+        return R.layout.fragment_sort_playlist;
+    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.setBackgroundColor(Color.WHITE);
+        toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setContentInsetStartWithNavigation(0);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().onBackPressed();
+            }
+        });
 
         touchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+        }
     }
 }

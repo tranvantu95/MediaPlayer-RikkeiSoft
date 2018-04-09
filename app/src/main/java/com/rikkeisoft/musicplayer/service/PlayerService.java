@@ -1,7 +1,5 @@
 package com.rikkeisoft.musicplayer.service;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -16,18 +14,18 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.rikkeisoft.musicplayer.R;
-import com.rikkeisoft.musicplayer.activity.MainActivity;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.player.PlayerNotification;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
-import com.rikkeisoft.musicplayer.utils.PlaylistHandler;
+import com.rikkeisoft.musicplayer.player.PlaylistHandler;
 import com.rikkeisoft.musicplayer.utils.Loader;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 import java.util.List;
 
@@ -78,9 +76,6 @@ public class PlayerService extends Service {
         Loader.getInstance().clearCache();
         reloadPlaylist();
     }
-
-    // handle on task remove
-    public static final String ACTION_KEEP_PLAYER_SERVICE = "com.rikkeisoft.musicplayer.action.KEEP_PLAYER_SERVICE";
 
     // data and database
     public static final String DATA = "player_data";
@@ -147,10 +142,21 @@ public class PlayerService extends Service {
     //
     private PlaylistPlayer playlistPlayer;
 
+    public PlaylistPlayer getPlaylistPlayer() {
+        return playlistPlayer;
+    }
+
     private PlayerModel playerModel;
 
+    public PlayerModel getPlayerModel() {
+        return playerModel;
+    }
+
     //
-    private Notification notification;
+    private PlayerNotification notification;
+
+    //
+    private boolean hasConnection, isShowingNotification;
 
     @Override
     public void onCreate() {
@@ -173,8 +179,6 @@ public class PlayerService extends Service {
 
         init();
 
-        notification = createNotification();
-        startForeground(1001, notification);
     }
 
     private void init() {
@@ -239,6 +243,10 @@ public class PlayerService extends Service {
             public void onPlayingChange(PlaylistPlayer playlistPlayer, boolean playing) {
                 Log.d("debug", "---onPlayingChange " + playing);
                 playerModel.getPlaying().setValue(playing);
+
+                //
+                notification.setPlay(playing);
+                showNotification();
             }
 
             @Override
@@ -277,6 +285,10 @@ public class PlayerService extends Service {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putInt(CURRENT_SONG_ID_KEY, song != null ? song.getId() : -1);
                 editor.apply();
+
+                //
+                notification.setSong(song);
+                showNotification();
             }
 
             @Override
@@ -351,6 +363,8 @@ public class PlayerService extends Service {
         playlistPlayer.initialize(playlistName, playlist, currentSong, currentIndex, shuffle, repeat, play);
 
         setLivePlaylistPlayer(playlistPlayer);
+
+        createNotification();
     }
 
     //
@@ -362,7 +376,7 @@ public class PlayerService extends Service {
     }
 
     private void setLivePlaylistPlayer(PlaylistPlayer playlistPlayer) {
-        Log.d("debug", "setLivePlaylistPlayer " + getClass().getSimpleName());
+        Log.d("debug", "setLivePlaylistPlayer " + (playlistPlayer != null) + " " + getClass().getSimpleName());
         liveData.getPlaylistPlayer().setValue(playlistPlayer);
         MyApplication.setPlaylistPlayer(playlistPlayer);
         this.playlistPlayer = playlistPlayer;
@@ -414,26 +428,36 @@ public class PlayerService extends Service {
     }
 
     //
-    private Notification createNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = "qwerty";
+    private void createNotification() {
+        notification = new PlayerNotification(this);
+        notification.setSong(playlistPlayer.getCurrentSong());
+        notification.setPlay(playlistPlayer.isRunning());
 
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+//        showNotification();
+    }
 
-        // Set the info for the views that show in the notification panel.
-        Notification notification = new Notification.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher_round)  // the status icon
-                .setTicker("ticker")  // the status text
-                .setWhen(System.currentTimeMillis())  // the time stamp
-                .setContentTitle("Title")  // the label of the entry
-                .setContentText("Content")  // the contents of the entry
-                .setContentIntent(contentIntent)  // The intent to send when the entry is clicked
-                .build();
+    private void showNotification() {
+        isShowingNotification = true;
 
-        // Send the notification.
-        return notification;
+        if(playlistPlayer.isRunning())
+            startForeground(1001, notification.getNotification());
+        else {
+            stopForeground(false);
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(1001, notification.getNotification());
+        }
+    }
+
+    public void onDeleteNotification() {
+        isShowingNotification = false;
+        checkStopService();
+    }
+
+    private void checkStopService() {
+        if (!isShowingNotification && !hasConnection) {
+            Log.d("debug", "stopSelf " + getClass().getSimpleName());
+            stopSelf();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,17 +470,15 @@ public class PlayerService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d("debug", "onBind " + getClass().getSimpleName());
+        hasConnection = true;
         return mBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d("debug", "onUnbind " + getClass().getSimpleName());
-        if(playlistPlayer != null && !playlistPlayer.isRunning()) {
-            Log.d("debug", "stopSelf " + getClass().getSimpleName());
-            stopSelf();
-        }
-
+        hasConnection = false;
+        checkStopService();
         return true;
     }
 
@@ -464,6 +486,7 @@ public class PlayerService extends Service {
     public void onRebind(Intent intent) {
         super.onRebind(intent);
         Log.d("debug", "onRebind " + getClass().getSimpleName());
+        hasConnection = true;
 
         if(MyApplication.getPlayerModel() == null && playerModel != null) {
             MyApplication.setPlayerModel(playerModel);
@@ -477,15 +500,6 @@ public class PlayerService extends Service {
         super.onTaskRemoved(rootIntent);
         Log.d("debug", "onTaskRemoved " + getClass().getSimpleName());
 
-//        sendBroadcast(new Intent(ACTION_KEEP_PLAYER_SERVICE));
-
-//        if(playerModel != null && playerModel.getCurrentPosition().getValue() != null) {
-//            Log.d("debug", "save position " + getClass().getSimpleName());
-//
-//            SharedPreferences.Editor editor = preferences.edit();
-//            editor.putInt(CURRENT_POSITION_KEY, playerModel.getCurrentPosition().getValue());
-//            editor.apply();
-//        }
     }
 
     @Override

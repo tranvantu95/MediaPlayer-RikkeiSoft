@@ -1,4 +1,4 @@
-package com.rikkeisoft.musicplayer.utils;
+package com.rikkeisoft.musicplayer.player;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -7,6 +7,8 @@ import android.util.Log;
 import com.rikkeisoft.musicplayer.db.MySQLite;
 import com.rikkeisoft.musicplayer.model.base.BaseItem;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.utils.ArrayUtils;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.util.ArrayList;
 import java.util.List;

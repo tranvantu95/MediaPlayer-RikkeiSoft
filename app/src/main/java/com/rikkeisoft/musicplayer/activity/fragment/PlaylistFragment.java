@@ -13,7 +13,7 @@ import com.rikkeisoft.musicplayer.custom.adapter.base.SwitchRecyclerAdapter;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 import java.util.List;
 

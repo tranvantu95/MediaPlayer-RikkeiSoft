@@ -174,8 +174,8 @@ public class Loader {
 
         String[] projection = {
                 Media._ID,     // song id
-//                Media.TITLE,   // song name
-                Media.DISPLAY_NAME,
+                Media.TITLE,   // song name
+//                Media.DISPLAY_NAME,
                 Media.ALBUM_ID,
                 Media.ALBUM,
                 Media.ARTIST_ID,

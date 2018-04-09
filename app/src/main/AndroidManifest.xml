@@ -37,9 +37,12 @@
 
         <service android:name=".service.PlayerService" />
 
-        <receiver android:name=".app.KeepPlayerService" >
+        <receiver android:name=".player.PlayerReceiver" >
             <intent-filter>
-                <action android:name="com.rikkeisoft.musicplayer.action.KEEP_PLAYER_SERVICE" />
+                <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS" />
+                <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_NEXT" />
+                <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PLAY" />
+                <action android:name="com.rikkeisoft.musicplayer.action.DELETE_NOTIFICATION" />
             </intent-filter>
         </receiver>
 

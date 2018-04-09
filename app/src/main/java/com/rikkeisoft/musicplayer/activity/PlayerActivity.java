@@ -26,7 +26,7 @@ import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.PlaylistModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.Format;
-import com.rikkeisoft.musicplayer.utils.PlaylistPlayer;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 import java.util.List;
 
@@ -65,8 +65,8 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         playerModel.getCurrentSong().observe(this, new Observer<SongItem>() {
             @Override
             public void onChanged(@Nullable SongItem songItem) {
-                if(songItem != null) setTittle(songItem.getName());
-                else setTitle("");
+                if(songItem != null) setTitle(songItem.getName());
+                else setTitle(null);
             }
         });
 
