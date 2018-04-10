@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.rikkeisoft.musicplayer.activity.PlayerActivity;
+import com.rikkeisoft.musicplayer.activity.base.AppbarActivity;
 import com.rikkeisoft.musicplayer.activity.base.MyFragment;
 import com.rikkeisoft.musicplayer.custom.adapter.SongsRecyclerAdapter;
 import com.rikkeisoft.musicplayer.custom.adapter.base.BaseRecyclerAdapter;
@@ -67,7 +68,8 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
             public void onItemClick(View itemView, int position) {
                 if(playlistPlayer != null) {
                     String oldPlaylistName = playlistPlayer.getPlaylistName();
-                    String newPlaylistName = getActivity().getTitle().toString();
+                    String newPlaylistName = getActivity() instanceof AppbarActivity
+                            ? ((AppbarActivity) getActivity()).getTitle2() : "";
                     List<SongItem> oldPlaylist = playlistPlayer.getPlaylist();
                     List<SongItem> newPlaylist = recyclerAdapter.getItems();
 

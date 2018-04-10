@@ -41,7 +41,7 @@ public class ArtistsRecyclerAdapter extends MyRecyclerAdapter<ArtistItem, Artist
             tvInfo.setText(infoString);
 
             if(artistItem.getBitmap() != null) ivCover.setImageBitmap(artistItem.getBitmap());
-            else ivCover.setImageDrawable(ivCover.getContext().getResources().getDrawable(R.drawable.im_artist));
+            else ivCover.setImageResource(R.drawable.im_artist);
         }
     }
 }

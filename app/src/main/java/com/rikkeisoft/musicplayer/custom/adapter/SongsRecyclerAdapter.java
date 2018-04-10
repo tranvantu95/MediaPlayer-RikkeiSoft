@@ -37,7 +37,7 @@ public class SongsRecyclerAdapter extends MyRecyclerAdapter<SongItem, SongsRecyc
             tvInfo.setText(songItem.getArtistName());
 
             if(songItem.getBitmap() != null) ivCover.setImageBitmap(songItem.getBitmap());
-            else ivCover.setImageDrawable(ivCover.getContext().getResources().getDrawable(R.drawable.im_song));
+            else ivCover.setImageResource(R.drawable.im_song);
         }
     }
 }

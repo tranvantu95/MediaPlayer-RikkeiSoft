@@ -49,22 +49,38 @@ public class AppbarActivity extends BaseActivity {
     }
 
     public void setTitle(String string) {
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null) {
-            actionBar.setTitle(string);
+        if(collapsingToolbar != null && collapsingToolbar.isTitleEnabled()) {
+            collapsingToolbar.setTitle(string);
+            return;
         }
-        else toolbar.setTitle(string);
+
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(string);
+            return;
+        }
+
+        if(toolbar != null) {
+            toolbar.setTitle(string);
+            return;
+        }
+
+        super.setTitle(string);
+    }
+
+    public String getTitle2() {
+        if(collapsingToolbar != null && collapsingToolbar.isTitleEnabled()
+                && collapsingToolbar.getTitle() != null)
+            return collapsingToolbar.getTitle().toString();
+
+        if(getSupportActionBar() != null && getSupportActionBar().getTitle() != null)
+            return getSupportActionBar().getTitle().toString();
+
+        if(toolbar != null && toolbar.getTitle() != null) return toolbar.getTitle().toString();
+
+        return getTitle() != null ? getTitle().toString() : "";
     }
 
     // Collapsing
-    public void setCollapsingTitle(int resStringId) {
-        setCollapsingTitle(getString(resStringId));
-    }
-
-    public void setCollapsingTitle(String string) {
-        collapsingToolbar.setTitle(string);
-    }
-
     public void setCollapsingTitleEnable(boolean enable) {
         collapsingToolbar.setTitleEnabled(enable);
     }

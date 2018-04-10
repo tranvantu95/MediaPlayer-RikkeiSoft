@@ -11,13 +11,13 @@
         android:layout_width="@dimen/song_item_image_size"
         android:layout_height="@dimen/song_item_image_size"
         android:padding="@dimen/divider_list"
-        android:background="?android:selectableItemBackground"
         app:srcCompat="@drawable/im_song"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="16dp">
+        android:paddingLeft="16dp"
+        android:background="?android:selectableItemBackground">
 
         <LinearLayout
             android:orientation="horizontal"

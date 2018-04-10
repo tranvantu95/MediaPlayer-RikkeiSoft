@@ -75,8 +75,7 @@ public abstract class MyRecyclerAdapter<Item extends BaseItem,
 
             if(item.getId() == recyclerAdapter.getCurrentId()) {
                 ivStatus.setVisibility(View.VISIBLE);
-                ivStatus.setImageDrawable(ivStatus.getContext().getResources().getDrawable(
-                        recyclerAdapter.isPlaying() ? R.drawable.ic_play_circle : R.drawable.ic_pause_circle));
+                ivStatus.setImageResource(recyclerAdapter.isPlaying() ? R.drawable.ic_play_circle : R.drawable.ic_pause_circle);
             }
             else ivStatus.setVisibility(View.GONE);
         }

@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,13 +18,15 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="8dp"
-            android:src="@mipmap/ic_launcher"
+            app:srcCompat="@drawable/im_song"
             android:adjustViewBounds="true"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:orientation="vertical" >
 
             <TextView
@@ -34,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:text="Title"
                 android:singleLine="true"
-                android:textColor="@android:color/white"
+                android:textColor="@color/colorWhite"
                 android:textSize="16sp" />
 
             <TextView
@@ -43,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:text="Info"
                 android:singleLine="true"
-                android:textColor="@android:color/white" />
+                android:textColor="@color/colorWhite" />
 
         </LinearLayout>
 
@@ -57,21 +58,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="4dp"
-                android:src="@drawable/ic_skip_previous" />
+                app:srcCompat="@drawable/ic_skip_previous" />
 
             <ImageView
                 android:id="@id/btn_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="4dp"
-                android:src="@drawable/ic_pause" />
+                app:srcCompat="@drawable/ic_pause" />
 
             <ImageView
                 android:id="@id/btn_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="4dp"
-                android:src="@drawable/ic_skip_next" />
+                app:srcCompat="@drawable/ic_skip_next" />
 
         </LinearLayout>
 

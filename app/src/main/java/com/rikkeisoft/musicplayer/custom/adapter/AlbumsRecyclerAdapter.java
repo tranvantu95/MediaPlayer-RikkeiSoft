@@ -36,7 +36,7 @@ public class AlbumsRecyclerAdapter extends MyRecyclerAdapter<AlbumItem, AlbumsRe
             tvInfo.setText(albumItem.getArtistName());
 
             if(albumItem.getBitmap() != null) ivCover.setImageBitmap(albumItem.getBitmap());
-            else ivCover.setImageDrawable(ivCover.getContext().getResources().getDrawable(R.drawable.im_album));
+            else ivCover.setImageResource(R.drawable.im_album);
         }
     }
 }

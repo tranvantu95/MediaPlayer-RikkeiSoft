@@ -70,14 +70,12 @@ public abstract class MyActivity extends SwitchListActivity {
 
                     if(songItem.getBitmap() != null)
                         bottomPlayerController.getIvCover().setImageBitmap(songItem.getBitmap());
-                    else bottomPlayerController.getIvCover().setImageDrawable(
-                            getResources().getDrawable(R.drawable.im_song));
+                    else bottomPlayerController.getIvCover().setImageResource(R.drawable.im_song);
                 }
                 else {
                     bottomPlayerController.getTvTitle().setText("");
                     bottomPlayerController.getTvInfo().setText("");
-                    bottomPlayerController.getIvCover().setImageDrawable(
-                            getResources().getDrawable(R.drawable.im_song));
+                    bottomPlayerController.getIvCover().setImageResource(R.drawable.im_song);
                 }
             }
         });
@@ -101,8 +99,8 @@ public abstract class MyActivity extends SwitchListActivity {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
                 if(aBoolean != null)
-                    bottomPlayerController.getBtnPlay().setImageDrawable(getResources()
-                        .getDrawable(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play));
+                    bottomPlayerController.getBtnPlay().setImageResource(aBoolean
+                            ? R.drawable.ic_pause : R.drawable.ic_play);
             }
         });
     }

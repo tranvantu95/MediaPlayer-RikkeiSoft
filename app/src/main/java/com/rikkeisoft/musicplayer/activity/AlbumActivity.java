@@ -93,7 +93,6 @@ public class AlbumActivity extends MyActivity {
             }
 
             setTitle(album.getName());
-            setCollapsingTitle(album.getName());
 
             if(album.getBitmap() != null) appbarImage.setImageBitmap(album.getBitmap());
 

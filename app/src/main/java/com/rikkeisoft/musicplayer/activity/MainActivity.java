@@ -1,5 +1,7 @@
 package com.rikkeisoft.musicplayer.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,8 +23,17 @@ import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class MainActivity extends MyActivity {
 
+    public static final int OPEN_PLAYER = 1;
+    private static String FLAG = "flag";
+
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
+
+    public static Intent createIntent(Context context, int flag) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(FLAG, flag);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +41,9 @@ public class MainActivity extends MyActivity {
         setContentView(R.layout.activity_main);
 
         init();
+
+        if(getIntent().getIntExtra(FLAG, 0) == OPEN_PLAYER)
+            startActivity(PlayerActivity.createIntent(this));
     }
 
     @Override

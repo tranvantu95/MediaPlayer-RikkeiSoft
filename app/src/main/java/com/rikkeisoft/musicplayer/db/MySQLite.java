@@ -88,14 +88,14 @@ public class MySQLite extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_PLAYLIST_NAME, playlistName);
-        db.insert(TABLE_PLAYLIST, "", values);
+        db.insert(TABLE_PLAYLIST, null, values);
 
         int size = songs.size();
         for(int i = 0; i < size; i++) {
 //            ContentValues values = new ContentValues();
 //            values.put(KEY_PLAYLIST_NAME, playlistName);
             values.put(KEY_SONG_ID, songs.get(i).getId());
-            db.insert(TABLE_SONG, "", values);
+            db.insert(TABLE_SONG, null, values);
         }
 
         db.close();

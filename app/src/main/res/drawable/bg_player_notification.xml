@@ -3,6 +3,6 @@
 
     <solid android:color="@color/colorCyan" />
 
-    <corners android:radius="1dp" />
+    <corners android:radius="2dp" />
 
 </shape>

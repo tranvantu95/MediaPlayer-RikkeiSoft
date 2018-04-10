@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
@@ -10,49 +11,59 @@
 
     <ImageView
         android:id="@id/iv_cover"
-        android:layout_width="72dp"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintTop_toTopOf="@+id/ll"
+        app:layout_constraintBottom_toBottomOf="@+id/ll"
         app:srcCompat="@drawable/im_song"
         android:adjustViewBounds="true"/>
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:selectableItemBackground">
+        android:id="@+id/ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/iv_cover"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="?android:selectableItemBackground"
+        android:minHeight="72dp"
+        android:orientation="vertical">
 
         <SeekBar
             android:id="@id/seek_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
-        <LinearLayout
-            android:orientation="horizontal"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="12dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
             android:gravity="center_vertical">
 
             <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/btn_play"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
                     android:text="this is song"
-                    android:textSize="16sp"
-                    android:maxLines="1"/>
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@id/tv_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="artist"
-                    android:maxLines="1"/>
+                    android:maxLines="1"
+                    android:text="artist" />
 
             </LinearLayout>
 
@@ -60,11 +71,13 @@
                 android:id="@id/btn_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                app:srcCompat="@drawable/ic_play"/>
+                android:layout_alignParentRight="true"
+                android:background="?android:selectableItemBackground"
+                android:padding="8dp"
+                app:srcCompat="@drawable/ic_play" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

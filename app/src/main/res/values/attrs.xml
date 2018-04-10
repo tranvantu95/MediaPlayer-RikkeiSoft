@@ -25,4 +25,12 @@
         <attr name="circle_fill" format="color"/>
     </declare-styleable>
 
+    <declare-styleable name="RatioLayout">
+        <attr name="lock" format="enum" >
+            <enum name="width" value="1" />
+            <enum name="height" value="2" />
+        </attr>
+        <attr name="ratio" format="float" />
+    </declare-styleable>
+
 </resources>

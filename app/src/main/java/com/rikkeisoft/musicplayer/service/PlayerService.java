@@ -1,5 +1,6 @@
 package com.rikkeisoft.musicplayer.service;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -9,10 +10,12 @@ import android.database.ContentObserver;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -30,6 +33,9 @@ import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 import java.util.List;
 
 public class PlayerService extends Service {
+
+    // notification
+    private static final int NOTIFICATION_ID = 2310;
 
     // Media change listener
     private ContentObserver onMediaChange;
@@ -429,23 +435,44 @@ public class PlayerService extends Service {
 
     //
     private void createNotification() {
+        Log.d("debug", "createNotification " + getClass().getSimpleName());
         notification = new PlayerNotification(this);
         notification.setSong(playlistPlayer.getCurrentSong());
         notification.setPlay(playlistPlayer.isRunning());
-
-//        showNotification();
     }
 
     private void showNotification() {
         isShowingNotification = true;
 
         if(playlistPlayer.isRunning())
-            startForeground(1001, notification.getNotification());
+            startForeground(NOTIFICATION_ID, notification.getNotification());
         else {
-            stopForeground(false);
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(1001, notification.getNotification());
+            stopForeground(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP);
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification.getNotification());
         }
+    }
+
+    private void deleteNotification(){
+        stopForeground(true);
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
+    }
+
+    private boolean isShowingNotification() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager nm = (NotificationManager)
+                    getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if(nm != null) {
+                StatusBarNotification[] activeNotifications = nm.getActiveNotifications();
+
+                for (StatusBarNotification notification : activeNotifications)
+                    if(notification.getId() == NOTIFICATION_ID) return true;
+
+                return false;
+            }
+        }
+
+        return isShowingNotification;
     }
 
     public void onDeleteNotification() {
@@ -454,7 +481,8 @@ public class PlayerService extends Service {
     }
 
     private void checkStopService() {
-        if (!isShowingNotification && !hasConnection) {
+        if (!hasConnection && (playlistPlayer == null || !playlistPlayer.isRunning())
+                && !isShowingNotification()) {
             Log.d("debug", "stopSelf " + getClass().getSimpleName());
             stopSelf();
         }
@@ -507,9 +535,11 @@ public class PlayerService extends Service {
         super.onDestroy();
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
 
+        deleteNotification();
+
         unregisterOnMediaChange();
 
-        playlistPlayer.release();
+        if(playlistPlayer != null) playlistPlayer.release();
     }
 
 }

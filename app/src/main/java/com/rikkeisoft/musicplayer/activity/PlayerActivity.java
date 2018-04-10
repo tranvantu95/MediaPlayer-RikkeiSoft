@@ -94,16 +94,15 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         playerModel.getPlaying().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) btnPlay.setImageDrawable(getResources()
-                        .getDrawable(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play));
+                if(aBoolean != null) btnPlay.setImageResource(aBoolean ? R.drawable.ic_pause : R.drawable.ic_play);
             }
         });
 
         playerModel.getShuffle().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
-                if(aBoolean != null) btnShuffle.setImageDrawable(getResources()
-                        .getDrawable(aBoolean ? R.drawable.ic_shuffle : R.drawable.ic_shuffle_disabled));
+                if(aBoolean != null) btnShuffle.setImageResource(aBoolean
+                        ? R.drawable.ic_shuffle : R.drawable.ic_shuffle_disabled);
             }
         });
 
@@ -125,7 +124,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
                             id = R.drawable.ic_repeat_off;
                     }
 
-                    btnRepeat.setImageDrawable(getResources().getDrawable(id));
+                    btnRepeat.setImageResource(id);
                 }
             }
         });

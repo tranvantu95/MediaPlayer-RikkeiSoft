@@ -91,7 +91,6 @@ public class ArtistActivity extends MyActivity {
             }
 
             setTitle(artist.getName());
-            setCollapsingTitle(artist.getName());
 
             if(artist.getBitmap() != null) appbarImage.setImageBitmap(artist.getBitmap());
 
