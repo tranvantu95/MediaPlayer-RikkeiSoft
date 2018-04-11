@@ -48,9 +48,6 @@ public class Loader {
         return isLoaded;
     }
 
-    /* Because playerService lifecycle different application lifecycle
-    * --> registerOnMediaChange for playerService and application
-    * --> clearCache at playerService and application */
     private long latestTimeClearCache;
 
     //

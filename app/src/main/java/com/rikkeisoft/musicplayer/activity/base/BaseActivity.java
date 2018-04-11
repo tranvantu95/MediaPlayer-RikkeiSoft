@@ -52,12 +52,12 @@ public class BaseActivity extends AppCompatActivity {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
                 PlayerService playerService = binder.getService();
                 onPlayerServiceConnected(playerService);
+
+                playerService.thisUnbindThis();
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                onPlaylistPlayerCreated(null);
-            }
+            public void onServiceDisconnected(ComponentName componentName) {}
         };
 
         Intent intent = new Intent(this, PlayerService.class);

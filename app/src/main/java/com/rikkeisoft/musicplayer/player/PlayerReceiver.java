@@ -27,24 +27,7 @@ public class PlayerReceiver extends BroadcastReceiver {
         PlayerService playerService = binder != null ? binder.getService() : null;
         PlaylistPlayer playlistPlayer = playerService != null ? playerService.getPlaylistPlayer() : null;
 
-        Log.d("debug", "playerService " + (playerService != null) + " " + getClass().getSimpleName());
-
-        if(playerService != null) handleAction(playerService, playlistPlayer, intent.getAction());
-        else context.bindService(new Intent(context, PlayerService.class), new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-                PlayerService playerService = binder.getService();
-                PlaylistPlayer playlistPlayer = playerService.getPlaylistPlayer();
-
-                handleAction(playerService, playlistPlayer, intent.getAction());
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        }, Context.BIND_AUTO_CREATE);
+        handleAction(playerService, playlistPlayer, intent.getAction());
     }
 
     private void handleAction(PlayerService playerService, PlaylistPlayer playlistPlayer, String action) {

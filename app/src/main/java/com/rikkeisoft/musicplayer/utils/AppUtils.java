@@ -49,11 +49,11 @@ public class AppUtils {
     }
 
     // Service
-    public static boolean isServiceRunning(Context context, Class _class) {
+    public static boolean isServiceRunning(Context context, Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         if(manager != null)
             for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-                if(_class.getName().equals(service.service.getClassName())) return true;
+                if(serviceClass.getName().equals(service.service.getClassName())) return true;
 
         return false;
     }

@@ -462,7 +462,6 @@ public class PlaylistPlayer extends MediaPlayer {
     }
 
     public void resume() {
-        if(!isValidateCurrentIndex()) currentIndex = 0;
         if(!ready) play(currentIndex, null);
         else if(!isPlaying()) start();
     }
@@ -472,9 +471,16 @@ public class PlaylistPlayer extends MediaPlayer {
         resume();
     }
 
-    public void togglePlay() {
-        if(!running) resume();
+    public void togglePlay(boolean fixIndex) {
+        if(!running) {
+            if(fixIndex && !isValidateCurrentIndex()) currentIndex = 0;
+            resume();
+        }
         else pause();
+    }
+
+    public void togglePlay() {
+        togglePlay(false);
     }
 
     public void toggleShuffle() {
