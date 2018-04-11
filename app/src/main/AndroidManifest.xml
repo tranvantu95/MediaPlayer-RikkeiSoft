@@ -38,6 +38,8 @@
 
         <service android:name=".service.PlayerService" />
 
+        <service android:name=".service.NotificationService" />
+
         <receiver android:name=".player.PlayerReceiver" >
             <intent-filter>
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS" />

@@ -1,6 +1,5 @@
 package com.rikkeisoft.musicplayer.service;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.ComponentName;
@@ -12,14 +11,11 @@ import android.database.ContentObserver;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
-import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -35,9 +31,6 @@ import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 import java.util.List;
 
 public class PlayerService extends Service {
-
-    // notification
-    private static final int NOTIFICATION_ID = 2310;
 
     // Media change listener
     private ContentObserver onMediaChange;
@@ -86,14 +79,12 @@ public class PlayerService extends Service {
     }
 
     // data and database
-    public static final String DATA = "player_data";
-    public static final String SHUFFLE_KEY = "shuffle";
-    public static final String REPEAT_KEY = "repeat";
-    public static final String CURRENT_PLAYLIST_NAME_KEY = "currentPlaylistName";
-    public static final String CURRENT_SONG_ID_KEY = "currentSongId";
-    public static final String CURRENT_POSITION_KEY = "currentPosition";
-
-    public static final String IS_SHOWING_NOTIFICATION_KEY = "isShowingNotification";
+    private static final String DATA = "player_data";
+    private static final String SHUFFLE_KEY = "shuffle";
+    private static final String REPEAT_KEY = "repeat";
+    private static final String CURRENT_PLAYLIST_NAME_KEY = "currentPlaylistName";
+    private static final String CURRENT_SONG_ID_KEY = "currentSongId";
+    private static final String CURRENT_POSITION_KEY = "currentPosition";
 
     public static final String CURRENT_LISTING = "Danh sách phát hiện tại";
 
@@ -163,10 +154,12 @@ public class PlayerService extends Service {
     }
 
     //
-    private PlayerNotification notification;
+    private ServiceConnection notificationConnection;
+    private NotificationService notificationService;
+    private PlayerNotification playerNotification;
 
     //
-    private boolean started, hasConnection, isShowingNotification;
+    private boolean started, hasConnection;
 
     @Override
     public void onCreate() {
@@ -255,8 +248,10 @@ public class PlayerService extends Service {
                 if(!playing) saveCurrentPosition(playlistPlayer);
 
                 //
-                notification.setPlay(playing);
-                if(playlistPlayer.getCurrentSong() != null) showNotification();
+                if(playerNotification != null) {
+                    playerNotification.setPlay(playing);
+                    if(playlistPlayer.getCurrentSong() != null) showNotification();
+                }
             }
 
             @Override
@@ -297,9 +292,11 @@ public class PlayerService extends Service {
                 editor.apply();
 
                 //
-                notification.setSong(song);
-                if(song != null) showNotification();
-                else deleteNotification();
+                if(playerNotification != null) {
+                    playerNotification.setSong(song);
+                    if(song != null) showNotification();
+                    else deleteNotification();
+                }
             }
 
             @Override
@@ -341,7 +338,7 @@ public class PlayerService extends Service {
             public void onNotFoundData(PlaylistPlayer playlistPlayer, SongItem song, int index) {
                 Log.d("debug", "---onNotFoundData " + song.getName());
                 playlistPlayer.simpleHandleNotFoundData(index);
-                Toast.makeText(getApplicationContext(), "Not Found Data " + song.getName(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "NotFoundData " + song.getName(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -373,7 +370,7 @@ public class PlayerService extends Service {
 
         setLivePlaylistPlayer(playlistPlayer);
 
-        createNotification();
+        bindNotificationService();
     }
 
     //
@@ -443,84 +440,63 @@ public class PlayerService extends Service {
         editor.apply();
     }
 
-    private void saveIsShowingNotification() {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(IS_SHOWING_NOTIFICATION_KEY, isShowingNotification);
-        editor.apply();
-    }
-
     //
-    private void createNotification() {
-        if(notification != null) return;
-        Log.d("debug", "createNotification " + getClass().getSimpleName());
+    private void bindNotificationService() {
+        if(notificationConnection != null) return;
+        Log.d("debug", "bindNotificationService " + getClass().getSimpleName());
 
-        notification = new PlayerNotification(this);
-        notification.setSong(playlistPlayer.getCurrentSong());
-        notification.setPlay(playlistPlayer.isRunning());
+        notificationConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
+                notificationService = binder.getService();
+                playerNotification = notificationService.getPlayerNotification();
 
-        isShowingNotification = preferences.getBoolean(IS_SHOWING_NOTIFICATION_KEY, false);
-        if(isShowingNotification) showNotification();
+                // linked playerNotification with NotificationService
+                notificationService.startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
+                // keep this service running when app closed
+                startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
+
+                if(playlistPlayer != null) {
+                    playerNotification.setSong(playlistPlayer.getCurrentSong());
+                    playerNotification.setPlay(playlistPlayer.isRunning());
+
+                    if(notificationService.isShowingNotification)
+                        notificationService.showNotification(playlistPlayer.isRunning());
+                    else notificationService.deleteNotification();
+                }
+                else notificationService.deleteNotification();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {}
+        };
+
+        bindService(new Intent(getApplicationContext(), NotificationService.class),
+                notificationConnection, BIND_AUTO_CREATE);
     }
 
     private void showNotification() {
-        if(!isShowingNotification) {
-            Log.d("debug", "showNotification " + getClass().getSimpleName());
-            isShowingNotification = true;
-            saveIsShowingNotification();
-        }
-
-        // always update ui
-        if(playlistPlayer.isRunning())
-            startForeground(NOTIFICATION_ID, notification.getNotification());
-        else {
-            stopForeground(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP);
-            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification.getNotification());
-        }
+        if(notificationService != null && playlistPlayer != null)
+            notificationService.showNotification(playlistPlayer.isRunning());
     }
 
     // this method not callback to onDeleteNotification()
     private void deleteNotification(){
-        Log.d("debug", "deleteNotification " + getClass().getSimpleName());
-        if(isShowingNotification) {
-            isShowingNotification = false;
-            saveIsShowingNotification();
-        }
-
+        if(notificationService != null) notificationService.deleteNotification();
         thisUnbindThis();
-
-        stopForeground(true);
-        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
     }
 
-    private boolean isShowingNotification() {
-        // notification can hidden by user settings
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            NotificationManager nm = (NotificationManager)
-                    getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-
-            if(nm != null) {
-                StatusBarNotification[] activeNotifications = nm.getActiveNotifications();
-
-                for (StatusBarNotification notification : activeNotifications)
-                    if(notification.getId() == NOTIFICATION_ID) return true;
-
-                return false;
-            }
-        }
-
-        return isShowingNotification;
-    }
-
-    // PlayerReceiver callback when notification deleted by user
+    // PlayerReceiver callback when playerNotification deleted by user
     public void onDeleteNotification() {
-        Log.d("debug", "onDeleteNotification " + getClass().getSimpleName());
-        if(isShowingNotification) {
-            isShowingNotification = false;
-            saveIsShowingNotification();
-        }
+        if(notificationService != null) notificationService.onDeleteNotification();
 
         if(thisBindThis) thisUnbindThis();
         else checkStopService();
+    }
+
+    private boolean isShowingNotification() {
+        return notificationService != null && notificationService.isShowingNotification();
     }
 
     private void checkStopService() {
@@ -619,7 +595,7 @@ public class PlayerService extends Service {
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onDestroy Service", Toast.LENGTH_LONG).show();
 
-        deleteNotification();
+        unbindService(notificationConnection);
 
         unregisterOnMediaChange();
 
