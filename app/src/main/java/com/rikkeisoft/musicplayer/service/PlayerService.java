@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.player.PlayerLockScreen;
 import com.rikkeisoft.musicplayer.player.PlayerNotification;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.player.PlaylistHandler;
@@ -191,6 +192,9 @@ public class PlayerService extends Service {
     private ServiceConnection notificationConnection;
     private NotificationService notificationService;
     private PlayerNotification playerNotification;
+
+    //
+    private PlayerLockScreen playerLockScreen;
 
     //
     private boolean started, hasConnection;
@@ -401,6 +405,9 @@ public class PlayerService extends Service {
         setLivePlaylistPlayer(playlistPlayer);
 
         bindNotificationService();
+
+        playerLockScreen = new PlayerLockScreen(getApplicationContext());
+
     }
 
     //
@@ -520,6 +527,8 @@ public class PlayerService extends Service {
                 notificationService.showNotification(playlistPlayer.isRunning());
             else notificationService.deleteNotification();
         }
+
+        playerLockScreen.updateMetadata(getApplicationContext(), playlistPlayer.getCurrentSong());
     }
 
     // PlayerReceiver callback when playerNotification deleted by user

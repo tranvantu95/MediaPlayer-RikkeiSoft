@@ -18,7 +18,6 @@ public class ActivityHandler extends AppCompatActivity {
 
     public static Intent createIntent(Context context, int flag) {
         Intent intent = new Intent(context, ActivityHandler.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(FLAG, flag);
         return intent;
     }
@@ -29,18 +28,18 @@ public class ActivityHandler extends AppCompatActivity {
         Log.d("debug", "---onCreate " + getClass().getSimpleName());
 
         // If this activity is the root activity of the task, the app is not running
-        if (isTaskRoot()) {
-            // Start the app before finishing
-            int flag = getIntent().getIntExtra(FLAG, 0);
-
-            switch (flag) {
-                case FLAG_OPEN_PLAYER:
-                    openPlayerFromRoot();
-                    break;
-            }
-
-            handled = true;
-        }
+//        if (isTaskRoot()) {
+//            // Start the app before finishing
+//            int flag = getIntent().getIntExtra(FLAG, 0);
+//
+//            switch (flag) {
+//                case FLAG_OPEN_PLAYER:
+//                    openPlayerFromRoot();
+//                    break;
+//            }
+//
+//            handled = true;
+//        }
 
         finish();
     }
@@ -69,28 +68,26 @@ public class ActivityHandler extends AppCompatActivity {
     }
 
     private void openPlayerFromRoot() {
-        Intent intent = MainActivity.createIntent(this, 0);
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        getApplicationContext().startActivity(intent);
+        Intent intent = MainActivity.createIntent(this, FLAG_OPEN_PLAYER);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     private void openPlayer() {
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         if(activityManager != null) {
-            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(Integer.MAX_VALUE);
-            Log.d("debug", "taskInfoList " + taskInfoList.size());
-            ActivityManager.RunningTaskInfo taskInfo = taskInfoList.get(1);
-            Log.d("debug", "numActivities " + taskInfo.numActivities);
-            Log.d("debug", "numRunning " + taskInfo.numRunning);
-            Log.d("debug", "baseActivity " + taskInfo.baseActivity.getClassName());
-            Log.d("debug", "topActivity " + taskInfo.topActivity.getClassName());
+            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(1);
+//            Log.d("debug", "taskInfoList " + taskInfoList.size());
+            ActivityManager.RunningTaskInfo taskInfo = taskInfoList.get(0);
+//            Log.d("debug", "numActivities " + taskInfo.numActivities);
+//            Log.d("debug", "numRunning " + taskInfo.numRunning);
+//            Log.d("debug", "baseActivity " + taskInfo.baseActivity.getClassName());
+//            Log.d("debug", "topActivity " + taskInfo.topActivity.getClassName());
 
-//            if("com.android.launcher3.Launcher".equals(taskInfo.topActivity.getClassName())) {
-//                openPlayerFromRoot();
-//            }
-//            else
+            if(taskInfo.topActivity.getClassName().contains("Launcher")) {
+                openPlayerFromRoot();
+            }
+            else
                 if(!PlayerActivity.class.getName().equals(taskInfo.topActivity.getClassName()))
                     startActivity(PlayerActivity.createIntent(this));
         }

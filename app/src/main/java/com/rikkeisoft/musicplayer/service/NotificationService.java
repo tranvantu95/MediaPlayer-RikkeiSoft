@@ -12,6 +12,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.rikkeisoft.musicplayer.player.PlayerLockScreen;
 import com.rikkeisoft.musicplayer.player.PlayerNotification;
 
 public class NotificationService extends Service {
