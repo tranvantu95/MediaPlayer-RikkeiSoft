@@ -52,8 +52,6 @@ public class BaseActivity extends AppCompatActivity {
                 PlayerService.LocalBinder binder = (PlayerService.LocalBinder) iBinder;
                 PlayerService playerService = binder.getService();
                 onPlayerServiceConnected(playerService);
-
-                playerService.thisUnbindThis();
             }
 
             @Override
@@ -249,6 +247,7 @@ public class BaseActivity extends AppCompatActivity {
 
     protected void onPermissionGranted() {
         Log.d("debug", "onPermissionGranted " + getClass().getSimpleName());
+        General.isPermissionGranted = true;
         hideRequestPermissionRationale();
 
         registerOnReceiverMediaChange();

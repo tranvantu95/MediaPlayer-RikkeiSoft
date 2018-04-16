@@ -11,8 +11,10 @@ import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Log;
 
 import com.rikkeisoft.musicplayer.R;
+import com.rikkeisoft.musicplayer.activity.MainActivity;
 
 public class AppUtils {
 
@@ -48,11 +50,13 @@ public class AppUtils {
         return fm.findFragmentByTag("android:switcher:" + viewPagerId + ":" + pagerPosition);
     }
 
+    // Activity
+
     // Service
     public static boolean isServiceRunning(Context context, Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        if(manager != null)
-            for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if(activityManager != null)
+            for(ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE))
                 if(serviceClass.getName().equals(service.service.getClassName())) return true;
 
         return false;

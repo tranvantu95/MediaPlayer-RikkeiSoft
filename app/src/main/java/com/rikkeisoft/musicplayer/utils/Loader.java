@@ -69,7 +69,7 @@ public class Loader {
         getSongs();
         getAlbums();
         getArtists();
-        isLoaded = true;
+        isLoaded = songs != null;
     }
 
     //
@@ -163,6 +163,8 @@ public class Loader {
     //
     @NonNull
     private List<SongItem> loadSongs() {
+        if(!General.isPermissionGranted) return new ArrayList<>();
+
         Log.d("debug", "---loadSongs");
 
         songs = new ArrayList<>();
@@ -220,6 +222,8 @@ public class Loader {
 
     @NonNull
     private List<AlbumItem> loadAlbums() {
+        if(!General.isPermissionGranted) return new ArrayList<>();
+
         Log.d("debug", "---loadAlbums");
 
         albums = new ArrayList<>();
@@ -268,6 +272,8 @@ public class Loader {
 
     @NonNull
     private List<ArtistItem> loadArtists() {
+        if(!General.isPermissionGranted) return new ArrayList<>();
+
         Log.d("debug", "---loadArtists");
 
         artists = new ArrayList<>();

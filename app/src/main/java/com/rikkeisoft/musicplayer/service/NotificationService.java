@@ -85,6 +85,8 @@ public class NotificationService extends Service {
     }
 
     public boolean isShowingNotification() {
+        if(!isShowingNotification) return false;
+
         // playerNotification can hidden by user settings
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager nm = (NotificationManager)
@@ -100,7 +102,7 @@ public class NotificationService extends Service {
             }
         }
 
-        return isShowingNotification;
+        return true;
     }
 
     private void saveIsShowingNotification() {

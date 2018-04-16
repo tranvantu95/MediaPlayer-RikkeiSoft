@@ -35,6 +35,9 @@
             android:name=".activity.PlayerActivity"
             android:label="@string/title_activity_player"
             android:theme="@style/AppTheme.NoActionBar"  />
+        <activity
+            android:name=".activity.NotificationActivity"
+            android:theme="@style/AppTheme.NoActionBar"  />
 
         <service android:name=".service.PlayerService" />
 

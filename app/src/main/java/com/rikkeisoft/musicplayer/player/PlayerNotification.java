@@ -17,6 +17,7 @@ import android.widget.RemoteViews;
 
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.MainActivity;
+import com.rikkeisoft.musicplayer.activity.PlayerActivity;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
 
@@ -48,9 +49,9 @@ public class PlayerNotification {
         }
 
         // The PendingIntent to launch our activity if the user selects this notification
-        Intent intent = MainActivity.createIntent(context, MainActivity.OPEN_PLAYER);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pMain = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(context, PlayerReceiver.class);
+        intent.setAction(PlayerReceiver.ACTION_SHOW_PLAYER);
+        PendingIntent pMain = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         intent = new Intent(context, PlayerReceiver.class);
         intent.setAction(PlayerReceiver.ACTION_DELETE_NOTIFICATION);

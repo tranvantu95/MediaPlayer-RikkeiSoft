@@ -2,9 +2,11 @@ package com.rikkeisoft.musicplayer.service;
 
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
@@ -25,6 +27,7 @@ import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.player.PlayerNotification;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.player.PlaylistHandler;
+import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
@@ -75,6 +78,37 @@ public class PlayerService extends Service {
     private void onMediaChange() {
         Log.d("debug", "onMediaChange " + getClass().getSimpleName());
         Loader.getInstance().clearCache();
+        reloadPlaylist();
+    }
+
+    // Media change listener
+    private BroadcastReceiver onReceiverMediaChange;
+
+    private void registerOnReceiverMediaChange() {
+        if(onReceiverMediaChange != null) return;
+        Log.d("debug", "registerOnReceiverMediaChange " + getClass().getSimpleName());
+
+        onReceiverMediaChange = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onReceiverMediaChange();
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(MyApplication.ACTION_MEDIA_CHANGE);
+        registerReceiver(onReceiverMediaChange, filter);
+    }
+
+    private void unregisterOnReceiverMediaChange() {
+        if(onReceiverMediaChange != null) {
+            Log.d("debug", "unregisterOnReceiverMediaChange " + getClass().getSimpleName());
+            unregisterReceiver(onReceiverMediaChange);
+            onReceiverMediaChange = null;
+        }
+    }
+
+    protected void onReceiverMediaChange() {
+        Log.d("debug", "onReceiverMediaChange " + getClass().getSimpleName());
         reloadPlaylist();
     }
 
@@ -166,7 +200,8 @@ public class PlayerService extends Service {
         super.onCreate();
         Log.d("debug", "onCreate " + getClass().getSimpleName());
 
-        registerOnMediaChange();
+//        registerOnMediaChange();
+        registerOnReceiverMediaChange();
 
 //        playerThread = new HandlerThread("playerThread");
 //        playerThread.start();
@@ -184,6 +219,8 @@ public class PlayerService extends Service {
 
     private void init() {
         if(MyApplication.getPlayerModel() == null) {
+            if(!General.isPermissionGranted) return;
+
             new PlaylistHandler.PlaylistLoader(getApplicationContext(), null, new PlaylistHandler.PlaylistLoader.Callback() {
                 @Override
                 public void onResult(List<SongItem> playlist) {
@@ -245,13 +282,10 @@ public class PlayerService extends Service {
                 Log.d("debug", "---onPlayingChange " + playing);
                 playerModel.getPlaying().setValue(playing);
 
-                if(!playing) saveCurrentPosition(playlistPlayer);
+                if(!playing) saveCurrentPosition(playlistPlayer.getCurrentPosition());
 
                 //
-                if(playerNotification != null) {
-                    playerNotification.setPlay(playing);
-                    if(playlistPlayer.getCurrentSong() != null) showNotification();
-                }
+                updateNotification();
             }
 
             @Override
@@ -292,11 +326,7 @@ public class PlayerService extends Service {
                 editor.apply();
 
                 //
-                if(playerNotification != null) {
-                    playerNotification.setSong(song);
-                    if(song != null) showNotification();
-                    else deleteNotification();
-                }
+                updateNotification();
             }
 
             @Override
@@ -352,7 +382,7 @@ public class PlayerService extends Service {
                 Log.d("debug", "---onRelease");
                 setLivePlaylistPlayer(null);
 
-                saveCurrentPosition(playlistPlayer);
+                saveCurrentPosition(playlistPlayer.getCurrentPosition());
             }
 
         });
@@ -434,9 +464,9 @@ public class PlayerService extends Service {
     }
 
     //
-    private void saveCurrentPosition(PlaylistPlayer playlistPlayer) {
+    private void saveCurrentPosition(int currentPosition) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(CURRENT_POSITION_KEY, playlistPlayer.getCurrentPosition());
+        editor.putInt(CURRENT_POSITION_KEY, currentPosition);
         editor.apply();
     }
 
@@ -454,18 +484,15 @@ public class PlayerService extends Service {
 
                 // linked playerNotification with NotificationService
                 notificationService.startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
+
                 // keep this service running when app closed
                 startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
 
-                if(playlistPlayer != null) {
-                    playerNotification.setSong(playlistPlayer.getCurrentSong());
-                    playerNotification.setPlay(playlistPlayer.isRunning());
-
-                    if(notificationService.isShowingNotification)
-                        notificationService.showNotification(playlistPlayer.isRunning());
-                    else notificationService.deleteNotification();
-                }
+                if(notificationService.isShowingNotification) updateNotification();
                 else notificationService.deleteNotification();
+
+                //
+                thisUnbindThis();
             }
 
             @Override
@@ -476,32 +503,42 @@ public class PlayerService extends Service {
                 notificationConnection, BIND_AUTO_CREATE);
     }
 
-    private void showNotification() {
-        if(notificationService != null && playlistPlayer != null)
-            notificationService.showNotification(playlistPlayer.isRunning());
+    private void unbindNotificationService() {
+        if(notificationConnection != null) {
+            Log.d("debug", "unbindNotificationService " + getClass().getSimpleName());
+            unbindService(notificationConnection);
+            notificationConnection = null;
+        }
     }
 
-    // this method not callback to onDeleteNotification()
-    private void deleteNotification(){
-        if(notificationService != null) notificationService.deleteNotification();
-        thisUnbindThis();
+    private void updateNotification() {
+        if(notificationService != null && playlistPlayer != null) {
+            playerNotification.setSong(playlistPlayer.getCurrentSong());
+            playerNotification.setPlay(playlistPlayer.isRunning());
+
+            if(playlistPlayer.getCurrentSong() != null)
+                notificationService.showNotification(playlistPlayer.isRunning());
+            else notificationService.deleteNotification();
+        }
     }
 
     // PlayerReceiver callback when playerNotification deleted by user
     public void onDeleteNotification() {
+        Log.d("debug", "onDeleteNotification " + getClass().getSimpleName());
         if(notificationService != null) notificationService.onDeleteNotification();
-
-        if(thisBindThis) thisUnbindThis();
-        else checkStopService();
+        checkStopService();
     }
 
     private boolean isShowingNotification() {
         return notificationService != null && notificationService.isShowingNotification();
     }
 
+    private boolean isPlaying() {
+        return playlistPlayer != null && playlistPlayer.isRunning();
+    }
+
     private void checkStopService() {
-        if (!hasConnection && (playlistPlayer == null || !playlistPlayer.isRunning())
-                && !isShowingNotification()) {
+        if (!hasConnection && !isPlaying() && !isShowingNotification()) {
             Log.d("debug", "stopSelf " + getClass().getSimpleName());
             stopSelf();
         }
@@ -544,7 +581,8 @@ public class PlayerService extends Service {
         Log.d("debug", "onStartCommand " + getClass().getSimpleName());
         started = true;
 
-        if(!hasConnection) thisBindThis(); // for PlayerReceiver peekService
+        if(!General.isPermissionGranted) stopSelf(); // when android auto startService
+        else if(!hasConnection) thisBindThis(); // for PlayerReceiver peekService
 
         return START_STICKY;
     }
@@ -586,18 +624,20 @@ public class PlayerService extends Service {
         Log.d("debug", "onTaskRemoved " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onTaskRemoved", Toast.LENGTH_LONG).show();
 
-        if(playlistPlayer != null) saveCurrentPosition(playlistPlayer);
+        if(playerModel != null && playerModel.getCurrentPosition().getValue() != null)
+            saveCurrentPosition(playerModel.getCurrentPosition().getValue());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
-        Toast.makeText(getApplicationContext(), "onDestroy Service", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "onDestroy " + getClass().getSimpleName(), Toast.LENGTH_LONG).show();
 
-        unbindService(notificationConnection);
+//        unregisterOnMediaChange();
+        unregisterOnReceiverMediaChange();
 
-        unregisterOnMediaChange();
+        unbindNotificationService();
 
         if(playlistPlayer != null) playlistPlayer.release();
     }
