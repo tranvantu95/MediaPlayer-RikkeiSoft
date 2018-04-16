@@ -36,7 +36,7 @@
             android:label="@string/title_activity_player"
             android:theme="@style/AppTheme.NoActionBar"  />
         <activity
-            android:name=".activity.NotificationActivity"
+            android:name=".activity.ActivityHandler"
             android:theme="@style/AppTheme.NoActionBar"  />
 
         <service android:name=".service.PlayerService" />
@@ -48,7 +48,6 @@
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS" />
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_NEXT" />
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PLAY" />
-                <action android:name="com.rikkeisoft.musicplayer.action.DELETE_NOTIFICATION" />
             </intent-filter>
         </receiver>
 

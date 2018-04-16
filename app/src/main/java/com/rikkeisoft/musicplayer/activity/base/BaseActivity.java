@@ -140,7 +140,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Log.d("debug", "onCreate " + getClass().getSimpleName());
 
     }
@@ -148,6 +147,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("debug", "onDestroy " + getClass().getSimpleName());
 
         unbindPlayerService();
         unregisterOnReceiverMediaChange();

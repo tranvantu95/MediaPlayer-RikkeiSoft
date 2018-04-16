@@ -23,15 +23,12 @@ import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 public class MainActivity extends MyActivity {
 
-    public static final int OPEN_PLAYER = 1;
-    private static String FLAG = "flag";
-
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
     public static Intent createIntent(Context context, int flag) {
         Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(FLAG, flag);
+        intent.putExtra(ActivityHandler.FLAG, flag);
         return intent;
     }
 
@@ -42,7 +39,9 @@ public class MainActivity extends MyActivity {
 
         init();
 
-        if(getIntent().getIntExtra(FLAG, 0) == OPEN_PLAYER)
+        int flag = getIntent().getIntExtra(ActivityHandler.FLAG, 0);
+
+        if(flag == ActivityHandler.FLAG_OPEN_PLAYER)
             startActivity(PlayerActivity.createIntent(this));
     }
 
