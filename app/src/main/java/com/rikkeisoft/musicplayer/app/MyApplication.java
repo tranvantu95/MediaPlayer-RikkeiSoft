@@ -1,11 +1,14 @@
 package com.rikkeisoft.musicplayer.app;
 
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
@@ -13,6 +16,7 @@ import android.util.Log;
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.base.SwitchListModel;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
@@ -77,6 +81,16 @@ public class MyApplication extends Application {
     }
 
     // cache for playerService
+    private static PlayerService playerService;
+
+    public static PlayerService getPlayerService() {
+        return playerService;
+    }
+
+    public static void setPlayerService(PlayerService playerService) {
+        MyApplication.playerService = playerService;
+    }
+
     private static PlayerModel playerModel;
 
     public static PlayerModel getPlayerModel() {
@@ -117,6 +131,28 @@ public class MyApplication extends Application {
                 "shouldShowRequestPermissionRationale", false);
         General.typeView = sharedPreferences.getInt("typeView", SwitchListModel.LIST);
 
+        //
+//        boolean widgetEnabled = sharedPreferences.getBoolean("widgetEnabled", false);
+//        if(widgetEnabled) {
+//            //
+//            General.isPermissionGranted = true;
+//
+//            startService(new Intent(this, PlayerService.class));
+//
+//            //
+////            bindService(new Intent(this, PlayerService.class), new ServiceConnection() {
+////                @Override
+////                public void onServiceConnected(ComponentName name, IBinder service) {
+////                    Log.d("debug", "---onServiceConnected " + getClass().getSimpleName());
+////
+////                }
+////
+////                @Override
+////                public void onServiceDisconnected(ComponentName name) {
+////
+////                }
+////            }, BIND_AUTO_CREATE);
+//        }
     }
 
 }

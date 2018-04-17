@@ -1,6 +1,7 @@
 package com.rikkeisoft.musicplayer.service;
 
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -18,14 +20,17 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
-import com.rikkeisoft.musicplayer.player.PlayerLockScreen;
-import com.rikkeisoft.musicplayer.player.PlayerNotification;
+import com.rikkeisoft.musicplayer.player.NotificationPlayer;
+import com.rikkeisoft.musicplayer.player.LockScreenPlayer;
+import com.rikkeisoft.musicplayer.player.PlayerReceiver;
+import com.rikkeisoft.musicplayer.player.WidgetPlayer;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.player.PlaylistHandler;
 import com.rikkeisoft.musicplayer.utils.General;
@@ -191,13 +196,16 @@ public class PlayerService extends Service {
     //
     private ServiceConnection notificationConnection;
     private NotificationService notificationService;
-    private PlayerNotification playerNotification;
+    private NotificationPlayer notificationPlayer;
 
     //
-    private PlayerLockScreen playerLockScreen;
+    private LockScreenPlayer lockScreenPlayer;
 
     //
-    private boolean started, hasConnection;
+    private ComponentName playerReceiverCN;
+
+    //
+    private boolean started, hasConnection, taskRemoved;
 
     @Override
     public void onCreate() {
@@ -289,7 +297,7 @@ public class PlayerService extends Service {
                 if(!playing) saveCurrentPosition(playlistPlayer.getCurrentPosition());
 
                 //
-                updateNotification();
+                updateView();
             }
 
             @Override
@@ -330,7 +338,7 @@ public class PlayerService extends Service {
                 editor.apply();
 
                 //
-                updateNotification();
+                updateView();
             }
 
             @Override
@@ -404,10 +412,7 @@ public class PlayerService extends Service {
 
         setLivePlaylistPlayer(playlistPlayer);
 
-        bindNotificationService();
-
-        playerLockScreen = new PlayerLockScreen(getApplicationContext());
-
+        onPlaylistPlayerCreated();
     }
 
     //
@@ -478,6 +483,47 @@ public class PlayerService extends Service {
     }
 
     //
+    private void onPlaylistPlayerCreated() {
+        registerMediaButtonEventReceiver();
+
+        bindNotificationService();
+
+        createLockScreen();
+
+        updateView();
+    }
+
+    // Intent.ACTION_MEDIA_BUTTON
+    private void registerMediaButtonEventReceiver() {
+        if(playerReceiverCN != null) return;
+        Log.d("debug", "registerMediaButtonEventReceiver " + getClass().getSimpleName());
+
+        playerReceiverCN = new ComponentName(getApplicationContext(), PlayerReceiver.class.getName());
+        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager != null) audioManager.registerMediaButtonEventReceiver(playerReceiverCN);
+    }
+
+    private void updateView() {
+        updateNotification();
+        updateLockScreen();
+        updateWidget();
+    }
+
+    private void updateWidget() {
+        sendBroadcast(new Intent(WidgetPlayer.ACTION_UPDATE));
+    }
+
+    private void createLockScreen() {
+        if(lockScreenPlayer == null)
+            lockScreenPlayer = new LockScreenPlayer(getApplicationContext(), playerReceiverCN);
+    }
+
+    private void updateLockScreen() {
+        if(playlistPlayer != null)
+            lockScreenPlayer.updateMetadata(getApplicationContext(), playlistPlayer.getCurrentSong());
+    }
+
+    //
     private void bindNotificationService() {
         if(notificationConnection != null) return;
         Log.d("debug", "bindNotificationService " + getClass().getSimpleName());
@@ -487,15 +533,21 @@ public class PlayerService extends Service {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
                 notificationService = binder.getService();
-                playerNotification = notificationService.getPlayerNotification();
+                notificationPlayer = notificationService.getNotificationPlayer();
 
-                // linked playerNotification with NotificationService
-                notificationService.startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
+                // linked notificationPlayer with NotificationService
+                notificationService.startForeground(NotificationService.NOTIFICATION_ID, notificationPlayer.getNotification());
 
                 // keep this service running when app closed
-                startForeground(NotificationService.NOTIFICATION_ID, playerNotification.getNotification());
+                startForeground(NotificationService.NOTIFICATION_ID, notificationPlayer.getNotification());
 
-                if(notificationService.isShowingNotification) updateNotification();
+                if(notificationService.isShowingNotification)
+                    new Handler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateNotification();
+                        }
+                    });
                 else notificationService.deleteNotification();
 
                 //
@@ -520,18 +572,20 @@ public class PlayerService extends Service {
 
     private void updateNotification() {
         if(notificationService != null && playlistPlayer != null) {
-            playerNotification.setSong(playlistPlayer.getCurrentSong());
-            playerNotification.setPlay(playlistPlayer.isRunning());
+            notificationPlayer.setSong(playlistPlayer.getCurrentSong());
+            notificationPlayer.setPlay(playlistPlayer.isRunning());
 
-            if(playlistPlayer.getCurrentSong() != null)
+            if(playlistPlayer.getCurrentSong() != null) {
                 notificationService.showNotification(playlistPlayer.isRunning());
+
+                if(playlistPlayer.isRunning())
+                    startForeground(NotificationService.NOTIFICATION_ID, notificationPlayer.getNotification());
+            }
             else notificationService.deleteNotification();
         }
-
-        playerLockScreen.updateMetadata(getApplicationContext(), playlistPlayer.getCurrentSong());
     }
 
-    // PlayerReceiver callback when playerNotification deleted by user
+    // PlayerReceiver callback when notificationPlayer deleted by user
     public void onDeleteNotification() {
         Log.d("debug", "onDeleteNotification " + getClass().getSimpleName());
         if(notificationService != null) notificationService.onDeleteNotification();
@@ -549,7 +603,8 @@ public class PlayerService extends Service {
     private void checkStopService() {
         if (!hasConnection && !isPlaying() && !isShowingNotification()) {
             Log.d("debug", "stopSelf " + getClass().getSimpleName());
-            stopSelf();
+            if(taskRemoved) stopSelf();
+            else stopForeground(true);
         }
     }
 
@@ -590,8 +645,12 @@ public class PlayerService extends Service {
         Log.d("debug", "onStartCommand " + getClass().getSimpleName());
         started = true;
 
-        if(!General.isPermissionGranted) stopSelf(); // when android auto startService
-        else if(!hasConnection) thisBindThis(); // for PlayerReceiver peekService
+        if(!General.isPermissionGranted) { // when android auto restartService
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        if(!hasConnection) thisBindThis(); // for PlayerReceiver peekService
 
         return START_STICKY;
     }
@@ -632,6 +691,7 @@ public class PlayerService extends Service {
         super.onTaskRemoved(rootIntent);
         Log.d("debug", "onTaskRemoved " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onTaskRemoved", Toast.LENGTH_LONG).show();
+        taskRemoved = true;
 
         if(playerModel != null && playerModel.getCurrentPosition().getValue() != null)
             saveCurrentPosition(playerModel.getCurrentPosition().getValue());
@@ -647,6 +707,8 @@ public class PlayerService extends Service {
         unregisterOnReceiverMediaChange();
 
         unbindNotificationService();
+
+        updateWidget();
 
         if(playlistPlayer != null) playlistPlayer.release();
     }

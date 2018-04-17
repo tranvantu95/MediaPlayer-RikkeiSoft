@@ -1,6 +1,7 @@
 package com.rikkeisoft.musicplayer.activity.base;
 
 import android.arch.lifecycle.Observer;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,6 +22,7 @@ import com.rikkeisoft.musicplayer.utils.Loader;
 public abstract class MyActivity extends SwitchListActivity {
 
     protected BottomPlayerController bottomPlayerController;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -43,12 +43,35 @@
 
         <service android:name=".service.NotificationService" />
 
-        <receiver android:name=".player.PlayerReceiver" >
+        <receiver android:name=".player.PlayerReceiver"
+            android:permission="com.rikkeisoft.musicplayer.permission.PLAYER_CONTROLLER">
             <intent-filter>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+
+                <!--My Action-->
+                <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PLAY_PAUSE" />
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS" />
                 <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_NEXT" />
-                <action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PLAY" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:icon="@mipmap/ic_launcher"
+            android:label="Example Widget"
+            android:name=".player.WidgetPlayer" >
+
+            <intent-filter >
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+
+                <!--My Action-->
+                <action android:name="com.rikkeisoft.musicplayer.action.UPDATE_WIDGET_PLAYER"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_player" />
+
         </receiver>
 
     </application>

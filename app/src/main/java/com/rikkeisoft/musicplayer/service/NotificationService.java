@@ -12,8 +12,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
-import com.rikkeisoft.musicplayer.player.PlayerLockScreen;
-import com.rikkeisoft.musicplayer.player.PlayerNotification;
+import com.rikkeisoft.musicplayer.player.NotificationPlayer;
 
 public class NotificationService extends Service {
 
@@ -35,10 +34,10 @@ public class NotificationService extends Service {
 
     public boolean isShowingNotification;
 
-    private PlayerNotification playerNotification;
+    private NotificationPlayer notificationPlayer;
 
-    public PlayerNotification getPlayerNotification() {
-        return playerNotification;
+    public NotificationPlayer getNotificationPlayer() {
+        return notificationPlayer;
     }
 
     @Override
@@ -49,23 +48,23 @@ public class NotificationService extends Service {
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
         isShowingNotification = preferences.getBoolean(IS_SHOWING_NOTIFICATION_KEY, false);
+        isShowingNotification = true;
 
-        playerNotification = new PlayerNotification(this);
-
+        notificationPlayer = new NotificationPlayer(this);
     }
 
     public void showNotification(boolean startForeground) {
+        Log.d("debug", "showNotification " + startForeground + " " + getClass().getSimpleName());
         if(!isShowingNotification) {
-            Log.d("debug", "showNotification " + getClass().getSimpleName());
             isShowingNotification = true;
             saveIsShowingNotification();
         }
 
         if(startForeground)
-            startForeground(NOTIFICATION_ID, playerNotification.getNotification());
+            startForeground(NOTIFICATION_ID, notificationPlayer.getNotification());
         else {
             stopForeground(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP);
-            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, playerNotification.getNotification());
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notificationPlayer.getNotification());
         }
     }
 
@@ -88,7 +87,7 @@ public class NotificationService extends Service {
     public boolean isShowingNotification() {
         if(!isShowingNotification) return false;
 
-        // playerNotification can hidden by user settings
+        // notificationPlayer can hidden by user settings
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager nm = (NotificationManager)
                     getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);

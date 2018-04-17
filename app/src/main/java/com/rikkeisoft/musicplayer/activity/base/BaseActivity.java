@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -142,6 +143,13 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d("debug", "onCreate " + getClass().getSimpleName());
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override

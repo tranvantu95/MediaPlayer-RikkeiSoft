@@ -20,9 +20,8 @@ import com.rikkeisoft.musicplayer.activity.ActivityHandler;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
 
-public class PlayerNotification {
+public class NotificationPlayer {
 
-    private static boolean currentVersionSupportLockScreenControls = AppUtils.currentVersionSupportLockScreenControls();
     private static boolean currentVersionSupportBigNotification = AppUtils.currentVersionSupportBigNotification();
     private static boolean currentVersionSupportVectorDrawable = AppUtils.currentVersionSupportVectorDrawable();
 
@@ -30,7 +29,7 @@ public class PlayerNotification {
 
     private Bitmap bmPlay, bmPause, bmSong;
 
-    public PlayerNotification(Context context) {
+    public NotificationPlayer(Context context) {
 
         String chanelId = "com.rikkeisoft.musicplayer.notification.player";
         String chanelName = "Beauty Music";
@@ -149,10 +148,10 @@ public class PlayerNotification {
             setListeners(context, notification.bigContentView);
     }
 
-    private void setListeners(Context context, RemoteViews view) {
+    private static void setListeners(Context context, RemoteViews view) {
         Intent previous = new Intent(PlayerReceiver.ACTION_PREVIOUS);
         Intent next = new Intent(PlayerReceiver.ACTION_NEXT);
-        Intent play = new Intent(PlayerReceiver.ACTION_PLAY);
+        Intent play = new Intent(PlayerReceiver.ACTION_PLAY_PAUSE);
 
         PendingIntent pPrevious = PendingIntent.getBroadcast(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);
