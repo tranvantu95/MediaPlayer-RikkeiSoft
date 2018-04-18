@@ -18,8 +18,11 @@ import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.ArtistItem;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
+
+import java.util.List;
 
 public class ArtistActivity extends MyActivity {
 
@@ -121,6 +124,12 @@ public class ArtistActivity extends MyActivity {
         super.onPlaylistPlayerCreated(playlistPlayer);
 
         getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
+    }
+
+    @Override
+    protected List<SongItem> getPlaylistDefault() {
+        if(artist != null) return artist.getSongs();
+        return null;
     }
 
     @Override

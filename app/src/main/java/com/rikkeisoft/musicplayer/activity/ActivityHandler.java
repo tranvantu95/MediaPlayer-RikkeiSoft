@@ -11,6 +11,8 @@ import java.util.List;
 
 public class ActivityHandler extends AppCompatActivity {
 
+    public static final String ACTION_SHOW_PLAYER_ACTIVITY = "com.rikkeisoft.musicplayer.action.SHOW_PLAYER_ACTIVITY";
+
     public static final int FLAG_OPEN_PLAYER = 1;
     public static String FLAG = "flag";
 
@@ -18,6 +20,7 @@ public class ActivityHandler extends AppCompatActivity {
 
     public static Intent createIntent(Context context, int flag) {
         Intent intent = new Intent(context, ActivityHandler.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(FLAG, flag);
         return intent;
     }

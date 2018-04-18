@@ -1,7 +1,7 @@
 package com.rikkeisoft.musicplayer.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
-import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,20 +10,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.ActivityHandler;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
@@ -35,59 +33,12 @@ import com.rikkeisoft.musicplayer.player.WidgetPlayer;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
 import com.rikkeisoft.musicplayer.player.PlaylistHandler;
 import com.rikkeisoft.musicplayer.utils.General;
-import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerService extends Service {
-
-    // Media change listener
-    private ContentObserver onMediaChange;
-
-    private void registerOnMediaChange() {
-        if(onMediaChange != null) return;
-        Log.d("debug", "registerOnMediaChange " + getClass().getSimpleName());
-
-        onMediaChange = new ContentObserver(new Handler()) {
-            private long latestTime = System.currentTimeMillis();
-
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                super.onChange(selfChange, uri);
-
-                if(System.currentTimeMillis() - latestTime > 1000) {
-                    latestTime = System.currentTimeMillis();
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            onMediaChange();
-                        }
-                    }, 1000);
-                }
-
-            }
-        };
-
-        getContentResolver().registerContentObserver(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true, onMediaChange);
-    }
-
-    private void unregisterOnMediaChange() {
-        if(onMediaChange != null) {
-            Log.d("debug", "unregisterOnMediaChange " + getClass().getSimpleName());
-            getContentResolver().unregisterContentObserver(onMediaChange);
-            onMediaChange = null;
-        }
-    }
-
-    private void onMediaChange() {
-        Log.d("debug", "onMediaChange " + getClass().getSimpleName());
-        Loader.getInstance().clearCache();
-        reloadPlaylist();
-    }
 
     // Media change listener
     private BroadcastReceiver onReceiverMediaChange;
@@ -118,6 +69,26 @@ public class PlayerService extends Service {
     protected void onReceiverMediaChange() {
         Log.d("debug", "onReceiverMediaChange " + getClass().getSimpleName());
         reloadPlaylist();
+    }
+
+    // MediaButtonEventReceiver Intent.ACTION_MEDIA_BUTTON
+    private ComponentName playerReceiverCN;
+
+    private void registerMediaButtonEventReceiver() {
+        if(playerReceiverCN != null) return;
+        Log.d("debug", "registerMediaButtonEventReceiver " + getClass().getSimpleName());
+
+        playerReceiverCN = new ComponentName(getApplicationContext(), PlayerReceiver.class.getName());
+        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager != null) audioManager.registerMediaButtonEventReceiver(playerReceiverCN);
+    }
+
+    private void unregisterMediaButtonEventReceiver() {
+        if(playerReceiverCN == null) return;
+        Log.d("debug", "unregisterMediaButtonEventReceiver " + getClass().getSimpleName());
+
+        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager != null) audioManager.unregisterMediaButtonEventReceiver(playerReceiverCN);
     }
 
     // data and database
@@ -204,9 +175,6 @@ public class PlayerService extends Service {
     private LockScreenPlayer lockScreenPlayer;
 
     //
-    private ComponentName playerReceiverCN;
-
-    //
     private boolean started, hasConnection, taskRemoved, startForeground;
 
     @Override
@@ -214,14 +182,15 @@ public class PlayerService extends Service {
         super.onCreate();
         Log.d("debug", "onCreate " + getClass().getSimpleName());
 
-//        registerOnMediaChange();
-        registerOnReceiverMediaChange();
-
 //        playerThread = new HandlerThread("playerThread");
 //        playerThread.start();
 //
 //        playerHandler = new PlayerHandler(playerThread.getLooper());
 //        uiHandler = new Handler();
+
+        registerMediaButtonEventReceiver();
+
+        registerOnReceiverMediaChange();
 
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
@@ -486,8 +455,6 @@ public class PlayerService extends Service {
 
     //
     private void onPlaylistPlayerCreated() {
-        registerMediaButtonEventReceiver();
-
         bindNotificationService();
 
         createLockScreen();
@@ -495,17 +462,7 @@ public class PlayerService extends Service {
         updateView();
 
         //
-        handleActions();
-    }
-
-    // Intent.ACTION_MEDIA_BUTTON
-    private void registerMediaButtonEventReceiver() {
-        if(playerReceiverCN != null) return;
-        Log.d("debug", "registerMediaButtonEventReceiver " + getClass().getSimpleName());
-
-        playerReceiverCN = new ComponentName(getApplicationContext(), PlayerReceiver.class.getName());
-        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        if(audioManager != null) audioManager.registerMediaButtonEventReceiver(playerReceiverCN);
+        handleIntents();
     }
 
     //
@@ -521,9 +478,6 @@ public class PlayerService extends Service {
                 notificationPlayer = notificationService.getNotificationPlayer();
 
                 if(notificationService.isShowingNotification) updateNotification();
-
-                //
-                thisUnbindThis();
             }
 
             @Override
@@ -542,62 +496,76 @@ public class PlayerService extends Service {
         }
     }
 
-    private void updateNotification() {
-        if(notificationService != null && playlistPlayer != null) {
-            notificationPlayer.setSong(playlistPlayer.getCurrentSong());
-            notificationPlayer.setPlay(playlistPlayer.isRunning());
-
-            if(playlistPlayer.getCurrentSong() != null) {
-                if(!startForeground) {
-                    notificationService.showNotification(true);
-                    startForeground();
-
-                    if(!playlistPlayer.isRunning()) new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            notificationService.showNotification(false);
-                        }
-                    }, 1000);
-                }
-                else notificationService.showNotification(playlistPlayer.isRunning());
-            }
-            else {
-                stopForeground();
-                notificationService.deleteNotification();
-            }
-        }
-    }
-
     private boolean isShowingNotification() {
         return notificationService != null && notificationService.isShowingNotification();
     }
 
-    // PlayerReceiver callback when notificationPlayer deleted by user
-    public void onDeleteNotification() {
-        Log.d("debug", "onDeleteNotification " + getClass().getSimpleName());
-        if(notificationService != null) notificationService.onDeleteNotification();
+    private void updateNotification() {
+        if(notificationService != null && playlistPlayer != null) {
+            Log.d("debug", "updateNotification " + getClass().getSimpleName());
+            notificationPlayer.setSong(playlistPlayer.getCurrentSong());
+            notificationPlayer.setPlay(playlistPlayer.isRunning());
+
+            if(playlistPlayer.getCurrentSong() != null) showNotification();
+            else deleteNotification();
+        }
+    }
+
+    private void showNotification() {
+        Log.d("debug", "showNotification " + getClass().getSimpleName());
+        if(!startForeground) {
+            notificationService.showNotification(true);
+            startForeground();
+
+            if(!playlistPlayer.isRunning()) new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notificationService.showNotification(false);
+                }
+            }, 1000);
+        }
+        else notificationService.showNotification(playlistPlayer.isRunning());
+    }
+
+    private void deleteNotification() {
+        Log.d("debug", "deleteNotification " + getClass().getSimpleName());
+        if(notificationService != null) notificationService.deleteNotification();
+        stopForeground();
         checkStopService();
     }
 
     //
     private void createLockScreen() {
-        if(lockScreenPlayer == null)
+        if(lockScreenPlayer == null) {
+            Log.d("debug", "createLockScreen " + getClass().getSimpleName());
             lockScreenPlayer = new LockScreenPlayer(getApplicationContext(), playerReceiverCN);
+        }
+    }
+
+    private void deleteLockScreen() {
+        if(lockScreenPlayer != null) {
+            Log.d("debug", "deleteLockScreen " + getClass().getSimpleName());
+            lockScreenPlayer.unregisterRemoteControlClient(getApplicationContext());
+        }
     }
 
     private void updateLockScreen() {
-        if(lockScreenPlayer != null && playlistPlayer != null)
+        if(lockScreenPlayer != null && playlistPlayer != null) {
+            Log.d("debug", "updateLockScreen " + getClass().getSimpleName());
             lockScreenPlayer.updateMetadata(getApplicationContext(), playlistPlayer.getCurrentSong());
+        }
     }
 
     //
     private void updateWidget() {
+        Log.d("debug", "updateWidget " + getClass().getSimpleName());
         //sendBroadcast(new Intent(WidgetPlayer.ACTION_UPDATE));
         WidgetPlayer.update(getApplicationContext(), playlistPlayer);
     }
 
     //
     private void updateView() {
+        Log.d("debug", "updateView " + getClass().getSimpleName());
         updateNotification();
         updateLockScreen();
         updateWidget();
@@ -630,51 +598,32 @@ public class PlayerService extends Service {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    private boolean thisBindThis;
-    private ServiceConnection thisConnectionThis = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            thisBindThis = true;
-//            thisUnbindThis();
-        }
+    private static List<Intent> intents = new ArrayList<>();
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            thisBindThis = false;
-        }
-    };
-
-    private void thisStartThis() {
-        Log.d("debug", "thisStartThis " + getClass().getSimpleName());
-        startService(new Intent(this, getClass()));
+    private void handleIntents() {
+        for(Intent intent : intents) handleIntent(intent);
+        intents.clear();
     }
 
-    private void thisBindThis() {
-        Log.d("debug", "thisBindThis " + getClass().getSimpleName());
-        bindService(new Intent(this, getClass()), thisConnectionThis, BIND_AUTO_CREATE);
-    }
+    private void handleIntent(Intent intent) {
+        Log.d("debug", "handleIntent " + getClass().getSimpleName());
+        String action = intent.getAction();
+        intent.setAction(null);
 
-    private void thisUnbindThis() {
-        if(thisBindThis) {
-            Log.d("debug", "thisUnbindThis " + getClass().getSimpleName());
-            thisBindThis = false;
-            unbindService(thisConnectionThis);
+        if(ActivityHandler.ACTION_SHOW_PLAYER_ACTIVITY.equals(action)) {
+            Log.d("debug", "ACTION_SHOW_PLAYER_ACTIVITY " + getClass().getSimpleName());
+            startActivity(ActivityHandler.createIntent(this, ActivityHandler.FLAG_OPEN_PLAYER));
         }
-    }
-
-    //
-    private List<String> actions = new ArrayList<>();
-
-    private void handleActions() {
-        for(String action : actions) handleAction(action);
-        actions.clear();
-    }
-
-    private void handleAction(String action) {
-        if(PlayerReceiver.ACTION_PLAY_PAUSE.equals(action)) {
-            Log.d("debug", "ACTION_PLAY_PAUSE " + !playlistPlayer.isRunning() + " " + getClass().getSimpleName());
-            playlistPlayer.togglePlay(true);
+        // notificationPlayer deleted by user
+        else if(NotificationPlayer.ACTION_DELETE_NOTIFICATION.equals(action)) {
+            Log.d("debug", "ACTION_DELETE_NOTIFICATION " + getClass().getSimpleName());
+            deleteNotification();
         }
+        else if(WidgetPlayer.ACTION_UPDATE.equals(action)) {
+            Log.d("debug", "ACTION_UPDATE_WIDGET_PLAYER " + getClass().getSimpleName());
+            updateWidget();
+        }
+        else PlayerReceiver.handleAction(playlistPlayer, intent, action);
     }
 
     @Override
@@ -685,19 +634,17 @@ public class PlayerService extends Service {
         if(!General.isPermissionGranted) {
             stopSelf();
 
-            if(intent.getAction() != null) startActivity(
-                    ActivityHandler.createIntent(this, ActivityHandler.FLAG_OPEN_PLAYER));
+            if(intent.getAction() != null) {
+                startActivity(ActivityHandler.createIntent(this, ActivityHandler.FLAG_OPEN_PLAYER));
+                intents.add(intent);
+            }
 
             return START_NOT_STICKY;
         }
 
-        if(!hasConnection) thisBindThis(); // for peekService
-
         if(intent.getAction() != null) {
-            if (playlistPlayer != null) handleAction(intent.getAction());
-            else actions.add(intent.getAction());
-
-            intent.setAction(null);
+            if (playlistPlayer != null) handleIntent(intent);
+            else intents.add(intent);
         }
 
         return START_STICKY;
@@ -708,7 +655,8 @@ public class PlayerService extends Service {
         Log.d("debug", "onBind " + getClass().getSimpleName());
         hasConnection = true;
 
-        if(!started) thisStartThis(); // keep service running when onUnbind
+        // keep service running when onUnbind
+        if(!started) startService(new Intent(this, getClass()));
 
         return mBinder;
     }
@@ -742,8 +690,7 @@ public class PlayerService extends Service {
         taskRemoved = true;
         checkStopService();
 
-        if(playerModel != null && playerModel.getCurrentPosition().getValue() != null)
-            saveCurrentPosition(playerModel.getCurrentPosition().getValue());
+        if(playlistPlayer != null) saveCurrentPosition(playlistPlayer.getCurrentPosition());
     }
 
     @Override
@@ -752,12 +699,34 @@ public class PlayerService extends Service {
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onDestroy " + getClass().getSimpleName(), Toast.LENGTH_LONG).show();
 
-//        unregisterOnMediaChange();
+        unregisterMediaButtonEventReceiver();
+
         unregisterOnReceiverMediaChange();
 
         unbindNotificationService();
 
+        deleteLockScreen();
+
         if(playlistPlayer != null) playlistPlayer.release();
+    }
+
+    //
+    public static void setListeners(Context context, RemoteViews view) {
+        Intent previous = new Intent(context, PlayerService.class);
+        previous.setAction(PlayerReceiver.ACTION_PREVIOUS);
+        Intent next = new Intent(context, PlayerService.class);
+        next.setAction(PlayerReceiver.ACTION_NEXT);
+        Intent play = new Intent(context, PlayerService.class);
+        play.setAction(PlayerReceiver.ACTION_PLAY_PAUSE);
+
+        PendingIntent pPrevious = PendingIntent.getService(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
+        view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);
+
+        PendingIntent pNext = PendingIntent.getService(context.getApplicationContext(), 0, next, PendingIntent.FLAG_UPDATE_CURRENT);
+        view.setOnClickPendingIntent(R.id.btn_next, pNext);
+
+        PendingIntent pPlay = PendingIntent.getService(context.getApplicationContext(), 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
+        view.setOnClickPendingIntent(R.id.btn_play, pPlay);
     }
 
 }

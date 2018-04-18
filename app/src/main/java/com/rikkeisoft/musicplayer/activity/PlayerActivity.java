@@ -242,7 +242,7 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         int id = view.getId();
         switch (id) {
             case R.id.btn_play:
-                if(playlistPlayer != null) playlistPlayer.togglePlay(true);
+                if(playlistPlayer != null) playlistPlayer.togglePlay();
                 break;
 
             case R.id.btn_next:

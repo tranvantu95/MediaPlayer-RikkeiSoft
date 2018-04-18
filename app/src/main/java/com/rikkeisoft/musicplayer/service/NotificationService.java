@@ -55,7 +55,7 @@ public class NotificationService extends Service {
     }
 
     public void showNotification(boolean startForeground) {
-        Log.d("debug", "showNotification " + startForeground + " " + getClass().getSimpleName());
+        Log.d("debug", "showNotification startForeground = " + startForeground + " " + getClass().getSimpleName());
         if(!isShowingNotification) {
             isShowingNotification = true;
             saveIsShowingNotification();
@@ -71,18 +71,13 @@ public class NotificationService extends Service {
 
     public void deleteNotification(){
         Log.d("debug", "deleteNotification " + getClass().getSimpleName());
-        onDeleteNotification();
-
-        stopForeground(true);
-        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
-    }
-
-    public void onDeleteNotification() {
-        Log.d("debug", "onDeleteNotification " + getClass().getSimpleName());
         if(isShowingNotification) {
             isShowingNotification = false;
             saveIsShowingNotification();
         }
+
+        stopForeground(true);
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID);
     }
 
     public boolean isShowingNotification() {

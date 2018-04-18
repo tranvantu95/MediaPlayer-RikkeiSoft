@@ -18,8 +18,11 @@ import com.rikkeisoft.musicplayer.model.AlbumsModel;
 import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
+import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
+
+import java.util.List;
 
 public class MainActivity extends MyActivity {
 
@@ -39,10 +42,6 @@ public class MainActivity extends MyActivity {
 
         init();
 
-        int flag = getIntent().getIntExtra(ActivityHandler.FLAG, 0);
-
-        if(flag == ActivityHandler.FLAG_OPEN_PLAYER)
-            startActivity(PlayerActivity.createIntent(this));
     }
 
     @Override
@@ -70,11 +69,18 @@ public class MainActivity extends MyActivity {
         viewPager = findViewById(R.id.view_pager);
     }
 
+    private boolean onDataLoaded;
+
     @Override
-    protected void beforeReloadData() {}
+    protected void beforeReloadData() {
+        onDataLoaded = false;
+    }
 
     @Override
     protected void onDataLoaded() {
+        if(onDataLoaded) return;
+        onDataLoaded = true;
+
         getModel(SongsModel.class).getItems().setValue(Loader.getInstance().getSongs());
         getModel(AlbumsModel.class).getItems().setValue(Loader.getInstance().getAlbums());
         getModel(ArtistsModel.class).getItems().setValue(Loader.getInstance().getArtists());
@@ -103,6 +109,18 @@ public class MainActivity extends MyActivity {
         super.onPlaylistPlayerCreated(playlistPlayer);
 
         getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
+
+        //
+        int flag = getIntent().getIntExtra(ActivityHandler.FLAG, 0);
+        getIntent().removeExtra(ActivityHandler.FLAG);
+
+        if(flag == ActivityHandler.FLAG_OPEN_PLAYER) openPlayerActivity();
+    }
+
+    @Override
+    protected List<SongItem> getPlaylistDefault() {
+        if(Loader.getInstance().isLoaded()) return Loader.getInstance().getSongs();
+        return null;
     }
 
     @Override

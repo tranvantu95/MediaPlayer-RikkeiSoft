@@ -18,9 +18,12 @@ import android.widget.RemoteViews;
 import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.activity.ActivityHandler;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
 
 public class NotificationPlayer {
+
+    public static final String ACTION_DELETE_NOTIFICATION = "com.rikkeisoft.musicplayer.action.DELETE_NOTIFICATION";
 
     private static boolean currentVersionSupportBigNotification = AppUtils.currentVersionSupportBigNotification();
     private static boolean currentVersionSupportVectorDrawable = AppUtils.currentVersionSupportVectorDrawable();
@@ -50,9 +53,9 @@ public class NotificationPlayer {
         Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);
         PendingIntent pMain = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        intent = new Intent(context, PlayerReceiver.class);
-        intent.setAction(PlayerReceiver.ACTION_DELETE_NOTIFICATION);
-        PendingIntent pDelete = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent = new Intent(context, PlayerService.class);
+        intent.setAction(ACTION_DELETE_NOTIFICATION);
+        PendingIntent pDelete = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, chanelId)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -143,24 +146,9 @@ public class NotificationPlayer {
     }
 
     private void setListeners(Context context) {
-        setListeners(context, notification.contentView);
+        PlayerReceiver.setListeners(context, notification.contentView);
         if(currentVersionSupportBigNotification)
-            setListeners(context, notification.bigContentView);
-    }
-
-    private static void setListeners(Context context, RemoteViews view) {
-        Intent previous = new Intent(PlayerReceiver.ACTION_PREVIOUS);
-        Intent next = new Intent(PlayerReceiver.ACTION_NEXT);
-        Intent play = new Intent(PlayerReceiver.ACTION_PLAY_PAUSE);
-
-        PendingIntent pPrevious = PendingIntent.getBroadcast(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);
-
-        PendingIntent pNext = PendingIntent.getBroadcast(context.getApplicationContext(), 0, next, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_next, pNext);
-
-        PendingIntent pPlay = PendingIntent.getBroadcast(context.getApplicationContext(), 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_play, pPlay);
+            PlayerReceiver.setListeners(context, notification.bigContentView);
     }
 
 }

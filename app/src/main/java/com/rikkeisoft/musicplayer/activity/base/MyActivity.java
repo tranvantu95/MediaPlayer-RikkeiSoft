@@ -17,11 +17,16 @@ import com.rikkeisoft.musicplayer.activity.PlayerActivity;
 import com.rikkeisoft.musicplayer.custom.view.BottomPlayerController;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 import com.rikkeisoft.musicplayer.utils.Loader;
+
+import java.util.List;
 
 public abstract class MyActivity extends SwitchListActivity {
 
     protected BottomPlayerController bottomPlayerController;
+
+    protected PlaylistPlayer.TogglePlayCallback togglePlayCallback;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,17 +37,24 @@ public abstract class MyActivity extends SwitchListActivity {
     protected void init() {
         super.init();
 
+        togglePlayCallback = new PlaylistPlayer.TogglePlayCallback() {
+            @Override
+            public void onPlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist) {
+                handlePlaylistEmpty(playlistPlayer, playlist, true);
+            }
+        };
+
         bottomPlayerController = new BottomPlayerController((ViewGroup) findViewById(R.id.root),
                 new BottomPlayerController.Callback() {
                     @Override
                     public void onTogglePlay() {
-                        if(playlistPlayer != null) playlistPlayer.togglePlay();
+                        if(playlistPlayer != null)
+                            playlistPlayer.togglePlay(true, togglePlayCallback);
                     }
 
                     @Override
                     public void onClick(View view) {
-                        if(playlistPlayer != null && !playlistPlayer.getPlaylist().isEmpty())
-                            startActivity(PlayerActivity.createIntent(getApplicationContext()));
+                        openPlayerActivity();
                     }
 
                     @Override
@@ -56,6 +68,26 @@ public abstract class MyActivity extends SwitchListActivity {
                     }
                 });
     }
+
+    protected void openPlayerActivity() {
+        if(playlistPlayer != null) {
+            if(playlistPlayer.getPlaylist().isEmpty())
+                handlePlaylistEmpty(playlistPlayer, playlistPlayer.getPlaylist(), false);
+
+            if(!playlistPlayer.getPlaylist().isEmpty())
+                startActivity(PlayerActivity.createIntent(getApplicationContext()));
+        }
+    }
+
+    protected void handlePlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist, boolean play) {
+        List<SongItem> playlistDefault = getPlaylistDefault();
+        if(playlistDefault == null || playlistDefault.isEmpty()) return;
+
+        playlist.addAll(playlistDefault);
+        playlistPlayer.setPlaylist(getTitle2(), playlist, play ? 0 : -1, play);
+    }
+
+    protected abstract List<SongItem> getPlaylistDefault();
 
     protected abstract int calculateForBottomPlayerController(CoordinatorLayout parent, View child, View dependency);
 

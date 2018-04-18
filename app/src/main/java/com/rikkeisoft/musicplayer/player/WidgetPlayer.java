@@ -95,7 +95,12 @@ public class WidgetPlayer extends AppWidgetProvider {
         PlaylistPlayer playlistPlayer = playerService != null ? playerService.getPlaylistPlayer() : null;
 
         //
-        update(context, appWidgetManager, appWidgetIds, playlistPlayer);
+        if(playlistPlayer != null) update(context, appWidgetManager, appWidgetIds, playlistPlayer);
+        else {
+            Intent intent = new Intent(context, PlayerService.class);
+            intent.setAction(ACTION_UPDATE);
+            context.startService(intent);
+        }
     }
 
     private static void update(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds,
@@ -138,8 +143,7 @@ public class WidgetPlayer extends AppWidgetProvider {
         for (int widgetId : appWidgetIds) {
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_player);
 
-            setListeners(context, remoteViews);
-
+            //
             remoteViews.setTextViewText(R.id.tv_title, title);
             remoteViews.setTextViewText(R.id.tv_info, info);
             remoteViews.setImageViewBitmap(R.id.iv_cover, bmSong);
@@ -149,6 +153,17 @@ public class WidgetPlayer extends AppWidgetProvider {
             remoteViews.setImageViewBitmap(R.id.btn_previous, bmPrevious);
             remoteViews.setImageViewBitmap(R.id.btn_next, bmNext);
 
+            //
+//            Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);
+//            PendingIntent pRoot = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(context, PlayerService.class);
+            intent.setAction(ActivityHandler.ACTION_SHOW_PLAYER_ACTIVITY);
+            PendingIntent pRoot = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            remoteViews.setOnClickPendingIntent(R.id.root, pRoot);
+
+            PlayerService.setListeners(context, remoteViews);
+
+            //
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
         }
     }
@@ -157,29 +172,6 @@ public class WidgetPlayer extends AppWidgetProvider {
         AppWidgetManager appWidgetManager = AppUtils.getAppWidgetManager(context);
         int[] appWidgetIds = AppUtils.getAppWidgetIds(context, appWidgetManager, WidgetPlayer.class);
         if(appWidgetIds.length > 0) update(context, appWidgetManager, appWidgetIds, playlistPlayer);
-    }
-
-    private static void setListeners(Context context, RemoteViews view) {
-        Intent previous = new Intent(PlayerReceiver.ACTION_PREVIOUS);
-        Intent next = new Intent(PlayerReceiver.ACTION_NEXT);
-        Intent play = new Intent(PlayerReceiver.ACTION_PLAY_PAUSE);
-        play.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-
-        play = new Intent(context, PlayerService.class);
-        play.setAction(PlayerReceiver.ACTION_PLAY_PAUSE);
-
-        PendingIntent pPrevious = PendingIntent.getBroadcast(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);
-
-        PendingIntent pNext = PendingIntent.getBroadcast(context.getApplicationContext(), 0, next, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_next, pNext);
-
-        PendingIntent pPlay = PendingIntent.getService(context.getApplicationContext(), 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.btn_play, pPlay);
-
-        Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);
-        PendingIntent pRoot = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        view.setOnClickPendingIntent(R.id.root, pRoot);
     }
 
 }

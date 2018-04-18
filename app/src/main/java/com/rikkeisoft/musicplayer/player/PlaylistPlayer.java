@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.ArrayUtils;
+import com.rikkeisoft.musicplayer.utils.Loader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -471,16 +472,36 @@ public class PlaylistPlayer extends MediaPlayer {
         resume();
     }
 
-    public void togglePlay(boolean fixIndex) {
+    public interface TogglePlayCallback {
+        void onPlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist);
+    }
+
+    public void togglePlay(boolean fixIndex, TogglePlayCallback togglePlayCallback) {
         if(!running) {
-            if(fixIndex && !isValidateCurrentIndex()) currentIndex = 0;
+            if(fixIndex) {
+                if(playlist.isEmpty()) {
+                    if(togglePlayCallback != null)
+                        togglePlayCallback.onPlaylistEmpty(this, playlist);
+                    else {
+                        if(Loader.getInstance().isLoaded()) {
+                            playlist.addAll(Loader.getInstance().getSongs());
+                            setPlaylist("Beauty Music", playlist, 0, true);
+                        }
+                    }
+
+                    return;
+                }
+
+                if(!isValidateCurrentIndex()) currentIndex = 0;
+            }
+
             resume();
         }
         else pause();
     }
 
     public void togglePlay() {
-        togglePlay(false);
+        togglePlay(true, null);
     }
 
     public void toggleShuffle() {

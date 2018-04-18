@@ -19,36 +19,38 @@ public class LockScreenPlayer {
 
     public LockScreenPlayer(Context context, ComponentName remoteComponentName) {
 
-        registerRemoteClient(context, remoteComponentName);
+        registerRemoteControlClient(context, remoteComponentName);
     }
 
-    private void registerRemoteClient(Context context, ComponentName remoteComponentName){
+    private void registerRemoteControlClient(Context context, ComponentName remoteComponentName){
         if(!currentVersionSupportLockScreenControls || remoteControlClient != null) return;
 
-        try {
-            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if(audioManager != null) {
-                Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                mediaButtonIntent.setComponent(remoteComponentName);
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager != null) {
+            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            mediaButtonIntent.setComponent(remoteComponentName);
 
-                PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(context, 0, mediaButtonIntent, 0);
+            PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(context, 0, mediaButtonIntent, 0);
 
-                remoteControlClient = new RemoteControlClient(mediaPendingIntent);
+            remoteControlClient = new RemoteControlClient(mediaPendingIntent);
 
-                remoteControlClient.setTransportControlFlags(
-                        RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE |
+            remoteControlClient.setTransportControlFlags(
+                    RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE |
 //                        RemoteControlClient.FLAG_KEY_MEDIA_PLAY |
 //                        RemoteControlClient.FLAG_KEY_MEDIA_PAUSE |
 //                        RemoteControlClient.FLAG_KEY_MEDIA_STOP |
-                        RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS |
-                        RemoteControlClient.FLAG_KEY_MEDIA_NEXT);
+                    RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS |
+                    RemoteControlClient.FLAG_KEY_MEDIA_NEXT);
 
-                audioManager.registerRemoteControlClient(remoteControlClient);
-            }
+            audioManager.registerRemoteControlClient(remoteControlClient);
         }
-        catch(Exception ex) {
-            ex.printStackTrace();
-        }
+    }
+
+    public void unregisterRemoteControlClient(Context context) {
+        if(!currentVersionSupportLockScreenControls || remoteControlClient == null) return;
+
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager != null) audioManager.unregisterRemoteControlClient(remoteControlClient);
     }
 
     public void updateMetadata(Context context, SongItem song){
