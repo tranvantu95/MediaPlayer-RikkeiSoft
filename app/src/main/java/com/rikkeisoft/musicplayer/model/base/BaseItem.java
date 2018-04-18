@@ -30,9 +30,15 @@ public abstract class BaseItem {
         this.name = name;
     }
 
+    public abstract String getInfo();
+
     public abstract Bitmap getBitmap();
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
+    }
+
+    public Bitmap cloneBitmap() {
+        return getBitmap() != null ? Bitmap.createBitmap(getBitmap()) : null;
     }
 }

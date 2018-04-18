@@ -33,9 +33,6 @@ public class SongsRecyclerAdapter extends MyRecyclerAdapter<SongItem, SongsRecyc
         public void setItem(SongItem songItem, int position) {
             super.setItem(songItem, position);
 
-            tvTitle.setText(songItem.getName());
-            tvInfo.setText(songItem.getArtistName());
-
             if(songItem.getBitmap() != null) ivCover.setImageBitmap(songItem.getBitmap());
             else ivCover.setImageResource(R.drawable.im_song);
         }

@@ -70,6 +70,8 @@ public class ActivityHandler extends AppCompatActivity {
     private void openPlayerFromRoot() {
         Intent intent = MainActivity.createIntent(this, FLAG_OPEN_PLAYER);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setAction(Intent.ACTION_MAIN);
         startActivity(intent);
     }
 

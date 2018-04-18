@@ -14,6 +14,7 @@ public class AlbumItem extends BaseItem {
     private String albumArt;
     private int artistId;
     private String artistName;
+    private int numberOfSongs;
 
     // linked
     private ArtistItem artist;
@@ -44,10 +45,30 @@ public class AlbumItem extends BaseItem {
         this.artistName = artistName;
     }
 
+    public int getNumberOfSongs() {
+        return numberOfSongs;
+    }
+
+    public void setNumberOfSongs(int numberOfSongs) {
+        this.numberOfSongs = numberOfSongs;
+    }
+
+    @Override
+    public String getInfo() {
+        int ns = getNumberOfSongs();
+        return getArtistName() + " | " + ns + " song" + (ns > 1 ? "s" : "");
+    }
+
     @Override
     public Bitmap getBitmap() {
         if(bitmap == null && getAlbumArt() != null)
             setBitmap(BitmapFactory.decodeFile(getAlbumArt()));
+//            try {
+//                setBitmap(BitmapFactory.decodeFile(getAlbumArt()));
+//            }
+//            catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
 
         return bitmap;
     }

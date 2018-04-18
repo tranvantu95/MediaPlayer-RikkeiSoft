@@ -48,9 +48,10 @@ public class NotificationService extends Service {
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
         isShowingNotification = preferences.getBoolean(IS_SHOWING_NOTIFICATION_KEY, false);
-        isShowingNotification = true;
+        isShowingNotification = true; // test
 
         notificationPlayer = new NotificationPlayer(this);
+
     }
 
     public void showNotification(boolean startForeground) {

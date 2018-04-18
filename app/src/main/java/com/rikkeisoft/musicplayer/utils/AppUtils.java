@@ -1,6 +1,8 @@
 package com.rikkeisoft.musicplayer.utils;
 
 import android.app.ActivityManager;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -60,6 +62,15 @@ public class AppUtils {
                 if(serviceClass.getName().equals(service.service.getClassName())) return true;
 
         return false;
+    }
+
+    // Widget
+    public static AppWidgetManager getAppWidgetManager(Context context) {
+        return AppWidgetManager.getInstance(context);
+    }
+
+    public static int[] getAppWidgetIds(Context context, AppWidgetManager appWidgetManager, Class<?> widgetClass) {
+        return appWidgetManager.getAppWidgetIds(new ComponentName(context, widgetClass));
     }
 
     // check support

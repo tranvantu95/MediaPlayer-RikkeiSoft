@@ -69,6 +69,11 @@ public class SongItem extends BaseItem {
     }
 
     @Override
+    public String getInfo() {
+        return getArtistName() + " | " + getAlbumName();
+    }
+
+    @Override
     public Bitmap getBitmap() {
         if(bitmap == null) setBitmap(getAlbum().getBitmap());
 

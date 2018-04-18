@@ -302,6 +302,8 @@ public class PlaylistPlayer extends MediaPlayer {
             return;
         }
 
+        setPlaying(true);
+
         if(index == currentIndex) {
             if(preparing) {
                 if(callback != null) callback.onPreparing(this);
@@ -319,8 +321,6 @@ public class PlaylistPlayer extends MediaPlayer {
         }
 
         setCurrentIndex(index, true);
-
-        setPlaying(true);
 
         prepare(index);
     }

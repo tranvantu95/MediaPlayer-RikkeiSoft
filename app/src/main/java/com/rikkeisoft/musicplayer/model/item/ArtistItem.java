@@ -36,6 +36,13 @@ public class ArtistItem extends BaseItem {
     }
 
     @Override
+    public String getInfo() {
+        int na = getNumberOfAlbums();
+        int ns = getNumberOfSongs();
+        return "" + na + " album" + (na > 1 ? "s" : "") + " | " + ns + " song" + (ns > 1 ? "s" : "");
+    }
+
+    @Override
     public Bitmap getBitmap() {
         if(bitmap == null && !getAlbums().isEmpty()) {
             for(int i = getAlbums().size() - 1; i >= 0; i--)

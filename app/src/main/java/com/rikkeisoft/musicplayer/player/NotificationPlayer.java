@@ -121,7 +121,7 @@ public class NotificationPlayer {
         if(song != null) {
             setTitle(song.getName());
             setInfo(song.getArtistName());
-            setIcon(song.getBitmap());
+            setIcon(song.cloneBitmap());
         }
         else {
             setTitle(null);

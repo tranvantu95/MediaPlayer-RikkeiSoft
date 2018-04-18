@@ -32,9 +32,6 @@ public class AlbumsRecyclerAdapter extends MyRecyclerAdapter<AlbumItem, AlbumsRe
         public void setItem(AlbumItem albumItem, int position) {
             super.setItem(albumItem, position);
 
-            tvTitle.setText(albumItem.getName());
-            tvInfo.setText(albumItem.getArtistName());
-
             if(albumItem.getBitmap() != null) ivCover.setImageBitmap(albumItem.getBitmap());
             else ivCover.setImageResource(R.drawable.im_album);
         }

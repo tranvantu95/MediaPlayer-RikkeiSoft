@@ -73,6 +73,9 @@ public abstract class MyRecyclerAdapter<Item extends BaseItem,
         public void setItem(Item item, int position) {
             super.setItem(item, position);
 
+            tvTitle.setText(item.getName());
+            tvInfo.setText(item.getInfo());
+
             if(item.getId() == recyclerAdapter.getCurrentId()) {
                 ivStatus.setVisibility(View.VISIBLE);
                 ivStatus.setImageResource(recyclerAdapter.isPlaying() ? R.drawable.ic_play_circle : R.drawable.ic_pause_circle);

@@ -236,6 +236,7 @@ public class Loader {
                 Albums.ALBUM_ART,
                 Media.ARTIST_ID,
                 Albums.ARTIST,
+                Albums.NUMBER_OF_SONGS,
         };
 
         String sortOder = Albums.ALBUM + " ASC";
@@ -260,6 +261,7 @@ public class Loader {
                 album.setAlbumArt(cursor.getString(++i)); //Log.d("debug", album.getAlbumArt());
                 album.setArtistId(cursor.getInt(++i));
                 album.setArtistName(cursor.getString(++i));
+                album.setNumberOfSongs(cursor.getInt(++i));
 
                 albums.add(album);
             }

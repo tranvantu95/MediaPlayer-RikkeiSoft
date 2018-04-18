@@ -14,6 +14,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -40,9 +41,9 @@ public class WidgetPlayer extends AppWidgetProvider {
         Log.d("debug", "onReceive " + getClass().getSimpleName());
 
         if(ACTION_UPDATE.equals(intent.getAction())) {
-            AppWidgetManager appWidgetManager = getAppWidgetManager(context);
-            int[] appWidgetIds = getAppWidgetIds(context, appWidgetManager);
-            update(context, appWidgetManager, appWidgetIds);
+            AppWidgetManager appWidgetManager = AppUtils.getAppWidgetManager(context);
+            int[] appWidgetIds = AppUtils.getAppWidgetIds(context, appWidgetManager, getClass());
+            if(appWidgetIds.length > 0) update(context, appWidgetManager, appWidgetIds);
         }
     }
 
@@ -88,25 +89,31 @@ public class WidgetPlayer extends AppWidgetProvider {
     }
 
     private void update(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.d("debug", "update " + getClass().getSimpleName());
-
-        //
         PlayerService.LocalBinder binder = (PlayerService.LocalBinder)
                 peekService(context, new Intent(context, PlayerService.class));
         PlayerService playerService = binder != null ? binder.getService() : null;
         PlaylistPlayer playlistPlayer = playerService != null ? playerService.getPlaylistPlayer() : null;
+
+        //
+        update(context, appWidgetManager, appWidgetIds, playlistPlayer);
+    }
+
+    private static void update(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds,
+                        @Nullable PlaylistPlayer playlistPlayer) {
+        Log.d("debug", "update " + WidgetPlayer.class.getSimpleName());
+
         SongItem currentSong = playlistPlayer != null ? playlistPlayer.getCurrentSong() : null;
 
         //
         Resources resources = context.getResources();
 
-        String title = "Không có nhạc để mở", info = null;
+        String title = "Chạm để mở nhạc", info = null;
         Bitmap bmSong = null, bmPlay, bmNext, bmPrevious;
 
         if(currentSong != null) {
             title = currentSong.getName();
             info = currentSong.getArtistName();
-            bmSong = currentSong.getBitmap();
+            bmSong = currentSong.cloneBitmap();
         }
 
         if(bmSong == null) {
@@ -146,12 +153,10 @@ public class WidgetPlayer extends AppWidgetProvider {
         }
     }
 
-    private AppWidgetManager getAppWidgetManager(Context context) {
-        return AppWidgetManager.getInstance(context);
-    }
-
-    private int[] getAppWidgetIds(Context context, AppWidgetManager appWidgetManager) {
-        return appWidgetManager.getAppWidgetIds(new ComponentName(context, getClass()));
+    public static void update(Context context, @Nullable PlaylistPlayer playlistPlayer) {
+        AppWidgetManager appWidgetManager = AppUtils.getAppWidgetManager(context);
+        int[] appWidgetIds = AppUtils.getAppWidgetIds(context, appWidgetManager, WidgetPlayer.class);
+        if(appWidgetIds.length > 0) update(context, appWidgetManager, appWidgetIds, playlistPlayer);
     }
 
     private static void setListeners(Context context, RemoteViews view) {
@@ -160,13 +165,16 @@ public class WidgetPlayer extends AppWidgetProvider {
         Intent play = new Intent(PlayerReceiver.ACTION_PLAY_PAUSE);
         play.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
 
+        play = new Intent(context, PlayerService.class);
+        play.setAction(PlayerReceiver.ACTION_PLAY_PAUSE);
+
         PendingIntent pPrevious = PendingIntent.getBroadcast(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);
 
         PendingIntent pNext = PendingIntent.getBroadcast(context.getApplicationContext(), 0, next, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_next, pNext);
 
-        PendingIntent pPlay = PendingIntent.getBroadcast(context.getApplicationContext(), 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pPlay = PendingIntent.getService(context.getApplicationContext(), 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_play, pPlay);
 
         Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);

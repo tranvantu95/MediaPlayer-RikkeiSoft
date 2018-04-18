@@ -32,14 +32,6 @@ public class ArtistsRecyclerAdapter extends MyRecyclerAdapter<ArtistItem, Artist
         public void setItem(ArtistItem artistItem, int position) {
             super.setItem(artistItem, position);
 
-            tvTitle.setText(artistItem.getName());
-
-            int na = artistItem.getNumberOfAlbums();
-            int ns = artistItem.getNumberOfSongs();
-            String infoString = "" + na + " album" + (na > 1 ? "s" : "") + " | " + ns + " song" + (ns > 1 ? "s" : "");
-
-            tvInfo.setText(infoString);
-
             if(artistItem.getBitmap() != null) ivCover.setImageBitmap(artistItem.getBitmap());
             else ivCover.setImageResource(R.drawable.im_artist);
         }

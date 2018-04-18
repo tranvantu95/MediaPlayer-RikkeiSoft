@@ -1,15 +1,18 @@
 package com.rikkeisoft.musicplayer.app;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
@@ -132,27 +135,9 @@ public class MyApplication extends Application {
         General.typeView = sharedPreferences.getInt("typeView", SwitchListModel.LIST);
 
         //
-//        boolean widgetEnabled = sharedPreferences.getBoolean("widgetEnabled", false);
-//        if(widgetEnabled) {
-//            //
-//            General.isPermissionGranted = true;
-//
-//            startService(new Intent(this, PlayerService.class));
-//
-//            //
-////            bindService(new Intent(this, PlayerService.class), new ServiceConnection() {
-////                @Override
-////                public void onServiceConnected(ComponentName name, IBinder service) {
-////                    Log.d("debug", "---onServiceConnected " + getClass().getSimpleName());
-////
-////                }
-////
-////                @Override
-////                public void onServiceDisconnected(ComponentName name) {
-////
-////                }
-////            }, BIND_AUTO_CREATE);
-//        }
+        General.isPermissionGranted = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+
     }
 
 }

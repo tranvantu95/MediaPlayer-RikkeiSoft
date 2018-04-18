@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
-import android.util.Log;
 
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
@@ -59,7 +58,8 @@ public class LockScreenPlayer {
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, song.getAlbumName());
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, song.getArtistName());
         metadataEditor.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, song.getName());
-        metadataEditor.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, song.getBitmap());
+        // FileNotFoundException
+//        metadataEditor.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, song.cloneBitmap());
         metadataEditor.apply();
 
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
