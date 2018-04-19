@@ -47,8 +47,8 @@ public class NotificationService extends Service {
 
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
-        isShowingNotification = preferences.getBoolean(IS_SHOWING_NOTIFICATION_KEY, false);
-        isShowingNotification = true; // test
+//        isShowingNotification = preferences.getBoolean(IS_SHOWING_NOTIFICATION_KEY, false);
+//        isShowingNotification = true; // test
 
         notificationPlayer = new NotificationPlayer(this);
 
@@ -102,9 +102,9 @@ public class NotificationService extends Service {
     }
 
     private void saveIsShowingNotification() {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(IS_SHOWING_NOTIFICATION_KEY, isShowingNotification);
-        editor.apply();
+//        SharedPreferences.Editor editor = preferences.edit();
+//        editor.putBoolean(IS_SHOWING_NOTIFICATION_KEY, isShowingNotification);
+//        editor.apply();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

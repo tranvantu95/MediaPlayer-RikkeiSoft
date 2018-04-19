@@ -60,9 +60,9 @@ public class PlayerReceiver extends BroadcastReceiver {
             *   If you listen to music at a high volume, this can be a noisy surprise.
             */
 
-            if(PlayerSettings.autoPauseWhenHeadsetUnplugged) {
+            if(PlayerSettings.autoPauseWhenHeadsetUnplugged)
                 if (playlistPlayer != null) playlistPlayer.pause();
-            }
+
         }
         else if(Intent.ACTION_MEDIA_BUTTON.equals(action)) {
             Log.d("debug", "ACTION_MEDIA_BUTTON " + PlayerReceiver.class.getSimpleName());

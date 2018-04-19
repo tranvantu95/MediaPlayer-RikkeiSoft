@@ -624,6 +624,7 @@ public class PlayerService extends Service {
     }
 
     private void checkStopService() {
+        Log.d("debug", "checkStopService " + getClass().getSimpleName());
         if (!hasConnection && !isPlaying() && !isShowingNotification()) {
             Log.d("debug", "stopSelf " + getClass().getSimpleName());
             stopSelf();
@@ -651,6 +652,7 @@ public class PlayerService extends Service {
         else if(ACTION_UPDATE_WIDGET_PLAYER.equals(action)) {
             Log.d("debug", "ACTION_UPDATE_WIDGET_PLAYER " + getClass().getSimpleName());
             updateWidget();
+            checkStopService();
         }
         else PlayerReceiver.handleAction(playlistPlayer, getApplicationContext(), intent, action);
     }
