@@ -134,9 +134,12 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
             @Override
             public void onChanged(@Nullable List<SongItem> songItems) {
                 getModel(PlaylistModel.class).getItems().setValue(songItems);
-                if(songItems == null || songItems.isEmpty()) finish();
+                if(playlistPlayer != null && (songItems == null || songItems.isEmpty())) finish();
             }
         });
+
+        //
+        tvTime.setText(Format.formatTime(seekBar.getProgress()));
     }
 
     @Override
@@ -144,6 +147,9 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         super.onPlaylistPlayerCreated(playlistPlayer);
 
         getModel(PlaylistModel.class).getPlaylistPlayer().setValue(playlistPlayer);
+
+        if(playlistPlayer != null && playlistPlayer.getPlaylist().isEmpty())
+            playlistPlayer.handlePlaylistEmptyDefault(false);
     }
 
     private void addFragment() {
@@ -293,20 +299,10 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
     }
 
     @Override
-    public void onBackPressed() {
-//        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-//        if(activityManager != null) {
-//            ActivityManager.RunningTaskInfo taskInfo = activityManager.getRunningTasks(1).get(0);
-//            if(taskInfo.numActivities <= 1) {
-//                Intent intent = MainActivity.createIntent(this, 0);
-//                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-//                startActivity(intent);
-//                finish();
-//                return;
-//            }
-//        }
+    public void finish() {
+        super.finish();
 
-        super.onBackPressed();
+        if(isTaskRoot()) startActivity(MainActivity.createIntent(this));
     }
 }
 

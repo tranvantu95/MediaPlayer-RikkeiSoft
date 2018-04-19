@@ -114,7 +114,12 @@ public class PlaylistFragment extends SongsFragment {
 
         @Override
         public void onPaused(PlaylistPlayer playlistPlayer) {
-            playlistPlayer.resume();
+            playlistPlayer.start();
+        }
+
+        @Override
+        public void isNewIndex(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.updateCurrentShuffleIndex();
         }
     };
 

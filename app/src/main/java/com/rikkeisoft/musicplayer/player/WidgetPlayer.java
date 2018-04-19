@@ -24,10 +24,9 @@ import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
 import com.rikkeisoft.musicplayer.service.PlayerService;
 import com.rikkeisoft.musicplayer.utils.AppUtils;
+import com.rikkeisoft.musicplayer.utils.General;
 
 public class WidgetPlayer extends AppWidgetProvider {
-
-    public static final String ACTION_UPDATE = "com.rikkeisoft.musicplayer.action.UPDATE_WIDGET_PLAYER";
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
@@ -40,11 +39,6 @@ public class WidgetPlayer extends AppWidgetProvider {
         super.onReceive(context, intent);
         Log.d("debug", "onReceive " + getClass().getSimpleName());
 
-        if(ACTION_UPDATE.equals(intent.getAction())) {
-            AppWidgetManager appWidgetManager = AppUtils.getAppWidgetManager(context);
-            int[] appWidgetIds = AppUtils.getAppWidgetIds(context, appWidgetManager, getClass());
-            if(appWidgetIds.length > 0) update(context, appWidgetManager, appWidgetIds);
-        }
     }
 
     @Override
@@ -95,10 +89,11 @@ public class WidgetPlayer extends AppWidgetProvider {
         PlaylistPlayer playlistPlayer = playerService != null ? playerService.getPlaylistPlayer() : null;
 
         //
-        if(playlistPlayer != null) update(context, appWidgetManager, appWidgetIds, playlistPlayer);
+        if(playlistPlayer != null || !General.isPermissionGranted)
+            update(context, appWidgetManager, appWidgetIds, playlistPlayer);
         else {
             Intent intent = new Intent(context, PlayerService.class);
-            intent.setAction(ACTION_UPDATE);
+            intent.setAction(PlayerService.ACTION_UPDATE_WIDGET_PLAYER);
             context.startService(intent);
         }
     }
@@ -154,11 +149,8 @@ public class WidgetPlayer extends AppWidgetProvider {
             remoteViews.setImageViewBitmap(R.id.btn_next, bmNext);
 
             //
-//            Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);
-//            PendingIntent pRoot = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Intent intent = new Intent(context, PlayerService.class);
-            intent.setAction(ActivityHandler.ACTION_SHOW_PLAYER_ACTIVITY);
-            PendingIntent pRoot = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = ActivityHandler.createIntent(context, ActivityHandler.FLAG_OPEN_PLAYER);
+            PendingIntent pRoot = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             remoteViews.setOnClickPendingIntent(R.id.root, pRoot);
 
             PlayerService.setListeners(context, remoteViews);

@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -53,6 +54,12 @@ public class AppUtils {
     }
 
     // Activity
+    public static Intent makeMainActivity(Intent intent) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setAction(Intent.ACTION_MAIN);
+        return intent;
+    }
 
     // Service
     public static boolean isServiceRunning(Context context, Class<?> serviceClass) {

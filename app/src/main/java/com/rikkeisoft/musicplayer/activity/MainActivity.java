@@ -19,6 +19,7 @@ import com.rikkeisoft.musicplayer.model.ArtistsModel;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.model.SongsModel;
 import com.rikkeisoft.musicplayer.model.item.SongItem;
+import com.rikkeisoft.musicplayer.utils.AppUtils;
 import com.rikkeisoft.musicplayer.utils.Loader;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
@@ -29,10 +30,9 @@ public class MainActivity extends MyActivity {
     private ViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
-    public static Intent createIntent(Context context, int flag) {
+    public static Intent createIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(ActivityHandler.FLAG, flag);
-        return intent;
+        return AppUtils.makeMainActivity(intent);
     }
 
     @Override
@@ -109,12 +109,6 @@ public class MainActivity extends MyActivity {
         super.onPlaylistPlayerCreated(playlistPlayer);
 
         getModel(SongsModel.class).getPlaylistPlayer().setValue(playlistPlayer);
-
-        //
-        int flag = getIntent().getIntExtra(ActivityHandler.FLAG, 0);
-        getIntent().removeExtra(ActivityHandler.FLAG);
-
-        if(flag == ActivityHandler.FLAG_OPEN_PLAYER) openPlayerActivity();
     }
 
     @Override

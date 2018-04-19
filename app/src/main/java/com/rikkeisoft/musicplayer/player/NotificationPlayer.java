@@ -23,8 +23,6 @@ import com.rikkeisoft.musicplayer.utils.AppUtils;
 
 public class NotificationPlayer {
 
-    public static final String ACTION_DELETE_NOTIFICATION = "com.rikkeisoft.musicplayer.action.DELETE_NOTIFICATION";
-
     private static boolean currentVersionSupportBigNotification = AppUtils.currentVersionSupportBigNotification();
     private static boolean currentVersionSupportVectorDrawable = AppUtils.currentVersionSupportVectorDrawable();
 
@@ -54,7 +52,7 @@ public class NotificationPlayer {
         PendingIntent pMain = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         intent = new Intent(context, PlayerService.class);
-        intent.setAction(ACTION_DELETE_NOTIFICATION);
+        intent.setAction(PlayerService.ACTION_DELETE_NOTIFICATION_PLAYER);
         PendingIntent pDelete = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, chanelId)
@@ -146,9 +144,9 @@ public class NotificationPlayer {
     }
 
     private void setListeners(Context context) {
-        PlayerReceiver.setListeners(context, notification.contentView);
+        PlayerService.setListeners(context, notification.contentView);
         if(currentVersionSupportBigNotification)
-            PlayerReceiver.setListeners(context, notification.bigContentView);
+            PlayerService.setListeners(context, notification.bigContentView);
     }
 
 }

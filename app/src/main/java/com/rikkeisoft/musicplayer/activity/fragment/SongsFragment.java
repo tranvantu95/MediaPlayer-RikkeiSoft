@@ -76,7 +76,7 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
                     if (!newPlaylistName.equals(oldPlaylistName) || !ArrayUtils.equalsList(oldPlaylist, newPlaylist))
                         playlistPlayer.setPlaylist(newPlaylistName, new ArrayList<>(newPlaylist), position, true);
                     else
-                        playlistPlayer.play(position, null);
+                        playlistPlayer.play(position, playCallback);
 
                     getActivity().startActivity(PlayerActivity.createIntent(getContext()));
                 }
@@ -84,4 +84,24 @@ public class SongsFragment extends MyFragment<SongItem, SongsModel, SongsRecycle
         });
     }
 
+    private PlaylistPlayer.PlayCallback playCallback = new PlaylistPlayer.PlayCallback() {
+        @Override
+        public void onNotReady(PlaylistPlayer playlistPlayer) {}
+
+        @Override
+        public void onPreparing(PlaylistPlayer playlistPlayer) {}
+
+        @Override
+        public void onPlaying(PlaylistPlayer playlistPlayer) {}
+
+        @Override
+        public void onPaused(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.start();
+        }
+
+        @Override
+        public void isNewIndex(PlaylistPlayer playlistPlayer) {
+            playlistPlayer.updateCurrentShuffleIndex();
+        }
+    };
 }

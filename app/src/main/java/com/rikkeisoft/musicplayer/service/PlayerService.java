@@ -40,6 +40,13 @@ import java.util.List;
 
 public class PlayerService extends Service {
 
+    public static final String ACTION_DELETE_NOTIFICATION_PLAYER = "com.rikkeisoft.musicplayer.action.DELETE_NOTIFICATION_PLAYER";
+    public static final String ACTION_UPDATE_WIDGET_PLAYER = "com.rikkeisoft.musicplayer.action.UPDATE_WIDGET_PLAYER";
+
+    public static final String ACTION_PLAY_PAUSE = "com.rikkeisoft.musicplayer.action.PLAYER_PLAY_PAUSE";
+    public static final String ACTION_PREVIOUS = "com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS";
+    public static final String ACTION_NEXT = "com.rikkeisoft.musicplayer.action.PLAYER_NEXT";
+
     // Media change listener
     private BroadcastReceiver onReceiverMediaChange;
 
@@ -89,6 +96,28 @@ public class PlayerService extends Service {
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         if(audioManager != null) audioManager.unregisterMediaButtonEventReceiver(playerReceiverCN);
+    }
+
+    //
+    private PlayerReceiver playerReceiver;
+
+    private void registerPlayerReceiver() {
+        if(playerReceiver != null) return;
+        Log.d("debug", "registerPlayerReceiver " + getClass().getSimpleName());
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+
+        playerReceiver = new PlayerReceiver();
+        registerReceiver(playerReceiver, filter);
+    }
+
+    private void unregisterPlayerReceiver() {
+        if(playerReceiver != null) {
+            Log.d("debug", "unregisterPlayerReceiver " + getClass().getSimpleName());
+            unregisterReceiver(playerReceiver);
+            playerReceiver = null;
+        }
     }
 
     // data and database
@@ -175,7 +204,7 @@ public class PlayerService extends Service {
     private LockScreenPlayer lockScreenPlayer;
 
     //
-    private boolean started, hasConnection, taskRemoved, startForeground;
+    private boolean started, hasConnection, startForeground, taskRemoved;
 
     @Override
     public void onCreate() {
@@ -187,10 +216,6 @@ public class PlayerService extends Service {
 //
 //        playerHandler = new PlayerHandler(playerThread.getLooper());
 //        uiHandler = new Handler();
-
-        registerMediaButtonEventReceiver();
-
-        registerOnReceiverMediaChange();
 
         preferences = getApplicationContext().getSharedPreferences(DATA, Context.MODE_PRIVATE);
 
@@ -265,10 +290,12 @@ public class PlayerService extends Service {
                 Log.d("debug", "---onPlayingChange " + playing);
                 playerModel.getPlaying().setValue(playing);
 
-                if(!playing) saveCurrentPosition(playlistPlayer.getCurrentPosition());
-
-                //
                 updateView();
+
+                if(!playing) {
+                    saveCurrentPosition(playlistPlayer.getCurrentPosition());
+                    checkStopService();
+                }
             }
 
             @Override
@@ -304,12 +331,12 @@ public class PlayerService extends Service {
                 playerModel.getCurrentPosition().setValue(0);
                 if(song != null) playerModel.getDuration().setValue(song.getDuration());
 
+                //
+                updateView();
+
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putInt(CURRENT_SONG_ID_KEY, song != null ? song.getId() : -1);
                 editor.apply();
-
-                //
-                updateView();
             }
 
             @Override
@@ -455,6 +482,13 @@ public class PlayerService extends Service {
 
     //
     private void onPlaylistPlayerCreated() {
+
+        registerOnReceiverMediaChange();
+
+        registerMediaButtonEventReceiver();
+
+        registerPlayerReceiver();
+
         bindNotificationService();
 
         createLockScreen();
@@ -559,7 +593,6 @@ public class PlayerService extends Service {
     //
     private void updateWidget() {
         Log.d("debug", "updateWidget " + getClass().getSimpleName());
-        //sendBroadcast(new Intent(WidgetPlayer.ACTION_UPDATE));
         WidgetPlayer.update(getApplicationContext(), playlistPlayer);
     }
 
@@ -591,7 +624,7 @@ public class PlayerService extends Service {
     }
 
     private void checkStopService() {
-        if (taskRemoved && !hasConnection && !isPlaying() && !isShowingNotification()) {
+        if (!hasConnection && !isPlaying() && !isShowingNotification()) {
             Log.d("debug", "stopSelf " + getClass().getSimpleName());
             stopSelf();
         }
@@ -610,20 +643,16 @@ public class PlayerService extends Service {
         String action = intent.getAction();
         intent.setAction(null);
 
-        if(ActivityHandler.ACTION_SHOW_PLAYER_ACTIVITY.equals(action)) {
-            Log.d("debug", "ACTION_SHOW_PLAYER_ACTIVITY " + getClass().getSimpleName());
-            startActivity(ActivityHandler.createIntent(this, ActivityHandler.FLAG_OPEN_PLAYER));
-        }
         // notificationPlayer deleted by user
-        else if(NotificationPlayer.ACTION_DELETE_NOTIFICATION.equals(action)) {
-            Log.d("debug", "ACTION_DELETE_NOTIFICATION " + getClass().getSimpleName());
+        if(ACTION_DELETE_NOTIFICATION_PLAYER.equals(action)) {
+            Log.d("debug", "ACTION_DELETE_NOTIFICATION_PLAYER " + getClass().getSimpleName());
             deleteNotification();
         }
-        else if(WidgetPlayer.ACTION_UPDATE.equals(action)) {
+        else if(ACTION_UPDATE_WIDGET_PLAYER.equals(action)) {
             Log.d("debug", "ACTION_UPDATE_WIDGET_PLAYER " + getClass().getSimpleName());
             updateWidget();
         }
-        else PlayerReceiver.handleAction(playlistPlayer, intent, action);
+        else PlayerReceiver.handleAction(playlistPlayer, getApplicationContext(), intent, action);
     }
 
     @Override
@@ -634,7 +663,7 @@ public class PlayerService extends Service {
         if(!General.isPermissionGranted) {
             stopSelf();
 
-            if(intent.getAction() != null) {
+            if(intent != null && intent.getAction() != null) {
                 startActivity(ActivityHandler.createIntent(this, ActivityHandler.FLAG_OPEN_PLAYER));
                 intents.add(intent);
             }
@@ -642,7 +671,7 @@ public class PlayerService extends Service {
             return START_NOT_STICKY;
         }
 
-        if(intent.getAction() != null) {
+        if(intent != null && intent.getAction() != null) {
             if (playlistPlayer != null) handleIntent(intent);
             else intents.add(intent);
         }
@@ -665,13 +694,6 @@ public class PlayerService extends Service {
     public void onRebind(Intent intent) {
         super.onRebind(intent);
         Log.d("debug", "onRebind " + getClass().getSimpleName());
-        hasConnection = true;
-
-        if(MyApplication.getPlayerModel() == null && playerModel != null) {
-            MyApplication.setPlayerModel(playerModel);
-            MyApplication.setPlaylistPlayer(playlistPlayer);
-            reloadPlaylist();
-        }
     }
 
     @Override
@@ -679,7 +701,7 @@ public class PlayerService extends Service {
         Log.d("debug", "onUnbind " + getClass().getSimpleName());
         hasConnection = false;
         checkStopService();
-        return true;
+        return false;
     }
 
     @Override
@@ -688,9 +710,7 @@ public class PlayerService extends Service {
         Log.d("debug", "onTaskRemoved " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onTaskRemoved", Toast.LENGTH_LONG).show();
         taskRemoved = true;
-        checkStopService();
-
-        if(playlistPlayer != null) saveCurrentPosition(playlistPlayer.getCurrentPosition());
+//        checkStopService();
     }
 
     @Override
@@ -699,9 +719,11 @@ public class PlayerService extends Service {
         Log.d("debug", "onDestroy " + getClass().getSimpleName());
         Toast.makeText(getApplicationContext(), "onDestroy " + getClass().getSimpleName(), Toast.LENGTH_LONG).show();
 
+        unregisterOnReceiverMediaChange();
+
         unregisterMediaButtonEventReceiver();
 
-        unregisterOnReceiverMediaChange();
+        unregisterPlayerReceiver();
 
         unbindNotificationService();
 
@@ -713,11 +735,11 @@ public class PlayerService extends Service {
     //
     public static void setListeners(Context context, RemoteViews view) {
         Intent previous = new Intent(context, PlayerService.class);
-        previous.setAction(PlayerReceiver.ACTION_PREVIOUS);
+        previous.setAction(ACTION_PREVIOUS);
         Intent next = new Intent(context, PlayerService.class);
-        next.setAction(PlayerReceiver.ACTION_NEXT);
+        next.setAction(ACTION_NEXT);
         Intent play = new Intent(context, PlayerService.class);
-        play.setAction(PlayerReceiver.ACTION_PLAY_PAUSE);
+        play.setAction(ACTION_PLAY_PAUSE);
 
         PendingIntent pPrevious = PendingIntent.getService(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);

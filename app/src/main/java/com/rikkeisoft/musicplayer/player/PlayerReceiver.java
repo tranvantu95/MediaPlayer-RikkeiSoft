@@ -19,10 +19,6 @@ import com.rikkeisoft.musicplayer.service.PlayerService;
 
 public class PlayerReceiver extends BroadcastReceiver {
 
-    public static final String ACTION_PLAY_PAUSE = "com.rikkeisoft.musicplayer.action.PLAYER_PLAY_PAUSE";
-    public static final String ACTION_PREVIOUS = "com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS";
-    public static final String ACTION_NEXT = "com.rikkeisoft.musicplayer.action.PLAYER_NEXT";
-
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("debug", "onReceive " + getClass().getSimpleName());
@@ -32,25 +28,26 @@ public class PlayerReceiver extends BroadcastReceiver {
         PlayerService playerService = binder != null ? binder.getService() : null;
         PlaylistPlayer playlistPlayer = playerService != null ? playerService.getPlaylistPlayer() : null;
 
-        if(playlistPlayer != null) handleAction(playlistPlayer, intent, intent.getAction());
-        else {
-            intent.setComponent(new ComponentName(context, PlayerService.class));
-            context.startService(intent);
-        }
+        handleAction(playlistPlayer, context, intent, intent.getAction());
     }
 
-    public static void handleAction(PlaylistPlayer playlistPlayer, Intent intent, String action) {
+    private static void sendToService(Context context, Intent intent) {
+        intent.setComponent(new ComponentName(context, PlayerService.class));
+        context.startService(intent);
+    }
+
+    public static void handleAction(PlaylistPlayer playlistPlayer, Context context, Intent intent, String action) {
         Log.d("debug", "handleAction " + PlayerReceiver.class.getSimpleName());
 
-        if(ACTION_PLAY_PAUSE.equals(action)) {
+        if(PlayerService.ACTION_PLAY_PAUSE.equals(action)) {
             Log.d("debug", "ACTION_PLAY_PAUSE " + PlayerReceiver.class.getSimpleName());
             if(playlistPlayer != null) playlistPlayer.togglePlay();
         }
-        else if(ACTION_PREVIOUS.equals(action)) {
+        else if(PlayerService.ACTION_PREVIOUS.equals(action)) {
             Log.d("debug", "ACTION_PREVIOUS " + PlayerReceiver.class.getSimpleName());
             if(playlistPlayer != null) playlistPlayer.previous();
         }
-        else if(ACTION_NEXT.equals(action)) {
+        else if(PlayerService.ACTION_NEXT.equals(action)) {
             Log.d("debug", "ACTION_NEXT " + PlayerReceiver.class.getSimpleName());
             if(playlistPlayer != null) playlistPlayer.next();
         }
@@ -63,7 +60,9 @@ public class PlayerReceiver extends BroadcastReceiver {
             *   If you listen to music at a high volume, this can be a noisy surprise.
             */
 
-            if(playlistPlayer != null && PlayerSettings.autoPauseWhenHeadsetUnplugged) playlistPlayer.pause();
+            if(PlayerSettings.autoPauseWhenHeadsetUnplugged) {
+                if (playlistPlayer != null) playlistPlayer.pause();
+            }
         }
         else if(Intent.ACTION_MEDIA_BUTTON.equals(action)) {
             Log.d("debug", "ACTION_MEDIA_BUTTON " + PlayerReceiver.class.getSimpleName());
@@ -107,12 +106,14 @@ public class PlayerReceiver extends BroadcastReceiver {
                     break;
             }
         }
+
+        if(playlistPlayer == null) sendToService(context, intent);
     }
 
     public static void setListeners(Context context, RemoteViews view) {
-        Intent previous = new Intent(ACTION_PREVIOUS);
-        Intent next = new Intent(ACTION_NEXT);
-        Intent play = new Intent(ACTION_PLAY_PAUSE);
+        Intent previous = new Intent(PlayerService.ACTION_PREVIOUS);
+        Intent next = new Intent(PlayerService.ACTION_NEXT);
+        Intent play = new Intent(PlayerService.ACTION_PLAY_PAUSE);
 
         PendingIntent pPrevious = PendingIntent.getBroadcast(context.getApplicationContext(), 0, previous, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.btn_previous, pPrevious);

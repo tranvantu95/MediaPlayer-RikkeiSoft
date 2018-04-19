@@ -40,7 +40,7 @@ public abstract class MyActivity extends SwitchListActivity {
         togglePlayCallback = new PlaylistPlayer.TogglePlayCallback() {
             @Override
             public void onPlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist) {
-                handlePlaylistEmpty(playlistPlayer, playlist, true);
+                handlePlaylistEmpty(playlistPlayer, true);
             }
         };
 
@@ -54,7 +54,7 @@ public abstract class MyActivity extends SwitchListActivity {
 
                     @Override
                     public void onClick(View view) {
-                        openPlayerActivity();
+                        openPlayer();
                     }
 
                     @Override
@@ -69,22 +69,18 @@ public abstract class MyActivity extends SwitchListActivity {
                 });
     }
 
-    protected void openPlayerActivity() {
+    protected void openPlayer() {
         if(playlistPlayer != null) {
             if(playlistPlayer.getPlaylist().isEmpty())
-                handlePlaylistEmpty(playlistPlayer, playlistPlayer.getPlaylist(), false);
+                handlePlaylistEmpty(playlistPlayer, false);
 
             if(!playlistPlayer.getPlaylist().isEmpty())
                 startActivity(PlayerActivity.createIntent(getApplicationContext()));
         }
     }
 
-    protected void handlePlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist, boolean play) {
-        List<SongItem> playlistDefault = getPlaylistDefault();
-        if(playlistDefault == null || playlistDefault.isEmpty()) return;
-
-        playlist.addAll(playlistDefault);
-        playlistPlayer.setPlaylist(getTitle2(), playlist, play ? 0 : -1, play);
+    protected void handlePlaylistEmpty(PlaylistPlayer playlistPlayer, boolean play) {
+        playlistPlayer.handlePlaylistEmpty(getTitle2(), getPlaylistDefault(), play);
     }
 
     protected abstract List<SongItem> getPlaylistDefault();

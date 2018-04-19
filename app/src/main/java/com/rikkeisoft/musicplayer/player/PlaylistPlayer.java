@@ -169,10 +169,8 @@ public class PlaylistPlayer extends MediaPlayer {
 
         this.repeat = repeat;
 
-        if(isValidateCurrentIndex()) {
-            if(play) play(currentIndex, null);
-            else prepare(currentIndex);
-        }
+        if(play) play(currentIndex, null);
+        else if(isValidateCurrentIndex()) prepare(currentIndex);
     }
 
     private void setPlaying(boolean playing) {
@@ -297,6 +295,7 @@ public class PlaylistPlayer extends MediaPlayer {
         setPlaylist(playlistName, playlist, index, true);
     }
 
+
     public void play(int index, PlayCallback callback) {
         if(!ArrayUtils.isValidateIndex(playlist, index)) {
             Log.d("debug", "index out of bound " + getClass().getSimpleName());
@@ -314,16 +313,24 @@ public class PlaylistPlayer extends MediaPlayer {
                 if (isPlaying()) {
                     if(callback != null) callback.onPlaying(this);
                 }
-                else if(callback != null) callback.onPaused(this);
-                else start();
+                else {
+                    if(callback != null) callback.onPaused(this);
+                    else start();
+                }
                 return;
             }
-            else if(callback != null) callback.onNotReady(this);
+            else {
+                if(callback != null) callback.onNotReady(this);
+                prepare(index);
+                return;
+            }
         }
+
+        prepare(index);
 
         setCurrentIndex(index, true);
 
-        prepare(index);
+        if(callback != null) callback.isNewIndex(this);
     }
 
     public void play(SongItem song, PlayCallback callback) {
@@ -360,6 +367,7 @@ public class PlaylistPlayer extends MediaPlayer {
         void onPreparing(PlaylistPlayer playlistPlayer);
         void onPlaying(PlaylistPlayer playlistPlayer);
         void onPaused(PlaylistPlayer playlistPlayer);
+        void isNewIndex(PlaylistPlayer playlistPlayer);
     }
 
     private PlayCallback playCallback = new PlayCallback() {
@@ -380,20 +388,36 @@ public class PlaylistPlayer extends MediaPlayer {
         public void onPaused(PlaylistPlayer playlistPlayer) {
             playlistPlayer.replay();
         }
+
+        @Override
+        public void isNewIndex(PlaylistPlayer playlistPlayer) {}
     };
 
-    private int getShuffleIndex(int index) {
-        currentShuffleIndex = index;
-        return playlist.indexOf(shuffleList.get(index));
+    private int getRandomIndex() {
+        return (int) (Math.random() * playlist.size());
     }
 
-    private void playShuffle(int index, PlayCallback playCallback) {
-        if(!ArrayUtils.isValidateIndex(shuffleList, index)) {
+    private int getShuffleIndex(int index) {
+        return shuffleList.indexOf(playlist.get(index));
+    }
+
+    private int getIndex(int shuffleIndex) {
+        return playlist.indexOf(shuffleList.get(shuffleIndex));
+    }
+
+    public void updateCurrentShuffleIndex() {
+        if(shuffle) currentShuffleIndex = getShuffleIndex(currentIndex);
+    }
+
+    private void playShuffle(int shuffleIndex, PlayCallback playCallback) {
+        if(!ArrayUtils.isValidateIndex(shuffleList, shuffleIndex)) {
             Log.d("debug", "index out of bound " + getClass().getSimpleName());
             return;
         }
 
-        play(getShuffleIndex(index), playCallback);
+        currentShuffleIndex = shuffleIndex;
+
+        play(getIndex(shuffleIndex), playCallback);
     }
 
     public void next() {
@@ -430,7 +454,7 @@ public class PlaylistPlayer extends MediaPlayer {
             else {
                 setPlaying(false);
 //                Collections.shuffle(shuffleList);
-//                int index = getShuffleIndex(0);
+//                int index = getIndex(0);
 //                setCurrentIndex(index);
 //                prepare(index);
             }
@@ -476,23 +500,35 @@ public class PlaylistPlayer extends MediaPlayer {
         void onPlaylistEmpty(PlaylistPlayer playlistPlayer, List<SongItem> playlist);
     }
 
+    public void handlePlaylistEmpty(String playlistName, List<SongItem> playlist, boolean play) {
+        if(playlist == null || playlist.isEmpty()) return;
+
+        this.playlist.addAll(playlist);
+        int index = !play ? -1 : !shuffle ? 0 : getRandomIndex();
+        setPlaylist(playlistName, this.playlist, index, play);
+    }
+
+    public void handlePlaylistEmptyDefault(boolean play) {
+        if(Loader.getInstance().isLoaded())
+            handlePlaylistEmpty("Beauty Music", Loader.getInstance().getSongs(), play);
+    }
+
     public void togglePlay(boolean fixIndex, TogglePlayCallback togglePlayCallback) {
         if(!running) {
             if(fixIndex) {
                 if(playlist.isEmpty()) {
-                    if(togglePlayCallback != null)
-                        togglePlayCallback.onPlaylistEmpty(this, playlist);
-                    else {
-                        if(Loader.getInstance().isLoaded()) {
-                            playlist.addAll(Loader.getInstance().getSongs());
-                            setPlaylist("Beauty Music", playlist, 0, true);
-                        }
-                    }
+                    if(togglePlayCallback == null) handlePlaylistEmptyDefault(true);
+                    else togglePlayCallback.onPlaylistEmpty(this, playlist);
 
                     return;
                 }
 
-                if(!isValidateCurrentIndex()) currentIndex = 0;
+                if(!isValidateCurrentIndex()) {
+                    if(!shuffle) play(0, null);
+                    else playShuffle(0, null);
+
+                    return;
+                }
             }
 
             resume();
@@ -546,7 +582,7 @@ public class PlaylistPlayer extends MediaPlayer {
         Collections.shuffle(shuffleList);
 
         if(isValidateCurrentIndex())
-            currentShuffleIndex = shuffleList.indexOf(playlist.get(currentIndex));
+            currentShuffleIndex = getShuffleIndex(currentIndex);
         else
             currentShuffleIndex = -1;
     }
