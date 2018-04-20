@@ -46,15 +46,16 @@
 
         <receiver android:name=".player.PlayerReceiver"
             android:permission="com.rikkeisoft.musicplayer.permission.PLAYER_CONTROLLER">
-            <!--<intent-filter>-->
+            <intent-filter>
                 <!--<action android:name="android.media.AUDIO_BECOMING_NOISY" />-->
-                <!--<action android:name="android.intent.action.MEDIA_BUTTON" />-->
+                <!--<action android:name="android.intent.action.PHONE_STATE"/>-->
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
 
-                <!--&lt;!&ndash;My Action&ndash;&gt;-->
+                <!--My Action-->
                 <!--<action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PLAY_PAUSE" />-->
                 <!--<action android:name="com.rikkeisoft.musicplayer.action.PLAYER_PREVIOUS" />-->
                 <!--<action android:name="com.rikkeisoft.musicplayer.action.PLAYER_NEXT" />-->
-            <!--</intent-filter>-->
+            </intent-filter>
         </receiver>
 
         <receiver

@@ -108,8 +108,8 @@ public class PlayerService extends Service {
         Log.d("debug", "registerPlayerReceiver " + getClass().getSimpleName());
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
         playerReceiver = new PlayerReceiver();
         registerReceiver(playerReceiver, filter);
