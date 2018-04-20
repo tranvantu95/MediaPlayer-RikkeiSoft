@@ -60,9 +60,10 @@ public class NotificationPlayer {
                 .setContentTitle("")
                 .setContentText("")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setContentIntent(pMain)
                 .setDeleteIntent(pDelete)
+                .setAutoCancel(false)
                 .setWhen(0)
                 .setCustomContentView(new RemoteViews(
                         context.getApplicationContext().getPackageName(), R.layout.notification_player_small));

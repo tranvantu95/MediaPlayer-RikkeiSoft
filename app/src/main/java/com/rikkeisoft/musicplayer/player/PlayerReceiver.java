@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
@@ -51,7 +52,7 @@ public class PlayerReceiver extends BroadcastReceiver {
             Log.d("debug", "ACTION_NEXT " + PlayerReceiver.class.getSimpleName());
             if(playlistPlayer != null) playlistPlayer.next();
         }
-        else if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+        else if(AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
             Log.d("debug", "ACTION_AUDIO_BECOMING_NOISY " + PlayerReceiver.class.getSimpleName());
 
             /*
@@ -63,6 +64,20 @@ public class PlayerReceiver extends BroadcastReceiver {
             if(PlayerSettings.autoPauseWhenHeadsetUnplugged)
                 if (playlistPlayer != null) playlistPlayer.pause();
 
+        }
+        else if(TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+            Log.d("debug", "ACTION_PHONE_STATE_CHANGED " + PlayerReceiver.class.getSimpleName());
+            String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+
+            if(TelephonyManager.EXTRA_STATE_RINGING.equals(state)){
+                Log.d("debug", "EXTRA_STATE_RINGING " + PlayerReceiver.class.getSimpleName());
+            }
+            if ((TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state))){
+                Log.d("debug", "EXTRA_STATE_OFFHOOK " + PlayerReceiver.class.getSimpleName());
+            }
+            if (TelephonyManager.EXTRA_STATE_IDLE.equals(state)){
+                Log.d("debug", "EXTRA_STATE_IDLE " + PlayerReceiver.class.getSimpleName());
+            }
         }
         else if(Intent.ACTION_MEDIA_BUTTON.equals(action)) {
             Log.d("debug", "ACTION_MEDIA_BUTTON " + PlayerReceiver.class.getSimpleName());

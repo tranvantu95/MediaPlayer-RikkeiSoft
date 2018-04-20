@@ -132,7 +132,8 @@ public class BaseActivity extends AppCompatActivity {
 
     // Permission
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 101;
-    private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
+    private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.READ_PHONE_STATE};
 
     private boolean showSettings;
 

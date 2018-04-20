@@ -1,5 +1,6 @@
 package com.rikkeisoft.musicplayer.service;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -107,6 +109,7 @@ public class PlayerService extends Service {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 
         playerReceiver = new PlayerReceiver();
         registerReceiver(playerReceiver, filter);
@@ -511,7 +514,7 @@ public class PlayerService extends Service {
                 notificationService = binder.getService();
                 notificationPlayer = notificationService.getNotificationPlayer();
 
-                if(notificationService.isShowingNotification) updateNotification();
+                if(notificationService.isShowingNotification || isPlaying()) updateNotification();
             }
 
             @Override
@@ -551,12 +554,16 @@ public class PlayerService extends Service {
             notificationService.showNotification(true);
             startForeground();
 
-            if(!playlistPlayer.isRunning()) new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    notificationService.showNotification(false);
-                }
-            }, 1000);
+            if(!playlistPlayer.isRunning())
+                notificationService.showNotification(false);
+
+//            if(!playlistPlayer.isRunning()) new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if(notificationService != null && playlistPlayer != null)
+//                      notificationService.showNotification(playlistPlayer.isRunning());
+//                }
+//            }, 1000);
         }
         else notificationService.showNotification(playlistPlayer.isRunning());
     }
