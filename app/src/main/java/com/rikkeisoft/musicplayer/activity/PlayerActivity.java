@@ -88,7 +88,10 @@ public class PlayerActivity extends AppbarActivity implements View.OnClickListen
         playerModel.getCurrentPosition().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(@Nullable Integer integer) {
-                if(integer != null && !userIsSeeking) seekBar.setProgress(integer);
+                if(integer != null && !userIsSeeking) {
+                    if(integer > seekBar.getMax()) integer = seekBar.getMax();
+                    seekBar.setProgress(integer);
+                }
             }
         });
 

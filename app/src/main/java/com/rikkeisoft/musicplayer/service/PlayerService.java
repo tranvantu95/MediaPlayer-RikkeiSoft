@@ -309,8 +309,9 @@ public class PlayerService extends Service {
 
                     if(playerModel.getCurrentPosition().getValue() != null) {
                         int position = playerModel.getCurrentPosition().getValue();
-                        if(position > 0 && position < playlistPlayer.getDuration() - 3000)
-                        playlistPlayer.seekTo(playerModel.getCurrentPosition().getValue());
+                        if(position > 0)
+                            if(playlistPlayer.canSeekTo(position)) playlistPlayer.seekTo(position);
+                            else playerModel.getCurrentPosition().setValue(0);
                     }
                 }
             }

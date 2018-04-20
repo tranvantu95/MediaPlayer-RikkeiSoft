@@ -596,6 +596,28 @@ public class PlaylistPlayer extends MediaPlayer {
         return running;
     }
 
+    public boolean isShuffle() {
+        return shuffle;
+    }
+
+    public int getRepeat() {
+        return repeat;
+    }
+
+    //
+    public boolean canSeekTo(int position) {
+        return !(isLastSong() && repeat == UN_REPEAT && position > getDuration() - 3000);
+    }
+
+    public boolean isLastSong() {
+        return currentIndex == playlist.size() - 1;
+    }
+
+    //
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
     public SongItem getCurrentSong() {
         return currentSong;
     }
@@ -619,6 +641,7 @@ public class PlaylistPlayer extends MediaPlayer {
         return playlist.get(currentIndex).getId();
     }
 
+    //
     private boolean isValidateCurrentIndex() {
         return ArrayUtils.isValidateIndex(playlist, currentIndex);
     }
