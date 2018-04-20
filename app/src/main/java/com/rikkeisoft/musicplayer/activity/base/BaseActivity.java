@@ -32,6 +32,7 @@ import com.rikkeisoft.musicplayer.R;
 import com.rikkeisoft.musicplayer.app.MyApplication;
 import com.rikkeisoft.musicplayer.model.PlayerModel;
 import com.rikkeisoft.musicplayer.service.PlayerService;
+import com.rikkeisoft.musicplayer.utils.AppUtils;
 import com.rikkeisoft.musicplayer.utils.General;
 import com.rikkeisoft.musicplayer.player.PlaylistPlayer;
 
@@ -326,14 +327,11 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void exitApp() {
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(homeIntent);
+        startActivity(AppUtils.makeHomeIntent(new Intent()));
     }
 
     // Model
-    protected  <Model extends ViewModel> Model getModel(Class<Model> modelClass) {
+    protected <Model extends ViewModel> Model getModel(Class<Model> modelClass) {
         return ViewModelProviders.of(this).get(modelClass);
     }
 

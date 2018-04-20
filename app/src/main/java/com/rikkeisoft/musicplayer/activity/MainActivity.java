@@ -32,7 +32,7 @@ public class MainActivity extends MyActivity {
 
     public static Intent createIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
-        return AppUtils.makeMainActivity(intent);
+        return AppUtils.makeMainIntent(intent);
     }
 
     @Override

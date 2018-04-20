@@ -20,6 +20,8 @@ import com.rikkeisoft.musicplayer.service.PlayerService;
 
 public class PlayerReceiver extends BroadcastReceiver {
 
+    private static boolean playing;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("debug", "onReceive " + getClass().getSimpleName());
@@ -71,12 +73,20 @@ public class PlayerReceiver extends BroadcastReceiver {
 
             if(TelephonyManager.EXTRA_STATE_RINGING.equals(state)){
                 Log.d("debug", "EXTRA_STATE_RINGING " + PlayerReceiver.class.getSimpleName());
+                if(playlistPlayer != null && playlistPlayer.isRunning()) {
+                    playlistPlayer.pause();
+                    playing = true;
+                }
             }
-            if ((TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state))){
+            else if ((TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state))){
                 Log.d("debug", "EXTRA_STATE_OFFHOOK " + PlayerReceiver.class.getSimpleName());
             }
-            if (TelephonyManager.EXTRA_STATE_IDLE.equals(state)){
+            else if (TelephonyManager.EXTRA_STATE_IDLE.equals(state)){
                 Log.d("debug", "EXTRA_STATE_IDLE " + PlayerReceiver.class.getSimpleName());
+                if(playing && playlistPlayer != null) {
+                    playlistPlayer.resume();
+                    playing = false;
+                }
             }
         }
         else if(Intent.ACTION_MEDIA_BUTTON.equals(action)) {

@@ -41,7 +41,7 @@ public class ActivityHandler extends AppCompatActivity {
             switch (flag) {
                 case FLAG_OPEN_PLAYER:
                     Intent intent = PlayerActivity.createIntent(this);
-                    startActivity(AppUtils.makeMainActivity(intent));
+                    startActivity(AppUtils.makeMainIntent(intent));
                     break;
             }
 

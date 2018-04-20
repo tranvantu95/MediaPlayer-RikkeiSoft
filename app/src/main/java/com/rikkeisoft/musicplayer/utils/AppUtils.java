@@ -54,9 +54,16 @@ public class AppUtils {
     }
 
     // Activity
-    public static Intent makeMainActivity(Intent intent) {
+    public static Intent makeMainIntent(Intent intent) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setAction(Intent.ACTION_MAIN);
+        return intent;
+    }
+
+    public static Intent makeHomeIntent(Intent intent) {
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addCategory(Intent.CATEGORY_HOME);
         intent.setAction(Intent.ACTION_MAIN);
         return intent;
     }
