@@ -35,7 +35,7 @@
                     app:srcCompat="@drawable/ic_disk"
                     android:adjustViewBounds="true"/>
 
-                <com.rikkeisoft.musicplayer.custom.view.CircularSeekBar
+                <com.ccs.app.musicplayer.custom.view.CircularSeekBar
                     android:id="@id/seek_bar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -134,7 +134,7 @@
         android:id="@id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.rikkeisoft.musicplayer.custom.view.PlayerBehavior">
+        app:layout_behavior="com.ccs.app.musicplayer.custom.view.PlayerBehavior">
 
     </FrameLayout>
 
